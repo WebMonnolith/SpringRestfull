@@ -14,8 +14,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @RestApi(
     endpoints={
             "/tools/calculation_api/cooling",
-            "/tools/calculation_api/adiabatic",
-            "/tools/calculation_api/AHU"
     },
     models={
             @Model(generic="UUID",
@@ -25,15 +23,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
                             @FieldData(access=Modifier.PRIVATE, datatype="int", name="testField"),
                             @FieldData(access=Modifier.PRIVATE, datatype="double", name="testField2"),
                     }
-            ),
-            @Model(generic="UUID",
-                    tableName="t_adiabatic",
-                    apiName="Adiabatic"
-            ),
-            @Model(generic="UUID",
-                    tableName="t_AHU",
-                    apiName="AHU"
-            ),
+            )
     },
     templates={
             ControllerTemplate.class,
@@ -42,8 +32,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
     },
     apiNames={
             "Cooling",
-            "Adiabatic",
-            "AHU"
     },
     basePackage="org.example.test"
 )
