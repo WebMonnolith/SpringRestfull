@@ -45,7 +45,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
             "Adiabatic",
             "AHU"
     },
-    basePackage="org.example"
+    basePackage="org.example.test"
 )
 @SpringBootApplication
 public class ExampleApp {

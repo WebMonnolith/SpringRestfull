@@ -26,7 +26,7 @@ public final class ClassBuilder implements Builder<Class<?>>, BuilderUtils {
     {
         this.name = name;
         this.classDefinition = new StringBuilder("package "+basePackage+";\n\n")
-                .append("import org.framework.web.core.templates.*;\n\n")
+                .append("import org.restframework.web.core.templates.*;\n\n")
                 .append("import java.util.*;\n\n");
 
         for (String annotation : annotations)

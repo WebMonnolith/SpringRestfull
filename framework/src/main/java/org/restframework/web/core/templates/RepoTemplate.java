@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 @Template(
         templateName="Repository",
         rule= SpringComponents.REPO,
-        generics={"org.framework.web.core.templates.ModelFrame<UUID>", "UUID"},
+        generics={"org.restframework.web.core.templates.ModelFrame<UUID>", "UUID"},
         type=ClassTypes.INTERFACE
 )
 @SuppressWarnings("unused")
