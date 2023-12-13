@@ -10,10 +10,11 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
 
-import static org.restframework.web.core.FileHelper.NO_DIR;
+import static org.restframework.web.core.helpers.FileHelper.NO_DIR;
+import static org.restframework.web.core.helpers.FileHelper.fileExists;
 
 @Slf4j
-public final class ClassBuilder implements Builder<Class<?>>, BuilderUtils {
+public final class ClassBuilder implements Builder, BuilderUtils {
 
     private final String name;
     private final StringBuilder classDefinition;
@@ -111,30 +112,34 @@ public final class ClassBuilder implements Builder<Class<?>>, BuilderUtils {
     }
 
     @Override
-    public Class<?> build(@NotNull String filePath, @NotNull String dir) {
+    public void build(@NotNull String filePath, @NotNull String dir) {
         this.classDefinition.append("}");
-        boolean newDirFlag = false;
-        String newFilePath = filePath;
+        String newFilePath;
 
         String javaCode = classDefinition.toString();
 
         File directory = new File(filePath+"\\"+dir);
         if (!directory.exists())
-            newDirFlag = directory.mkdir();
+            directory.mkdir();
 
         if (dir.equals(NO_DIR))
             newFilePath = filePath.replace('.', File.separatorChar) + File.separator + name + ".java";
         else
             newFilePath = filePath.replace('.', File.separatorChar) + File.separator + dir + "\\" + name + ".java";
 
-        log.info("FILEPATH: {}", newFilePath);
         File file = new File(newFilePath);
+
+        if (fileExists(file)) {
+            log.info("File [{}] already exists at: {}", name, newFilePath);
+            return;
+        }
 
         try (PrintWriter writer = new PrintWriter(new FileWriter(file))) {
             writer.println(javaCode);
+            log.info("Created file [{}] at: {}", name, newFilePath);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return null;
+
     }
 }

@@ -9,7 +9,7 @@ import org.restframework.web.annotations.FieldData;
 import org.restframework.web.annotations.Model;
 import org.restframework.web.annotations.RestApi;
 import org.restframework.web.annotations.Template;
-import org.restframework.web.core.Modifier;
+import org.restframework.web.core.generators.builders.Modifier;
 import org.restframework.web.core.generators.builders.ClassBuilder;
 import org.restframework.web.core.generators.builders.FieldBuilder;
 import org.restframework.web.core.templates.ClassTypes;
@@ -21,8 +21,8 @@ import org.springframework.core.annotation.AnnotationUtils;
 
 import java.util.Arrays;
 
-import static org.restframework.web.core.FileHelper.NO_DIR;
-import static org.restframework.web.core.ModelHelper.convertToFieldBuilder;
+import static org.restframework.web.core.helpers.FileHelper.NO_DIR;
+import static org.restframework.web.core.helpers.ModelHelper.convertToFieldBuilder;
 import static org.restframework.web.core.templates.TemplateUtils.*;
 
 @Slf4j

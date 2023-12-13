@@ -1,6 +1,6 @@
 package org.restframework.web.annotations;
 
-import org.restframework.web.core.Modifier;
+import org.restframework.web.core.generators.builders.Modifier;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

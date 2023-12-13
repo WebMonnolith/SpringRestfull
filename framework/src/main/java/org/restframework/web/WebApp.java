@@ -4,7 +4,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.restframework.web.annotations.RestApi;
 import org.restframework.web.core.AppRunner;
-import org.restframework.web.core.FileHelper;
+import org.restframework.web.core.helpers.FileHelper;
 import org.restframework.web.core.RestApp;
 import org.restframework.web.core.generators.MvcGenerator;
 import org.restframework.web.core.generators.MvcSupport;
@@ -15,8 +15,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import java.lang.reflect.InvocationTargetException;
-
-import static org.restframework.web.core.templates.SpringComponents.CONTROLLER;
 
 @Slf4j
 @SuppressWarnings("unused")

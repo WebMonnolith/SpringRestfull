@@ -6,12 +6,12 @@
     <parent>
         <groupId>org.mono</groupId>
         <artifactId>RESTful</artifactId>
-        <version>0.1</version>
+        <version>0.2</version>
     </parent>
 
     <groupId>org.restframework.web</groupId>
     <artifactId>framework</artifactId>
-    <version>0.1</version>
+    <version>0.2</version>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>

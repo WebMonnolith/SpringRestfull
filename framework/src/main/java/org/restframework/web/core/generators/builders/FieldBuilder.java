@@ -1,12 +1,9 @@
 package org.restframework.web.core.generators.builders;
 
-import org.restframework.web.core.Modifier;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.annotation.Annotation;
-
-public final class FieldBuilder implements Builder<String>, BuilderUtils {
+public final class FieldBuilder implements Builder, BuilderUtils {
     private final StringBuilder fieldDefinition;
 
     public FieldBuilder(
@@ -14,7 +11,8 @@ public final class FieldBuilder implements Builder<String>, BuilderUtils {
             @NotNull String type,
             @NotNull Modifier access)
     {
-        this.fieldDefinition = new StringBuilder("\t")
+        this.fieldDefinition = new StringBuilder()
+                .append("\t")
                 .append(access.getValue())
                 .append(" ")
                 .append(type)
@@ -29,7 +27,7 @@ public final class FieldBuilder implements Builder<String>, BuilderUtils {
             @NotNull Modifier access,
             @NotNull String[] annotations)
     {
-        this.fieldDefinition = new StringBuilder("\t");
+        this.fieldDefinition = new StringBuilder();
 
 
         for (String annotation : annotations)

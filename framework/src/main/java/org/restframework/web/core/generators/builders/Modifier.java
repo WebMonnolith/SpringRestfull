@@ -1,4 +1,4 @@
-package org.restframework.web.core;
+package org.restframework.web.core.generators.builders;
 
 import lombok.Getter;
 

@@ -1,12 +1,12 @@
-package org.restframework.web.core;
+package org.restframework.web.core.helpers;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Objects;
 
 public class FileHelper {
 
@@ -32,7 +32,12 @@ public class FileHelper {
         throw new IllegalArgumentException("Source path not found in the expected structure!");
     }
 
-    public static String convertPackageToPath(String packageName) {
+    public static boolean fileExists(@NotNull File file) {
+        return file.exists() && !file.isDirectory();
+    }
+
+    @Contract(pure = true)
+    public static @NotNull String convertPackageToPath(String packageName) {
         return packageName.replace('.', '\\');
     }
 }
