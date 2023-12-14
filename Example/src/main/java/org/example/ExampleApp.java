@@ -1,6 +1,7 @@
 package org.example;
 
 import org.restframework.web.WebApp;
+import org.restframework.web.annotations.EnableRestConfiguration;
 import org.restframework.web.annotations.FieldData;
 import org.restframework.web.annotations.Model;
 import org.restframework.web.annotations.RestApi;
@@ -8,24 +9,25 @@ import org.restframework.web.core.generators.builders.Modifier;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 
+//@EnableRestConfiguration(contentRoot="/src/main/resources")
 @RestApi(
-        endpoints={
-                "/tools/api/testing",
-        },
-        models={
-                @Model(generic="UUID",
-                        tableName="test_table",
-                        apiName="Test",
-                        fields={
-                                @FieldData(access=Modifier.PRIVATE, datatype="int", name="testField"),
-                                @FieldData(access=Modifier.PRIVATE, datatype="double", name="testField2"),
-                        }
-                )
-        },
-        apiNames={
-                "Test",
-        },
-        basePackage="org.example.test"
+    endpoints={
+        "/tools/api/testing",
+    },
+    models={
+        @Model(generic="UUID",
+            tableName="test_table",
+            apiName="Test",
+            fields={
+                @FieldData(access=Modifier.PRIVATE, datatype="int", name="testField"),
+                @FieldData(access=Modifier.PRIVATE, datatype="double", name="testField2"),
+            }
+        )
+    },
+    apiNames={
+        "Test",
+    },
+    basePackage="org.example.test"
 )
 @SpringBootApplication
 public class ExampleApp {

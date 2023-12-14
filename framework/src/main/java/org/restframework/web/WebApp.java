@@ -2,8 +2,11 @@ package org.restframework.web;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.Nullable;
+import org.restframework.web.annotations.EnableRestConfiguration;
 import org.restframework.web.annotations.RestApi;
 import org.restframework.web.core.AppRunner;
+import org.restframework.web.core.RestAppConfigurationContext;
 import org.restframework.web.core.helpers.FileHelper;
 import org.restframework.web.core.RestApp;
 import org.restframework.web.core.generators.MvcGenerator;
@@ -32,10 +35,27 @@ public final class WebApp implements RestApp {
         if (!clazz.isAnnotationPresent(RestApi.class))
             throw new RestException("There must be a class annotated with @" + RestApi.class + ", in order to run web framework.");
 
-        WebApp.targetPath = FileHelper.constructPath(
-                clazz, "/src/main/java",
-                FileHelper.convertPackageToPath(WebApp.info.basePackage()));
+        RestAppConfigurationContext context = this.configure(clazz);
+        assert context != null;
 
+        String srcRoot = "/src/main/java";
+
+//        log.info("content-root: {}", context.getValueByKey("content-root"));
+
+
+        WebApp.targetPath = FileHelper.constructPath(
+                clazz, srcRoot,
+                FileHelper.convertPackageToPath(WebApp.info.basePackage()));
+    }
+
+    private @Nullable RestAppConfigurationContext configure(@NotNull Class<?> clazz) {
+        EnableRestConfiguration configuration = clazz.getAnnotation(EnableRestConfiguration.class);
+        if (configuration != null) {
+            return new RestAppConfigurationContext()
+                    .configure("content-root", configuration.contentRoot());
+        }
+
+        return null;
     }
 
     @Override
