@@ -9,5 +9,5 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE})
 @SuppressWarnings("unused")
 public @interface EnableRestConfiguration {
-    String contentRoot() default "";
+    String contentRoot() default "/src/main/java";
 }

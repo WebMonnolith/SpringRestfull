@@ -28,8 +28,9 @@ public class RestAppConfigurationContext {
         return this;
     }
 
-    public Object getValueByKey(@NotNull String key) {
-        return RestAppConfigurationContext.configurations.get(key);
+    @SuppressWarnings("unchecked")
+    public <T> T getValueByKey(@NotNull String key) {
+        return (T) RestAppConfigurationContext.configurations.get(key);
     }
 
     private <T> void replace(@NotNull String key, @NotNull T value) {

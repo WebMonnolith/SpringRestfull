@@ -19,6 +19,9 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 import java.lang.reflect.InvocationTargetException;
 
+import static org.restframework.web.core.RestConfigInit.configure;
+import static org.restframework.web.core.RestConfigInit.hasConfiguration;
+
 @Slf4j
 @SuppressWarnings("unused")
 @Data
@@ -35,27 +38,21 @@ public final class WebApp implements RestApp {
         if (!clazz.isAnnotationPresent(RestApi.class))
             throw new RestException("There must be a class annotated with @" + RestApi.class + ", in order to run web framework.");
 
-        RestAppConfigurationContext context = this.configure(clazz);
-        assert context != null;
+        RestAppConfigurationContext context = configure(clazz);
 
-        String srcRoot = "/src/main/java";
+        String srcRoot;
 
-//        log.info("content-root: {}", context.getValueByKey("content-root"));
-
+        if (hasConfiguration(clazz)) {
+            assert context != null;
+            srcRoot = context.getValueByKey("content-root");
+        }
+        else {
+            srcRoot = "/src/main/java";
+        }
 
         WebApp.targetPath = FileHelper.constructPath(
                 clazz, srcRoot,
                 FileHelper.convertPackageToPath(WebApp.info.basePackage()));
-    }
-
-    private @Nullable RestAppConfigurationContext configure(@NotNull Class<?> clazz) {
-        EnableRestConfiguration configuration = clazz.getAnnotation(EnableRestConfiguration.class);
-        if (configuration != null) {
-            return new RestAppConfigurationContext()
-                    .configure("content-root", configuration.contentRoot());
-        }
-
-        return null;
     }
 
     @Override
@@ -200,7 +197,7 @@ public final class WebApp implements RestApp {
         int len = rest.apiNames().length;
         if (rest.endpoints().length == len && rest.models().length == len) return true;
         throw new RestException(
-                String.format("Length mismatch of internal array types: names()=%d, endpoints()=%d, options()=%d",
+                String.format("Length mismatch of internal array types: names()=%d, endpoints()=%d, models()=%d",
                 len, rest.endpoints().length, rest.models().length)
         );
     }

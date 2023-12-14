@@ -9,7 +9,7 @@ import org.restframework.web.core.generators.builders.Modifier;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 
-//@EnableRestConfiguration(contentRoot="/src/main/resources")
+@EnableRestConfiguration
 @RestApi(
     endpoints={
         "/tools/api/testing",
