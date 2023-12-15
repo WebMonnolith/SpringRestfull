@@ -37,3 +37,4 @@ build/
 ### Mac OS ###
 .DS_Store
 /Example/src/main/java/org/example/test/
+/Example/src/main/resources/
