@@ -1,33 +1,41 @@
 package org.example;
 
 import org.restframework.web.WebApp;
-import org.restframework.web.annotations.EnableRestConfiguration;
-import org.restframework.web.annotations.FieldData;
-import org.restframework.web.annotations.Model;
-import org.restframework.web.annotations.RestApi;
+import org.restframework.web.annotations.*;
 import org.restframework.web.core.generators.builders.Modifier;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 
 @EnableRestConfiguration
 @RestApi(
-    endpoints={
-        "/tools/api/testing",
-    },
-    models={
-        @Model(generic="UUID",
-            tableName="test_table",
-            apiName="Test",
-            fields={
-                @FieldData(access=Modifier.PRIVATE, datatype="int", name="testField"),
-                @FieldData(access=Modifier.PRIVATE, datatype="double", name="testField2"),
-            }
+    APIS= {
+        @API(
+            endpoint="/tools/api/testing1",
+            model=@Model(generic = "UUID",
+                        tableName = "test_table1",
+                        apiName = "Test1",
+                        fields = {
+                                @FieldData(access = Modifier.PRIVATE, datatype = "int", name = "testField"),
+                                @FieldData(access = Modifier.PRIVATE, datatype = "double", name = "testField2"),
+                        }
+                ),
+            apiName="Test1",
+            basePackage = "org.example.test.test1"
+        ),
+        @API(
+            endpoint="/tools/api/testing2",
+            model=@Model(generic = "UUID",
+                        tableName = "test_table2",
+                        apiName = "Test2",
+                        fields = {
+                                @FieldData(access = Modifier.PRIVATE, datatype = "int", name = "testField"),
+                                @FieldData(access = Modifier.PRIVATE, datatype = "double", name = "testField2"),
+                        }
+                    ),
+            apiName="Test2",
+            basePackage = "org.example.test.test2"
         )
-    },
-    apiNames={
-        "Test",
-    },
-    basePackage="org.example.test"
+    }
 )
 @SpringBootApplication
 public class ExampleApp {

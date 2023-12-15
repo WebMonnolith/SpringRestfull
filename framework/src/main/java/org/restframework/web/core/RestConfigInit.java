@@ -9,7 +9,9 @@ public class RestConfigInit {
         EnableRestConfiguration configuration = clazz.getAnnotation(EnableRestConfiguration.class);
         if (hasConfiguration(clazz)) {
             return new RestAppConfigurationContext()
-                    .configure("content-root", configuration.contentRoot());
+                    .configure("content-root", configuration.contentRoot())
+                    .configure("model-generation", configuration.generateModelsOnce())
+                    .configure("dto-generation", configuration.generateDtos());
         }
 
         return null;

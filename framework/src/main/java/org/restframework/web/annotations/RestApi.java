@@ -14,13 +14,10 @@ import java.lang.annotation.RetentionPolicy;
 @SuppressWarnings("unused")
 @Component
 public @interface RestApi {
-    String basePackage();
     Class<?>[] templates() default {
         ControllerTemplate.class,
         ServiceTemplate.class,
         RepoTemplate.class,
     };
-    String[] apiNames() default {};
-    String[] endpoints() default {};
-    Model[] models() default {};
+    API[] APIS();
 }

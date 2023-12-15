@@ -8,8 +8,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE})
 @SuppressWarnings("unused")
-public @interface EnableRestConfiguration {
-    String contentRoot() default "/src/main/java";
-    boolean generateModelsOnce() default false;
-    boolean generateDtos() default false;
+public @interface API {
+    String apiName();
+    String endpoint();
+    Model model();
+    String basePackage();
+
 }
