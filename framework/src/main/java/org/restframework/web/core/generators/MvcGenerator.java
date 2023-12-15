@@ -4,19 +4,16 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.restframework.web.WebApp;
 import org.restframework.web.annotations.*;
-import org.restframework.web.core.generators.builders.Modifier;
-import org.restframework.web.core.generators.builders.ClassBuilder;
-import org.restframework.web.core.generators.builders.FieldBuilder;
+import org.restframework.web.core.builders.Modifier;
+import org.restframework.web.core.builders.ClassBuilder;
+import org.restframework.web.core.builders.FieldBuilder;
 import org.restframework.web.core.templates.ClassTypes;
 import org.restframework.web.core.templates.ModelFrame;
 import org.restframework.web.core.templates.SpringComponents;
 import org.restframework.web.exceptions.RestException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.annotation.AnnotationUtils;
-
-import java.util.Arrays;
 
 import static org.restframework.web.core.helpers.FileHelper.NO_DIR;
 import static org.restframework.web.core.helpers.ModelHelper.convertToFieldBuilder;

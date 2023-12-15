@@ -2,7 +2,7 @@ package org.example;
 
 import org.restframework.web.WebApp;
 import org.restframework.web.annotations.*;
-import org.restframework.web.core.generators.builders.Modifier;
+import org.restframework.web.core.builders.Modifier;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 
