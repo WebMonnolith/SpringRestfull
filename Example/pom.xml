@@ -25,9 +25,9 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
-            <groupId>org.restframework.web</groupId>
-            <artifactId>framework</artifactId>
-            <version>0.2</version>
+            <groupId>org.restframework</groupId>
+            <artifactId>api-framework</artifactId>
+            <version>0.2.1</version>
         </dependency>
     </dependencies>
 

@@ -1,9 +1,13 @@
 package org.example;
 
+import org.restframework.security.MD5Hash;
 import org.restframework.web.WebApp;
 import org.restframework.web.annotations.*;
 import org.restframework.web.core.builders.Modifier;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 
 
 @EnableRestConfiguration
@@ -40,6 +44,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class ExampleApp {
     public static void main(String[] args) {
+        try {
+            MD5Hash hasher = new MD5Hash("Incrediblepassword here");
+            System.out.println(Arrays.toString(hasher.getMessage()));
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+
         WebApp app = new WebApp(ExampleApp.class);
         app.run(ExampleApp.class, args);
     }
