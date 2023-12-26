@@ -1,5 +1,6 @@
-package org.restframework.security.AES;
+package org.restframework.security.AES.core;
 
+import lombok.Data;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -10,10 +11,31 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
+@Data
 @SuppressWarnings("unused")
-public class StringSecurity {
+public class StringSecurity implements Encryptor {
+
+    private String plainText;
+    private String cipherText;
+
+    public StringSecurity(String plainText) {
+        this.plainText = plainText;
+        this.cipherText = "";
+    }
+
+    @Override
+    public void encrypt(CryptoAlgorithm algorithm, SecretKey key, IvParameterSpec iv) throws Exception {
+        this.cipherText = StringSecurity.encryptString(algorithm, this.plainText, key, iv);
+    }
+
+    @Override
+    public void decrypt(CryptoAlgorithm algorithm, SecretKey key, IvParameterSpec iv) throws Exception {
+        if (this.cipherText.isEmpty()) return;
+        this.plainText = StringSecurity.decryptString(algorithm, this.cipherText, key, iv);
+    }
+
     public static @NotNull String encryptString(
-            @NotNull Algorithm algorithm,
+            @NotNull CryptoAlgorithm algorithm,
             @NotNull String input,
             SecretKey key, IvParameterSpec parameter)
 
@@ -34,7 +56,7 @@ public class StringSecurity {
 
     @Contract("_, _, _, _ -> new")
     public static @NotNull String decryptString(
-            @NotNull Algorithm algorithm,
+            @NotNull CryptoAlgorithm algorithm,
             @NotNull String cipherText,
             SecretKey key, IvParameterSpec iv)
 

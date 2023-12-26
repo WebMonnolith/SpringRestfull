@@ -1,4 +1,4 @@
-package org.restframework.security.AES;
+package org.restframework.security.AES.core;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -12,10 +12,29 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
 @SuppressWarnings("unused")
-public class ObjectSecurity {
+public class ObjectSecurity implements Encryptor {
+
+    private Serializable object;
+    private SealedObject sealedObject;
+
+    public ObjectSecurity(Serializable object) {
+        this.object = object;
+    }
+
+    @Override
+    public void encrypt(CryptoAlgorithm algorithm, SecretKey key, IvParameterSpec iv) throws Exception {
+        this.sealedObject = ObjectSecurity.encryptObject(algorithm, object, key, iv);
+    }
+
+    @Override
+    public void decrypt(CryptoAlgorithm algorithm, SecretKey key, IvParameterSpec iv) throws Exception {
+        if (this.sealedObject == null) return;
+        this.object = ObjectSecurity.decryptObject(algorithm, this.sealedObject, key, iv);
+    }
+
     @Contract("_, _, _, _ -> new")
     public static @NotNull SealedObject encryptObject(
-            @NotNull Algorithm algorithm,
+            @NotNull CryptoAlgorithm algorithm,
             Serializable object,
             SecretKey key,
             IvParameterSpec iv)
@@ -36,7 +55,7 @@ public class ObjectSecurity {
 
 
     public static Serializable decryptObject(
-            @NotNull Algorithm algorithm,
+            @NotNull CryptoAlgorithm algorithm,
             @NotNull SealedObject sealedObject,
             SecretKey key,
             IvParameterSpec iv)

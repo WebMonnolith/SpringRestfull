@@ -1,5 +1,7 @@
-package org.restframework.security.AES;
+package org.restframework.security.AES.core;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.jetbrains.annotations.NotNull;
 
 import javax.crypto.*;
@@ -13,23 +15,37 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
+@EqualsAndHashCode(callSuper = true)
+@Data
 @SuppressWarnings("unused")
-public class FileSecurity {
+public record FileSecurity(File inputFile, File outputFile) implements Encryptor {
+
+    public static final String ENCRYPTED_FILE_EXTENSION = ".encrypted";
+    public static final String DECRYPTED_FILE_EXTENSION = ".decrypted";
+
+    @Override
+    public void encrypt(CryptoAlgorithm algorithm, SecretKey key, IvParameterSpec iv) throws Exception {
+        FileSecurity.encryptFile(algorithm, key, iv, this.inputFile, this.outputFile);
+    }
+
+    @Override
+    public void decrypt(CryptoAlgorithm algorithm, SecretKey key, IvParameterSpec iv) throws Exception {
+    }
+
     public static void encryptFile(
-            @NotNull Algorithm algorithm,
+            @NotNull CryptoAlgorithm algorithm,
             @NotNull SecretKey key,
             @NotNull IvParameterSpec iv,
             File inputFile, File outputFile)
 
-        throws
+            throws
             IOException,
             NoSuchPaddingException,
             NoSuchAlgorithmException,
             InvalidAlgorithmParameterException,
             InvalidKeyException,
             BadPaddingException,
-            IllegalBlockSizeException
-    {
+            IllegalBlockSizeException {
 
         Cipher cipher = Cipher.getInstance(algorithm.getValue());
         cipher.init(Cipher.ENCRYPT_MODE, key, iv);
