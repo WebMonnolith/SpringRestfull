@@ -1,12 +1,19 @@
 package org.example;
 
-import org.restframework.security.hashing.MD5Hash;
+
+import lombok.SneakyThrows;
+import org.restframework.security.AES.core.CryptoAlgorithm;
+import org.restframework.security.AES.core.StringSecurity;
+import org.restframework.security.AES.utils.InitVector;
+import org.restframework.security.AES.utils.Key;
 import org.restframework.web.WebApp;
 import org.restframework.web.annotations.*;
 import org.restframework.web.core.builders.Modifier;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.util.Arrays;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
 
 
 @EnableRestConfiguration
@@ -42,10 +49,16 @@ import java.util.Arrays;
 )
 @SpringBootApplication
 public class ExampleApp {
+    @SneakyThrows
     public static void main(String[] args) {
-        MD5Hash<String> hasher = new MD5Hash<>("Incrediblepassword here");
-        System.out.println(Arrays.toString(hasher.getMessage()));
-        System.out.println(hasher.convertMsgToHex());
+        String input = "Some very important text that needs to be encrypted";
+        SecretKey key = Key.generateKey(128);
+        CryptoAlgorithm algorithm = CryptoAlgorithm.AES_CBC_PKCS5_PADDING;
+        IvParameterSpec iv = new InitVector().getParameter();
+        String cipherText = StringSecurity.encryptString(algorithm, input, key, iv);
+        String plainText = StringSecurity.decryptString(algorithm, cipherText, key, iv);
+        System.out.println(cipherText);
+        System.out.println(plainText);
 
         WebApp app = new WebApp(ExampleApp.class);
         app.run(ExampleApp.class, args);
