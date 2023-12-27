@@ -5,6 +5,9 @@ import org.restframework.security.AES.core.CryptoAlgorithm;
 import org.restframework.security.AES.core.StringSecurity;
 import org.restframework.security.AES.utils.InitVector;
 import org.restframework.security.AES.utils.Key;
+import org.restframework.security.Hashing;
+import org.restframework.security.MD5Hash;
+import org.restframework.security.SHA256Hash;
 import org.restframework.web.WebApp;
 import org.restframework.web.annotations.*;
 import org.restframework.web.core.builders.Modifier;
@@ -12,6 +15,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
+import java.util.Arrays;
 
 
 @EnableRestConfiguration
@@ -49,6 +53,9 @@ import javax.crypto.spec.IvParameterSpec;
 public class ExampleApp {
     @SneakyThrows
     public static void main(String[] args) {
+        Hashing<String> hasher = new MD5Hash<>("Hello world");
+        System.out.println(Arrays.toString(hasher.getMessage()));
+
         String input = "Some very important text that needs to be encrypted";
         SecretKey key = Key.generateKey(128);
         CryptoAlgorithm algorithm = CryptoAlgorithm.AES_CBC_PKCS5_PADDING;

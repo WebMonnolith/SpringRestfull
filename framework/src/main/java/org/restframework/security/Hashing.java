@@ -8,13 +8,13 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 @Getter
-public abstract class Hasher <T extends String> {
+public abstract class Hashing<T extends String> {
 
     protected T input;
     protected final MessageDigest messageDigest;
     protected final byte[] message;
 
-    public Hasher(@NotNull T input) throws NoSuchAlgorithmException {
+    public Hashing(@NotNull T input) throws NoSuchAlgorithmException {
         this.input = input;
         this.messageDigest = MessageDigest.getInstance("MD5");
         this.message = this.messageDigest.digest(input.getBytes(StandardCharsets.UTF_8));

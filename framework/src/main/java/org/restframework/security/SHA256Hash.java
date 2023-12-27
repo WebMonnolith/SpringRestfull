@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import java.security.NoSuchAlgorithmException;
 
 @SuppressWarnings("unused")
-public class SHA256Hash <T extends String> extends Hasher<T> {
+public class SHA256Hash <T extends String> extends Hashing<T> {
 
     public SHA256Hash(@NotNull T input) throws NoSuchAlgorithmException {
         super(input);

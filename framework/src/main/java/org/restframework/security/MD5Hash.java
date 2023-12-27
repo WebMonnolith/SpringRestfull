@@ -4,12 +4,11 @@ import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
 import java.math.BigInteger;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 @Getter
 @SuppressWarnings("unused")
-public class MD5Hash <T extends String> extends Hasher<T> {
+public class MD5Hash <T extends String> extends Hashing<T> {
 
     private final BigInteger signum;
 

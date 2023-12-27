@@ -15,10 +15,13 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode()
 @Data
 @SuppressWarnings("unused")
-public record FileSecurity(File inputFile, File outputFile) implements Encryptor {
+public class FileSecurity implements Encryptor {
+
+    private File inputFile;
+    private File outputFile;
 
     public static final String ENCRYPTED_FILE_EXTENSION = ".encrypted";
     public static final String DECRYPTED_FILE_EXTENSION = ".decrypted";
