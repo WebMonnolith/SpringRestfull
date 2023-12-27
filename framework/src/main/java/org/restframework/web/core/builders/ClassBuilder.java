@@ -37,6 +37,26 @@ public final class ClassBuilder implements Builder, BuilderUtils {
                 .append(classType.getValue()).append(name);
     }
 
+    public ClassBuilder(
+            @NotNull String name,
+            @NotNull String basePackage,
+            @NotNull String @NotNull [] annotations,
+            @NotNull ClassTypes classType,
+            @NotNull String[] imports)
+    {
+        this.name = name;
+        this.classDefinition = new StringBuilder("package "+basePackage+";\n\n");
+
+        for (String dependency : imports)
+            this.classDefinition.append(dependency).append(";\n\n");
+
+        for (String annotation : annotations)
+            this.addAnnotation(annotation);
+
+        this.classDefinition
+                .append(classType.getValue()).append(name);
+    }
+
     @Override
     public <T> void addAnnotation(@NotNull T annotation) {
         classDefinition.append("@").append(annotation).append("\n");

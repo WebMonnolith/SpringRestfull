@@ -1,4 +1,4 @@
-package org.restframework.security;
+package org.restframework.security.hashing;
 
 import org.jetbrains.annotations.NotNull;
 

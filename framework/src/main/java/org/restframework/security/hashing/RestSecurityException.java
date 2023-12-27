@@ -1,4 +1,4 @@
-package org.restframework.security;
+package org.restframework.security.hashing;
 
 public class RestSecurityException extends RuntimeException{
 

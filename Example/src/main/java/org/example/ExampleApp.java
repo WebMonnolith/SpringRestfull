@@ -6,9 +6,8 @@ import org.restframework.security.AES.core.CryptoAlgorithm;
 import org.restframework.security.AES.core.StringSecurity;
 import org.restframework.security.AES.utils.InitVector;
 import org.restframework.security.AES.utils.Key;
-import org.restframework.security.Hashing;
-import org.restframework.security.MD5Hash;
-import org.restframework.security.SHA256Hash;
+import org.restframework.security.hashing.Hashing;
+import org.restframework.security.hashing.MD5Hash;
 import org.restframework.web.WebApp;
 import org.restframework.web.annotations.*;
 import org.restframework.web.core.builders.Modifier;
@@ -17,7 +16,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import java.util.Arrays;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
-import java.util.Arrays;
 
 
 @EnableRestConfiguration

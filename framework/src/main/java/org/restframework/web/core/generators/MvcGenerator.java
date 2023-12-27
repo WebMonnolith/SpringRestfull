@@ -32,6 +32,7 @@ public final class MvcGenerator {
         private Template templateAnnotation;
         private Model modelAnnotation;
         private String modelName;
+        private String dtoName;
 
     }
 
@@ -62,7 +63,12 @@ public final class MvcGenerator {
                 api.apiName()+templateAnnotation.templateName(),
                 api.basePackage()+'.'+templateAnnotation.templateName().toLowerCase(),
                 MvcGenerator.support.callInner(templateAnnotation.rule(), api.endpoint()),
-                templateAnnotation.type());
+                templateAnnotation.type(),
+                new String[]{
+                        "import org.restframework.web.core.templates.*",
+                        "import java.util.*",
+                        "import " + api.basePackage() + ".*"
+                });
 
         MvcGenerator.compile(CompilationContext.builder()
                 .api(api)
@@ -70,6 +76,7 @@ public final class MvcGenerator {
                 .template(template)
                 .templateAnnotation(templateAnnotation)
                 .modelName(api.model().apiName()+api.model().abbrev())
+                .dtoName(api.model().apiName()+"Dto")
                 .build());
 
         mvcBuilder.build(buildPath, templateAnnotation.templateName().toLowerCase());
@@ -126,16 +133,23 @@ public final class MvcGenerator {
 
     private static void compile(@NotNull CompilationContext context) {
         if (!CompilationFlags.useModelsApi) {
-            if (!context.getModelName().isEmpty() && context.getTemplateAnnotation().rule() == SpringComponents.REPO)
+            if (!context.getModelName().isEmpty())
                 CompilationFlags.customRepoGenerics = true;
 
             if (CompilationFlags.customRepoGenerics && useImplementation(context.getTemplateAnnotation()))
                 if (hasGenerics(context.getTemplateAnnotation()))
                     context.getBuilder().addInterface(context.getTemplate());
                 else
-                    context.getBuilder().addInterface(context.getTemplate(),
-                            context.getApi().basePackage() + '.' + context.getModelName(),
-                            "UUID");
+                    if (context.getTemplateAnnotation().rule() == SpringComponents.REPO)
+                        context.getBuilder().addInterface(context.getTemplate(),
+                                 context.getModelName(),
+                                "UUID");
+                    else
+                        context.getBuilder().addInterface(context.getTemplate(),
+                                "UUID",
+                                    context.getDtoName(),
+                                    context.getModelName()
+                                );
             else if (CompilationFlags.customRepoGenerics && useInheritance(context.getTemplateAnnotation()))
                 if (hasGenerics(context.getTemplateAnnotation()))
                     context.getBuilder().addExtension(context.getTemplate());
