@@ -9,17 +9,13 @@ import java.security.NoSuchAlgorithmException;
 
 @Getter
 @SuppressWarnings("unused")
-public class MD5Hash <T extends String> {
+public class MD5Hash <T extends String> extends Hasher<T> {
 
-    private final MessageDigest messageDigest;
-    private final byte[] message;
     private final BigInteger signum;
 
     public MD5Hash(@NotNull T input) throws NoSuchAlgorithmException {
-        this.messageDigest = MessageDigest.getInstance("MD5");
-        this.message = this.messageDigest.digest(input.getBytes());
+        super(input);
         this.signum = new BigInteger(1, this.message);
-
     }
 
     public synchronized String convertMsgToHex() {
