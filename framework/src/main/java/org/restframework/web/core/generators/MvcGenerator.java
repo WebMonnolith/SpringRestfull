@@ -9,6 +9,7 @@ import org.restframework.web.core.builders.Modifier;
 import org.restframework.web.core.builders.ClassBuilder;
 import org.restframework.web.core.builders.FieldBuilder;
 import org.restframework.web.core.templates.ClassTypes;
+import org.restframework.web.core.templates.DtoFrame;
 import org.restframework.web.core.templates.ModelFrame;
 import org.restframework.web.core.templates.SpringComponents;
 import org.restframework.web.exceptions.RestException;
@@ -76,15 +77,15 @@ public final class MvcGenerator {
                 .template(template)
                 .templateAnnotation(templateAnnotation)
                 .modelName(api.model().apiName()+api.model().abbrev())
-                .dtoName(api.model().apiName()+"Dto")
                 .build());
 
         mvcBuilder.build(buildPath, templateAnnotation.templateName().toLowerCase());
     }
 
-    public synchronized static void generateModels(
+    public synchronized static void generateByKey(
             @NotNull API api,
             boolean flag,
+            @NotNull SpringComponents component,
             @NotNull String buildPath) {
 
         if (CompilationFlags.generateModelsOnce)
@@ -92,13 +93,20 @@ public final class MvcGenerator {
 
         CompilationFlags.useModelsApi = true;
 
-        if (api.model().apiName().equals(api.apiName())) {
-            ClassBuilder modelBuilder = new ClassBuilder(
-                    api.model().apiName()+api.model().abbrev(),
-                    api.basePackage(),
-                    MvcGenerator.support.callInner(SpringComponents.MODEL, api.model().tableName()),
-                    ClassTypes.CLASS);
+        String value = "";
+        String name = api.model().apiName()+"Dto";
+        if (component == SpringComponents.MODEL) {
+            value = api.model().tableName();
+            name = api.model().apiName()+api.model().abbrev();
+        }
 
+        ClassBuilder modelBuilder = new ClassBuilder(
+                name,
+                api.basePackage(),
+                MvcGenerator.support.callInner(component, value),
+                ClassTypes.CLASS);
+
+        if (component == SpringComponents.MODEL) {
             modelBuilder.addExtension(ModelFrame.class, api.model().generic());
 
             MvcSupport support = new MvcSupport() {
@@ -115,16 +123,20 @@ public final class MvcGenerator {
                             api.model().generic(),
                             Modifier.PRIVATE,
                             support.callInner(SpringComponents.MODEL, api.model().generic())));
-
-            MvcGenerator.compile(CompilationContext.builder()
-                    .api(api)
-                    .builder(modelBuilder)
-                    .modelAnnotation(api.model())
-                    .build()
-            );
-
-            modelBuilder.build(buildPath, NO_DIR);
         }
+        else
+            modelBuilder.addExtension(DtoFrame.class);
+
+        MvcGenerator.compile(CompilationContext.builder()
+                .api(api)
+                .builder(modelBuilder)
+                .modelAnnotation(api.model())
+                .dtoName(api.model().apiName()+"Dto")
+                .build()
+        );
+
+        modelBuilder.build(buildPath, NO_DIR);
+
 
         if (flag) {
             CompilationFlags.generateModelsOnce = true;

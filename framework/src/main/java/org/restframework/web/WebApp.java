@@ -157,7 +157,8 @@ public final class WebApp implements RestApp {
             API api = restApi.APIS()[i];
             for (Class<?> template : restApi.templates())
                 MvcGenerator.generateClasses(api, template, new MvcSupportHandler(), WebApp.outputResultPathBase().get(i));
-            MvcGenerator.generateModels(api, WebApp.context.getValueByKey("model-generation"), WebApp.outputResultPathBase().get(i));
+            MvcGenerator.generateByKey(api, false, WebApp.context.getValueByKey("model-generation"), WebApp.outputResultPathBase().get(i));
+            MvcGenerator.generateByKey(api, false, WebApp.context.getValueByKey("dto-generation"), WebApp.outputResultPathBase().get(i));
         }
     }
 
@@ -187,10 +188,7 @@ public final class WebApp implements RestApp {
 
     static class MvcSupportHandler implements MvcSupport {
         @Override
-        public void call(SpringComponents rules, String value) {
-            if (!ruleHolder.isEmpty())
-                ruleHolder.clear();
-
+        public void call(@NotNull SpringComponents rules, String value) {
             switch (rules) {
                 case CONTROLLER -> {
                     ruleHolder.add(LombokAnnotations.DATA.getValue());
@@ -213,6 +211,7 @@ public final class WebApp implements RestApp {
                     ruleHolder.add(PersistenceAnnotations.ENTITY.getValue());
                     ruleHolder.add(this.makeTable(value));
                 }
+                case DTO -> {}
                 case NONE -> throw new RestException("@" + RestApi.class + " MVC has no templates associated with it");
             }
         }

@@ -10,8 +10,8 @@ public class RestConfigInit {
         if (hasConfiguration(clazz)) {
             return new RestAppConfigurationContext()
                     .configure("content-root", configuration.contentRoot())
-                    .configure("model-generation", configuration.generateModelsOnce())
-                    .configure("dto-generation", configuration.generateDtos());
+                    .configure("model-generation", configuration.modelComponent())
+                    .configure("dto-generation", configuration.dtoComponent());
         }
 
         return null;

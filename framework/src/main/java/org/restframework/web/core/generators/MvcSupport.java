@@ -63,6 +63,8 @@ public interface MvcSupport {
     }
 
     List<String> ruleHolder = new ArrayList<>();
+    String NO_VALUE = "";
+
     void call(SpringComponents rules, String value);
 
     default @NotNull String[] getAllRules(@NotNull List<String> rules) {
