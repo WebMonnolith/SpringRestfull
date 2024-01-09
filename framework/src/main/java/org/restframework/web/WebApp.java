@@ -2,8 +2,7 @@ package org.restframework.web;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.Nullable;
-import org.restframework.web.annotations.EnableRestConfiguration;
+import org.restframework.web.annotations.API;
 import org.restframework.web.annotations.RestApi;
 import org.restframework.web.core.AppRunner;
 import org.restframework.web.core.RestAppConfigurationContext;
@@ -18,44 +17,43 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.restframework.web.core.RestConfigInit.configure;
+import static org.restframework.web.core.RestConfigInit.hasConfiguration;
 
 @Slf4j
 @SuppressWarnings("unused")
 @Data
 public final class WebApp implements RestApp {
 
+    private static RestAppConfigurationContext context;
     private static RestApp internalApp;
     private static RestApi info;
     private static Object appContext;
     private static Class<?> classContext;
-    private static String targetPath;
+    private final static List<String> targetPaths = new ArrayList<>();
 
     public WebApp(@NotNull Class<?> clazz) {
         WebApp.info = clazz.getAnnotation(RestApi.class);
         if (!clazz.isAnnotationPresent(RestApi.class))
             throw new RestException("There must be a class annotated with @" + RestApi.class + ", in order to run web framework.");
 
-        RestAppConfigurationContext context = this.configure(clazz);
-        assert context != null;
+        WebApp.context = configure(clazz);
 
-        String srcRoot = "/src/main/java";
+        String srcRoot;
 
-//        log.info("content-root: {}", context.getValueByKey("content-root"));
-
-
-        WebApp.targetPath = FileHelper.constructPath(
-                clazz, srcRoot,
-                FileHelper.convertPackageToPath(WebApp.info.basePackage()));
-    }
-
-    private @Nullable RestAppConfigurationContext configure(@NotNull Class<?> clazz) {
-        EnableRestConfiguration configuration = clazz.getAnnotation(EnableRestConfiguration.class);
-        if (configuration != null) {
-            return new RestAppConfigurationContext()
-                    .configure("content-root", configuration.contentRoot());
+        if (hasConfiguration(clazz)) {
+            assert WebApp.context != null;
+            srcRoot = WebApp.context.getValueByKey("content-root");
+        }
+        else {
+            srcRoot = "/src/main/java";
         }
 
-        return null;
+        for (API api : WebApp.info.APIS())
+            WebApp.targetPaths.add(FileHelper.constructPath(clazz, srcRoot, FileHelper.convertPackageToPath(api.basePackage())));
     }
 
     @Override
@@ -154,21 +152,43 @@ public final class WebApp implements RestApp {
         return SpringApplication.run(clazz, args);
     }
 
-    private static void generate(@NotNull RestApi api) {
-        if (WebApp.checkContext(api)) {
-            for (Class<?> template : api.templates()) {
-                MvcGenerator.generateClasses(api, template, new MvcSupportHandler());
-            }
-            MvcGenerator.generateModels(api, true);
+    private static void generate(@NotNull RestApi restApi) {
+        for (int i = 0; i < restApi.APIS().length; i++) {
+            API api = restApi.APIS()[i];
+            for (Class<?> template : restApi.templates())
+                MvcGenerator.generateClasses(api, template, new MvcSupportHandler(), WebApp.outputResultPathBase().get(i));
+            MvcGenerator.generateByKey(api, false, WebApp.context.getValueByKey("model-generation"), WebApp.outputResultPathBase().get(i));
+            MvcGenerator.generateByKey(api, false, WebApp.context.getValueByKey("dto-generation"), WebApp.outputResultPathBase().get(i));
         }
+    }
+
+    public static RestApi context() {
+        return WebApp.info;
+    }
+
+    public static Object appContext() {
+        return WebApp.appContext;
+    }
+
+    public static Class<?> classContext() {
+        return WebApp.classContext;
+    }
+
+    public static RestApp internalApp() {
+        return WebApp.internalApp;
+    }
+
+    public static List<String> outputResultPathBase() {
+        return WebApp.targetPaths;
+    }
+
+    public static RestAppConfigurationContext configurations() {
+        return WebApp.context;
     }
 
     static class MvcSupportHandler implements MvcSupport {
         @Override
-        public void call(SpringComponents rules, String value) {
-            if (!ruleHolder.isEmpty())
-                ruleHolder.clear();
-
+        public void call(@NotNull SpringComponents rules, String value) {
             switch (rules) {
                 case CONTROLLER -> {
                     ruleHolder.add(LombokAnnotations.DATA.getValue());
@@ -191,43 +211,10 @@ public final class WebApp implements RestApp {
                     ruleHolder.add(PersistenceAnnotations.ENTITY.getValue());
                     ruleHolder.add(this.makeTable(value));
                 }
+                case DTO -> {}
                 case NONE -> throw new RestException("@" + RestApi.class + " MVC has no templates associated with it");
             }
         }
-    }
-
-    private static boolean compareContext(@NotNull RestApi rest) {
-        int len = rest.apiNames().length;
-        if (rest.endpoints().length == len && rest.models().length == len) return true;
-        throw new RestException(
-                String.format("Length mismatch of internal array types: names()=%d, endpoints()=%d, options()=%d",
-                len, rest.endpoints().length, rest.models().length)
-        );
-    }
-
-    private static boolean checkContext(@NotNull RestApi rest) {
-        if (compareContext(rest)) return true;
-        throw new RestException("@RestApp exception!");
-    }
-
-    public static RestApi context() {
-        return WebApp.info;
-    }
-
-    public static Object appContext() {
-        return WebApp.appContext;
-    }
-
-    public static Class<?> classContext() {
-        return WebApp.classContext;
-    }
-
-    public static RestApp internalApp() {
-        return WebApp.internalApp;
-    }
-
-    public static String outputResultPathBase() {
-        return WebApp.targetPath;
     }
 
 }

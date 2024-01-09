@@ -9,9 +9,9 @@
         <version>0.2</version>
     </parent>
 
-    <groupId>org.restframework.web</groupId>
-    <artifactId>framework</artifactId>
-    <version>0.2</version>
+    <groupId>org.restframework</groupId>
+    <artifactId>api-framework</artifactId>
+    <version>0.2.1</version>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>

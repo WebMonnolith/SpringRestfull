@@ -14,16 +14,16 @@ import java.util.Optional;
         type=ClassTypes.CLASS
 )
 @SuppressWarnings("unused")
-public interface ControllerTemplate<ID> extends ExceptionAdvice {
+public interface ControllerTemplate<ID, DTO, Model> extends ExceptionAdvice {
 
     int INSERT_NOT_IMPLEMENTED_CODE = 10000;
     boolean NOT_IMPLEMENTED = false;
 
-    default int insertEntity(DtoFrame entity) { return INSERT_NOT_IMPLEMENTED_CODE; }
-    default List<DtoFrame> getAllEntities() { return new ArrayList<>(); }
-    default Optional<ModelFrame<ID>> getById(ID id) { return Optional.empty(); }
-    default boolean removeEntity(ModelFrame<ID> entityToRemove) { return NOT_IMPLEMENTED; }
+    default int insertEntity(DTO entity) { return INSERT_NOT_IMPLEMENTED_CODE; }
+    default List<DTO> getAllEntities() { return new ArrayList<>(); }
+    default Optional<Model> getById(ID id) { return Optional.empty(); }
+    default boolean removeEntity(Model entityToRemove) { return NOT_IMPLEMENTED; }
     default boolean removeEntityById(ID id) { return NOT_IMPLEMENTED; }
     default boolean removeAllEntities() { return NOT_IMPLEMENTED; }
-    default boolean updateEntity(ID id, ModelFrame<ID> entity) { return NOT_IMPLEMENTED; }
+    default boolean updateEntity(ID id, Model entity) { return NOT_IMPLEMENTED; }
 }

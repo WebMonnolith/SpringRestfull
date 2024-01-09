@@ -1,8 +1,7 @@
-package org.restframework.web.core.generators.builders;
+package org.restframework.web.core.builders;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 @SuppressWarnings("unused")
@@ -13,7 +12,6 @@ public interface BuilderUtils {
     default void addInterface(@NotNull Class<?> clazz, String @NotNull ... GenericTypes) {}
     default void addExtension(@NotNull Class<?> clazz) {}
     default void addExtension(@NotNull Class<?> clazz, String @NotNull ... GenericTypes) {}
-    default void addMethod(Method method) {}
-    default void addMethod(String method) {}
+    default void addMethod(MethodBuilder method) {}
     default void addField(FieldBuilder field) {}
 }

@@ -1,4 +1,4 @@
-package org.restframework.web.core.generators.builders;
+package org.restframework.web.core.builders;
 
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -29,6 +29,26 @@ public final class ClassBuilder implements Builder, BuilderUtils {
         this.classDefinition = new StringBuilder("package "+basePackage+";\n\n")
                 .append("import org.restframework.web.core.templates.*;\n\n")
                 .append("import java.util.*;\n\n");
+
+        for (String annotation : annotations)
+            this.addAnnotation(annotation);
+
+        this.classDefinition
+                .append(classType.getValue()).append(name);
+    }
+
+    public ClassBuilder(
+            @NotNull String name,
+            @NotNull String basePackage,
+            @NotNull String @NotNull [] annotations,
+            @NotNull ClassTypes classType,
+            @NotNull String[] imports)
+    {
+        this.name = name;
+        this.classDefinition = new StringBuilder("package "+basePackage+";\n\n");
+
+        for (String dependency : imports)
+            this.classDefinition.append(dependency).append(";\n\n");
 
         for (String annotation : annotations)
             this.addAnnotation(annotation);
@@ -95,15 +115,8 @@ public final class ClassBuilder implements Builder, BuilderUtils {
     }
 
     @Override
-    public void addMethod(String method) {
-        this.classDefinition.append(method);
-    }
-
-    @Override
-    public void addMethod(Method method) {
-        classDefinition.append(method.getReturnType().getSimpleName()).append(" ")
-                .append(method.getName()).append("() {\n")
-                .append("\treturn null;\n}\n");
+    public void addMethod(MethodBuilder method) {
+        classDefinition.append(method.getDefinition());
     }
 
     @Override

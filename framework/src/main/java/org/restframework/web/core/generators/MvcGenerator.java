@@ -4,22 +4,17 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.restframework.web.WebApp;
-import org.restframework.web.annotations.FieldData;
-import org.restframework.web.annotations.Model;
-import org.restframework.web.annotations.RestApi;
-import org.restframework.web.annotations.Template;
-import org.restframework.web.core.generators.builders.Modifier;
-import org.restframework.web.core.generators.builders.ClassBuilder;
-import org.restframework.web.core.generators.builders.FieldBuilder;
+import org.restframework.web.annotations.*;
+import org.restframework.web.core.builders.Modifier;
+import org.restframework.web.core.builders.ClassBuilder;
+import org.restframework.web.core.builders.FieldBuilder;
 import org.restframework.web.core.templates.ClassTypes;
+import org.restframework.web.core.templates.DtoFrame;
 import org.restframework.web.core.templates.ModelFrame;
 import org.restframework.web.core.templates.SpringComponents;
 import org.restframework.web.exceptions.RestException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.annotation.AnnotationUtils;
-
-import java.util.Arrays;
 
 import static org.restframework.web.core.helpers.FileHelper.NO_DIR;
 import static org.restframework.web.core.helpers.ModelHelper.convertToFieldBuilder;
@@ -32,13 +27,13 @@ public final class MvcGenerator {
     @AllArgsConstructor
     @Builder
     private static class CompilationContext {
-        private RestApi restApi;
+        private API api;
         private ClassBuilder builder;
         private Class<?> template;
         private Template templateAnnotation;
         private Model modelAnnotation;
         private String modelName;
-        private int index;
+        private String dtoName;
 
     }
 
@@ -52,110 +47,127 @@ public final class MvcGenerator {
     }
 
     public synchronized static void generateClasses(
-            @NotNull RestApi restApi,
+            @NotNull API api,
             @NotNull Class<?> template,
-            @NotNull MvcSupport support)
+            @NotNull MvcSupport support,
+            @NotNull String buildPath)
     {
         Template templateAnnotation = AnnotationUtils.findAnnotation(template, Template.class);
         if (templateAnnotation == null)
             throw new RestException("@" + RestApi.class + "templates must be annotated with @Template " +
-                    restApi.basePackage() + "\n" + Arrays.toString(restApi.apiNames()));
+                    api.basePackage() + "\n" + api.apiName());
 
         MvcGenerator.support = support;
         CompilationFlags.useModelsApi = false;
 
-        for (int i = 0; i < restApi.apiNames().length; i++) {
-            ClassBuilder mvcBuilder = new ClassBuilder(
-                    restApi.apiNames()[i]+templateAnnotation.templateName(),
-                    restApi.basePackage()+'.'+templateAnnotation.templateName().toLowerCase(),
-                    MvcGenerator.support.callInner(templateAnnotation.rule(), restApi.endpoints()[i]),
-                    templateAnnotation.type());
+        ClassBuilder mvcBuilder = new ClassBuilder(
+                api.apiName()+templateAnnotation.templateName(),
+                api.basePackage()+'.'+templateAnnotation.templateName().toLowerCase(),
+                MvcGenerator.support.callInner(templateAnnotation.rule(), api.endpoint()),
+                templateAnnotation.type(),
+                new String[]{
+                        "import org.restframework.web.core.templates.*",
+                        "import java.util.*",
+                        "import " + api.basePackage() + ".*"
+                });
 
-            MvcGenerator.compile(CompilationContext.builder()
-                    .restApi(restApi)
-                    .builder(mvcBuilder)
-                    .template(template)
-                    .templateAnnotation(templateAnnotation)
-                    .modelName(restApi.models()[i].apiName()+restApi.models()[i].abbrev())
-                    .index(i)
-                    .build());
+        MvcGenerator.compile(CompilationContext.builder()
+                .api(api)
+                .builder(mvcBuilder)
+                .template(template)
+                .templateAnnotation(templateAnnotation)
+                .modelName(api.model().apiName()+api.model().abbrev())
+                .build());
 
-            mvcBuilder.build(WebApp.outputResultPathBase(), templateAnnotation.templateName().toLowerCase());
-        }
-
+        mvcBuilder.build(buildPath, templateAnnotation.templateName().toLowerCase());
     }
 
-    public synchronized static void generateModels(
-            @NotNull RestApi restApi,
-            boolean flag) {
+    public synchronized static void generateByKey(
+            @NotNull API api,
+            boolean flag,
+            @NotNull SpringComponents component,
+            @NotNull String buildPath) {
 
         if (CompilationFlags.generateModelsOnce)
             return;
 
         CompilationFlags.useModelsApi = true;
-        Model[] models = restApi.models();
 
-        if (models.length == 0)
-            return;
-
-        for (int i = 0; i < models.length; i++) {
-            if (models[i].apiName().equals(restApi.apiNames()[i])) {
-                ClassBuilder modelBuilder = new ClassBuilder(
-                        models[i].apiName()+models[i].abbrev(),
-                        restApi.basePackage(),
-                        MvcGenerator.support.callInner(SpringComponents.MODEL, models[i].tableName()),
-                        ClassTypes.CLASS);
-
-                modelBuilder.addExtension(ModelFrame.class, models[i].generic());
-
-                MvcSupport support = new MvcSupport() {
-                    @Override
-                    public void call(SpringComponents rules, String value) {
-                        ruleHolder.add(PersistenceAnnotations.ID.getValue());
-                        ruleHolder.add(this.makeGenerationType(value));
-                    }
-                };
-
-                modelBuilder.addField(
-                        new FieldBuilder(
-                                "id",
-                                models[i].generic(),
-                                Modifier.PRIVATE,
-                                support.callInner(SpringComponents.MODEL, models[i].generic())));
-
-                MvcGenerator.compile(CompilationContext.builder()
-                        .restApi(restApi)
-                        .builder(modelBuilder)
-                        .modelAnnotation(models[i])
-                        .index(i)
-                        .build()
-                );
-                modelBuilder.build(WebApp.outputResultPathBase(), NO_DIR);
-            }
+        String value = "";
+        String name = api.model().apiName()+"Dto";
+        if (component == SpringComponents.MODEL) {
+            value = api.model().tableName();
+            name = api.model().apiName()+api.model().abbrev();
         }
+
+        ClassBuilder modelBuilder = new ClassBuilder(
+                name,
+                api.basePackage(),
+                MvcGenerator.support.callInner(component, value),
+                ClassTypes.CLASS);
+
+        if (component == SpringComponents.MODEL) {
+            modelBuilder.addExtension(ModelFrame.class, api.model().generic());
+
+            MvcSupport support = new MvcSupport() {
+                @Override
+                public void call(SpringComponents rules, String value) {
+                    ruleHolder.add(PersistenceAnnotations.ID.getValue());
+                    ruleHolder.add(this.makeGenerationType(value));
+                }
+            };
+
+            modelBuilder.addField(
+                    new FieldBuilder(
+                            "id",
+                            api.model().generic(),
+                            Modifier.PRIVATE,
+                            support.callInner(SpringComponents.MODEL, api.model().generic())));
+        }
+        else
+            modelBuilder.addExtension(DtoFrame.class);
+
+        MvcGenerator.compile(CompilationContext.builder()
+                .api(api)
+                .builder(modelBuilder)
+                .modelAnnotation(api.model())
+                .dtoName(api.model().apiName()+"Dto")
+                .build()
+        );
+
+        modelBuilder.build(buildPath, NO_DIR);
+
 
         if (flag) {
             CompilationFlags.generateModelsOnce = true;
-        }}
+        }
+    }
 
     private static void compile(@NotNull CompilationContext context) {
         if (!CompilationFlags.useModelsApi) {
-            if (!context.getModelName().isEmpty() && context.getTemplateAnnotation().rule() == SpringComponents.REPO)
+            if (!context.getModelName().isEmpty())
                 CompilationFlags.customRepoGenerics = true;
 
             if (CompilationFlags.customRepoGenerics && useImplementation(context.getTemplateAnnotation()))
                 if (hasGenerics(context.getTemplateAnnotation()))
                     context.getBuilder().addInterface(context.getTemplate());
                 else
-                    context.getBuilder().addInterface(context.getTemplate(),
-                            context.getRestApi().basePackage() + '.' + context.getModelName(),
-                            "UUID");
+                    if (context.getTemplateAnnotation().rule() == SpringComponents.REPO)
+                        context.getBuilder().addInterface(context.getTemplate(),
+                                 context.getModelName(),
+                                "UUID");
+                    else
+                        context.getBuilder().addInterface(context.getTemplate(),
+                                "UUID",
+                                    context.getDtoName(),
+                                    context.getModelName()
+                                );
             else if (CompilationFlags.customRepoGenerics && useInheritance(context.getTemplateAnnotation()))
                 if (hasGenerics(context.getTemplateAnnotation()))
                     context.getBuilder().addExtension(context.getTemplate());
                 else
                     context.getBuilder().addExtension(context.getTemplate(),
-                            context.getRestApi().basePackage() + '.' +  context.getModelName(),
+                            context.getApi().basePackage() + '.' +  context.getModelName(),
                             "UUID");
 
             if (useImplementation(context.getTemplateAnnotation()) && ! CompilationFlags.customRepoGenerics)
@@ -173,16 +185,16 @@ public final class MvcGenerator {
                 context.getBuilder().addField(
                         new FieldBuilder(
                                 "repository",
-                                context.getRestApi().basePackage() + ".repository." +
-                                        context.getRestApi().apiNames()[context.getIndex()] + "Repository",
+                                context.getApi().basePackage() + ".repository." +
+                                        context.getApi().apiName() + "Repository",
                                 Modifier.PRIVATE_FINAL));
 
             if (context.getTemplateAnnotation().rule() == SpringComponents.CONTROLLER)
                 context.getBuilder().addField(
                         new FieldBuilder(
-                                "service" + context.getRestApi().apiNames()[context.getIndex()],
-                                context.getRestApi().basePackage() + ".service." +
-                                        context.getRestApi().apiNames()[context.getIndex()] + "Service",
+                                "service" + context.getApi().apiName(),
+                                context.getApi().basePackage() + ".service." +
+                                        context.getApi().apiName() + "Service",
                                 Modifier.PRIVATE_FINAL));
 
             CompilationFlags.customRepoGenerics = false;

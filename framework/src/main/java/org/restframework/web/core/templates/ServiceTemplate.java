@@ -14,16 +14,16 @@ import java.util.Optional;
         type=ClassTypes.CLASS
 )
 @SuppressWarnings("unused")
-public interface ServiceTemplate<ID> {
+public interface ServiceTemplate<ID, DTO, Model> {
 
     int INSERT_NOT_IMPLEMENTED_CODE = 10000;
     boolean NOT_IMPLEMENTED = false;
 
-    default int insert(DtoFrame dto) { return INSERT_NOT_IMPLEMENTED_CODE; }
-    default boolean update(ID id, ModelFrame<ID> entity) {
+    default int insert(DTO dto) { return INSERT_NOT_IMPLEMENTED_CODE; }
+    default boolean update(ID id, Model entity) {
         return NOT_IMPLEMENTED;
     }
-    default boolean remove(ModelFrame<ID> entity) {
+    default boolean remove(Model entity) {
         return NOT_IMPLEMENTED;
     }
     default boolean removeById(ID id) {
@@ -35,8 +35,8 @@ public interface ServiceTemplate<ID> {
             repository.deleteById(id);
         return isAvailable;
     }
-    default List<DtoFrame> getAll() { return new ArrayList<>(); }
-    default Optional<ModelFrame<ID>> getById(ID id) { return Optional.empty(); }
+    default List<DTO> getAll() { return new ArrayList<>(); }
+    default Optional<Model> getById(ID id) { return Optional.empty(); }
     default <Repo extends RepoTemplate<ModelFrame<ID>, ID>> boolean exists(@NotNull ID id, @NotNull Repo repository) {
         List<ModelFrame<ID>> entities = repository.findAll();
         boolean isAvailable = false;
