@@ -9,6 +9,7 @@
         <version>0.2</version>
     </parent>
 
+    <version>0.1</version>
     <groupId>org.restframework</groupId>
     <artifactId>complex</artifactId>
 

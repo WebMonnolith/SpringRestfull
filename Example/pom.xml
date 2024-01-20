@@ -29,6 +29,11 @@
             <artifactId>api-framework</artifactId>
             <version>0.2.1</version>
         </dependency>
+        <dependency>
+            <groupId>org.restframework</groupId>
+            <artifactId>complex</artifactId>
+            <version>0.1</version>
+        </dependency>
     </dependencies>
 
 </project>
