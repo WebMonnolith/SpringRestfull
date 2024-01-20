@@ -16,7 +16,9 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +37,7 @@ public final class WebApp implements RestApp {
     private static Class<?> classContext;
     private final static List<String> targetPaths = new ArrayList<>();
 
-    public WebApp(@NotNull Class<?> clazz) {
+    public WebApp(@NotNull Class<?> clazz) throws UnsupportedEncodingException {
         WebApp.info = clazz.getAnnotation(RestApi.class);
         if (!clazz.isAnnotationPresent(RestApi.class))
             throw new RestException("There must be a class annotated with @" + RestApi.class + ", in order to run web framework.");
