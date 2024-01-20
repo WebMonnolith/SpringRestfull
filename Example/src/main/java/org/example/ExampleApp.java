@@ -28,7 +28,6 @@ import javax.crypto.spec.IvParameterSpec;
                         apiName = "Test1",
                         fields = {
                                 @FieldData(access = Modifier.PRIVATE, datatype = "int", name = "testField"),
-                                @FieldData(access = Modifier.PRIVATE, datatype = "double", name = "testField2"),
                         }
                 ),
             apiName="Test1",
