@@ -1,6 +1,8 @@
 package org.restframework.complex;
 
 
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -10,6 +12,8 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+@Data
+@Slf4j
 public class DecisionTree {
 
     private static final String RIGHT_CHILD = "RIGHT_CHILD";
@@ -19,6 +23,7 @@ public class DecisionTree {
     public DecisionTree() {}
     public DecisionTree(@NotNull List<Double[]> data, Integer labelColumnIndex) {
         this.buildTree(data, labelColumnIndex);
+        log.info("Decision tree has been build!");
     }
 
     public TreeNode buildTree(@NotNull List<Double[]> data, Integer labelColumnIndex) {
@@ -70,12 +75,15 @@ public class DecisionTree {
         }
 
         HashMap<String, List<Double[]>> partitionedData = partitionByQuestion(question, data);
+        try {
+            TreeNode left = this.buildTree(partitionedData.get(LEFT_CHILD), labelColumnIndex);
+            TreeNode right = this.buildTree(partitionedData.get(RIGHT_CHILD), labelColumnIndex);
 
-        TreeNode left = this.buildTree(partitionedData.get(LEFT_CHILD), labelColumnIndex);
-        TreeNode right = this.buildTree(partitionedData.get(RIGHT_CHILD), labelColumnIndex);
-
-        node.setRight(right);
-        node.setLeft(left);
+            node.setRight(right);
+            node.setLeft(left);
+        } catch (StackOverflowError e) {
+            log.error("Stackoverflow Error: {} - (Could not match the input)", e.getMessage());
+        }
 
         return node;
 
@@ -173,11 +181,16 @@ public class DecisionTree {
     public double predict(Double[] data) {
         if (data != null && data.length > 0) {
             TreeNode node = this.root;
-            while (!node.isLeaf()) {
-                boolean result = node.question.apply(data);
-                node = result ? node.getRight() : node.getLeft();
+            try {
+                while (!node.isLeaf()) {
+                    boolean result = node.question.apply(data);
+                    node = result ? node.getRight() : node.getLeft();
+                }
+                return node.getPrediction();
             }
-            return node.getPrediction();
+            catch (NullPointerException e) {
+                log.error("NullPointer error: {} - (The provided data is probably incorrect)", e.getMessage());
+            }
         }
 
         return -1d;
