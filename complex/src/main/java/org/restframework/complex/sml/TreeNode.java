@@ -2,6 +2,7 @@ package org.restframework.complex.sml;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.function.Function;
 
@@ -15,6 +16,7 @@ import java.util.function.Function;
  */
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class TreeNode {
     /**
      * The question associated with an internal node.

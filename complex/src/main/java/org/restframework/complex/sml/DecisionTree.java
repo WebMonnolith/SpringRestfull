@@ -34,6 +34,7 @@ public class DecisionTree {
     private static final String RIGHT_CHILD = "RIGHT_CHILD";
     private static final String LEFT_CHILD = "LEFT_CHILD";
     private TreeNode root;
+    private boolean noErrors = true;
 
     /**
      * Constructs a DecisionTree instance with the given dataset and number of features.
@@ -49,7 +50,7 @@ public class DecisionTree {
      */
     public DecisionTree(@NotNull List<Double[]> data, Integer labelColumnIndex) {
         this.buildTree(data, labelColumnIndex);
-        log.info("Decision tree has been build!");
+        if (this.noErrors) log.info("Decision tree has been build!");
     }
 
     /**
@@ -108,6 +109,7 @@ public class DecisionTree {
         }
 
         HashMap<String, List<Double[]>> partitionedData = partitionByQuestion(question, data);
+
         try {
             TreeNode left = this.buildTree(partitionedData.get(LEFT_CHILD), labelColumnIndex);
             TreeNode right = this.buildTree(partitionedData.get(RIGHT_CHILD), labelColumnIndex);
@@ -115,6 +117,7 @@ public class DecisionTree {
             node.setRight(right);
             node.setLeft(left);
         } catch (StackOverflowError e) {
+            this.noErrors = false;
             log.error("Stackoverflow Error: {} - (Could not match the input)", e.getMessage());
         }
 
@@ -139,6 +142,7 @@ public class DecisionTree {
                 return node.getPrediction();
             }
             catch (NullPointerException e) {
+                this.noErrors = false;
                 log.error("NullPointer error: {} - (The provided data is probably incorrect)", e.getMessage());
             }
         }
@@ -164,7 +168,18 @@ public class DecisionTree {
 
     // TODO handling of categorical column needs to added
     private final BiFunction<Integer, Double, Function<Double[], Boolean>>
-            questionGenerator = (index, value) -> (data) -> data[index].compareTo(value) <= 0;
+        questionGenerator = (index, value) -> {
+            return (data) -> {
+                try {
+                    return data[index].compareTo(value) <= 0;
+                }
+                catch (ArrayIndexOutOfBoundsException e) {
+                    this.noErrors = false;
+                    log.error("IndexOutOfBounds error: {} - (The label indexes are probably incorrect)", e.getMessage());
+                }
+                return null;
+            };
+        };
 
     private @NotNull HashMap<Double, Integer> findFreqMap(
             @NotNull List<Double[]> data,
@@ -188,6 +203,7 @@ public class DecisionTree {
     private @NotNull HashMap<String, List<Double[]>> partitionByQuestion(
             Function<Double[], Boolean> partitionFunction,
             @NotNull List<Double[]> dataSet)
+            throws ArrayIndexOutOfBoundsException
     {
         HashMap<String, List<Double[]>> hashMap = new HashMap<>();
 
@@ -196,11 +212,12 @@ public class DecisionTree {
 
         for (Double[] doubles : dataSet) {
             boolean value = partitionFunction.apply(doubles);
-
             List<Double[]> list;
             if (value) list = hashMap.get(RIGHT_CHILD);
             else list = hashMap.get(LEFT_CHILD);
+
             list.add(doubles);
+
         }
 
         return hashMap;
