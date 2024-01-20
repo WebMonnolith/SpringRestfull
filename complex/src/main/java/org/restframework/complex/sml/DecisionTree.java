@@ -5,13 +5,28 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+/**
+ * The DecisionTree class represents a decision tree for making predictions based on input data.
+ * It uses a provided dataset to build the tree and can make predictions for new data points.
+ * <pre>
+ *
+ * List<Double[]> dataSet = new ArrayList<>();
+ * // ... (add data points to the dataset)
+ *
+ * DecisionTree tree = new DecisionTree(dataSet, numFeatures);
+ * double result = tree.predict(newDataPoint);
+ * if (result == expectedValue)
+ *     System.out.println("Prediction is correct: " + result);
+ *
+ * </pre>
+ * @author  Jessy van Polanen
+ * @see     TreeNode
+ * @version 1.0
+ */
 @Data
 @Slf4j
 public class DecisionTree {
@@ -20,12 +35,30 @@ public class DecisionTree {
     private static final String LEFT_CHILD = "LEFT_CHILD";
     private TreeNode root;
 
+    /**
+     * Constructs a DecisionTree instance with the given dataset and number of features.
+
+     */
     public DecisionTree() {}
+
+    /**
+     * Constructs a DecisionTree instance with the given dataset and number of features.
+     *
+     * @param data              The dataset used for building the decision tree.
+     * @param labelColumnIndex  The index of tree insertion.
+     */
     public DecisionTree(@NotNull List<Double[]> data, Integer labelColumnIndex) {
         this.buildTree(data, labelColumnIndex);
         log.info("Decision tree has been build!");
     }
 
+    /**
+     * Builds a DecisionTree behind the scene with the given dataset and number of features.
+     *
+     * @param data              The dataset used for building the decision tree.
+     * @param labelColumnIndex  The index of tree insertion.
+     * @return                  A node to the corresponding Tree structure
+     */
     public TreeNode buildTree(@NotNull List<Double[]> data, Integer labelColumnIndex) {
         if (data.isEmpty())
             return null;
@@ -87,6 +120,30 @@ public class DecisionTree {
 
         return node;
 
+    }
+
+    /**
+     * Predicts the outcome for a given data point using the constructed decision tree.
+     *
+     * @param data The data point for which the prediction is made.
+     * @return The predicted outcome for the given data point, -1 = InvalidOutput.
+     */
+    public double predict(Double[] data) {
+        if (data != null && data.length > 0) {
+            TreeNode node = this.root;
+            try {
+                while (!node.isLeaf()) {
+                    boolean result = node.question.apply(data);
+                    node = result ? node.getRight() : node.getLeft();
+                }
+                return node.getPrediction();
+            }
+            catch (NullPointerException e) {
+                log.error("NullPointer error: {} - (The provided data is probably incorrect)", e.getMessage());
+            }
+        }
+
+        return -1d;
     }
 
     private final BiFunction<Integer, List<Double[]>, Double> gini = (index, data) -> {
@@ -176,23 +233,5 @@ public class DecisionTree {
         HashSet<Double> uniqueDataPoints = new HashSet<>();
         data.forEach((n) -> uniqueDataPoints.add(n[index]));
         return uniqueDataPoints;
-    }
-
-    public double predict(Double[] data) {
-        if (data != null && data.length > 0) {
-            TreeNode node = this.root;
-            try {
-                while (!node.isLeaf()) {
-                    boolean result = node.question.apply(data);
-                    node = result ? node.getRight() : node.getLeft();
-                }
-                return node.getPrediction();
-            }
-            catch (NullPointerException e) {
-                log.error("NullPointer error: {} - (The provided data is probably incorrect)", e.getMessage());
-            }
-        }
-
-        return -1d;
     }
 }
