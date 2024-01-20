@@ -155,12 +155,13 @@ public final class WebApp implements RestApp {
     }
 
     private static void generate(@NotNull RestApi restApi) {
+        MvcGenerator generator = new MvcGenerator(new MvcSupportHandler());
         for (int i = 0; i < restApi.APIS().length; i++) {
             API api = restApi.APIS()[i];
+            generator.generateByKey(api, false, WebApp.context.getValueByKey("model-generation"), WebApp.outputResultPathBase().get(i));
+            generator.generateByKey(api, false, WebApp.context.getValueByKey("dto-generation"), WebApp.outputResultPathBase().get(i));
             for (Class<?> template : restApi.templates())
-                MvcGenerator.generateClasses(api, template, new MvcSupportHandler(), WebApp.outputResultPathBase().get(i));
-            MvcGenerator.generateByKey(api, false, WebApp.context.getValueByKey("model-generation"), WebApp.outputResultPathBase().get(i));
-            MvcGenerator.generateByKey(api, false, WebApp.context.getValueByKey("dto-generation"), WebApp.outputResultPathBase().get(i));
+                generator.generateClasses(api, template, WebApp.outputResultPathBase().get(i));
         }
     }
 

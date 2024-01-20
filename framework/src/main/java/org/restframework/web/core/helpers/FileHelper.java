@@ -19,7 +19,10 @@ public class FileHelper {
     public static @NotNull String constructPath(
             @NotNull Class<?> clazz,
             @NotNull String srcRoot,
-            @NotNull String basePackage) throws UnsupportedEncodingException {
+            @NotNull String basePackage)
+            throws UnsupportedEncodingException
+    {
+        //TODO Add exception handling
         URL location = clazz.getProtectionDomain().getCodeSource().getLocation();
         String decodedPath = URLDecoder.decode(location.getPath(), "UTF-8");
         if (decodedPath.startsWith("/"))

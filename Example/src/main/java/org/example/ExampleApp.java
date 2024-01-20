@@ -32,21 +32,21 @@ import javax.crypto.spec.IvParameterSpec;
                         }
                 ),
             apiName="Test1",
-            basePackage = "org.example.test.test1"
+            basePackage = "org.example.test"
         ),
-        @API(
-            endpoint="/tools/api/testing2",
-            model=@Model(generic = "UUID",
-                        tableName = "test_table2",
-                        apiName = "Test2",
-                        fields = {
-                                @FieldData(access = Modifier.PRIVATE, datatype = "int", name = "testField"),
-                                @FieldData(access = Modifier.PRIVATE, datatype = "double", name = "testField2"),
-                        }
-                    ),
-            apiName="Test2",
-            basePackage = "org.example.test.test2"
-        )
+//        @API(
+//            endpoint="/tools/api/testing2",
+//            model=@Model(generic = "UUID",
+//                        tableName = "test_table2",
+//                        apiName = "Test2",
+//                        fields = {
+//                                @FieldData(access = Modifier.PRIVATE, datatype = "int", name = "testField"),
+//                                @FieldData(access = Modifier.PRIVATE, datatype = "double", name = "testField2"),
+//                        }
+//                    ),
+//            apiName="Test2",
+//            basePackage = "org.example.test"
+//        )
     }
 )
 @SpringBootApplication
