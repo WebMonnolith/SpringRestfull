@@ -52,18 +52,6 @@ import javax.crypto.spec.IvParameterSpec;
 public class ExampleApp {
     @SneakyThrows
     public static void main(String[] args) {
-//        Hashing<String> hasher = new MD5Hash<>("Hello world");
-//        System.out.println(Arrays.toString(hasher.getMessage()));
-//
-//        String input = "Some very important text that needs to be encrypted";
-//        SecretKey key = Key.generateKey(128);
-//        CryptoAlgorithm algorithm = CryptoAlgorithm.AES_CBC_PKCS5_PADDING;
-//        IvParameterSpec iv = new InitVector().getParameter();
-//        String cipherText = StringSecurity.encryptString(algorithm, input, key, iv);
-//        String plainText = StringSecurity.decryptString(algorithm, cipherText, key, iv);
-//        System.out.println(cipherText);
-//        System.out.println(plainText);
-
         new WebApp(ExampleApp.class)
         .run(args);
     }
