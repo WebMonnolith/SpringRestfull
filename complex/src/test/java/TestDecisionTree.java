@@ -1,5 +1,5 @@
 import org.junit.jupiter.api.Test;
-import org.restframework.complex.sml.DecisionTree;
+import org.restframework.complex.containers.sml.DecisionTree;
 
 import java.util.ArrayList;
 import java.util.List;

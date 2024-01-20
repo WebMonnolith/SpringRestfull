@@ -1,8 +1,10 @@
-package org.restframework.complex.sml;
+package org.restframework.complex.containers.sml;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.restframework.complex.containers.Node;
 
 import java.util.function.Function;
 
@@ -14,10 +16,11 @@ import java.util.function.Function;
  * @author Your Name
  * @version 1.0
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TreeNode {
+public class TreeNode extends Node<TreeNode> {
     /**
      * The question associated with an internal node.
      * If null, the node is a leaf node.
@@ -28,16 +31,6 @@ public class TreeNode {
      * Flag indicating whether the node is a leaf node.
      */
     private boolean isLeaf;
-
-    /**
-     * The left subtree of the node. Null for leaf nodes.
-     */
-    private TreeNode left;
-
-    /**
-     * The right subtree of the node. Null for leaf nodes.
-     */
-    private TreeNode right;
 
     /**
      * The prediction value for leaf nodes. Null for internal nodes.
