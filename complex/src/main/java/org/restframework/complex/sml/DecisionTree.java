@@ -210,14 +210,20 @@ public class DecisionTree {
         hashMap.put(RIGHT_CHILD, new ArrayList<>());
         hashMap.put(LEFT_CHILD, new ArrayList<>());
 
-        for (Double[] doubles : dataSet) {
-            boolean value = partitionFunction.apply(doubles);
-            List<Double[]> list;
-            if (value) list = hashMap.get(RIGHT_CHILD);
-            else list = hashMap.get(LEFT_CHILD);
+        try {
+            for (Double[] doubles : dataSet) {
+                boolean value = partitionFunction.apply(doubles);
+                List<Double[]> list;
+                if (value) list = hashMap.get(RIGHT_CHILD);
+                else list = hashMap.get(LEFT_CHILD);
 
-            list.add(doubles);
+                list.add(doubles);
 
+            }
+        }
+        catch (NullPointerException e) {
+            this.noErrors = false;
+            log.error("NullPointer error: {} - (The label indexes are probably incorrect, or the other inputs)", e.getMessage());
         }
 
         return hashMap;
