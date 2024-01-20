@@ -20,7 +20,7 @@ import java.util.function.Function;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TreeNode extends Node<TreeNode> {
+public class DecisionTreeNode extends Node<DecisionTreeNode> {
     /**
      * The question associated with an internal node.
      * If null, the node is a leaf node.

@@ -24,7 +24,7 @@ import java.util.function.Function;
  *
  * </pre>
  * @author  Jessy van Polanen
- * @see     TreeNode
+ * @see     DecisionTreeNode
  * @version 1.0
  */
 @Data
@@ -33,7 +33,7 @@ public class DecisionTree {
 
     private static final String RIGHT_CHILD = "RIGHT_CHILD";
     private static final String LEFT_CHILD = "LEFT_CHILD";
-    private TreeNode root;
+    private DecisionTreeNode root;
     private boolean noErrors = true;
 
     /**
@@ -60,14 +60,14 @@ public class DecisionTree {
      * @param labelColumnIndex  The index of tree insertion.
      * @return                  A node to the corresponding Tree structure
      */
-    public TreeNode buildTree(@NotNull List<Double[]> data, Integer labelColumnIndex) {
+    public DecisionTreeNode buildTree(@NotNull List<Double[]> data, Integer labelColumnIndex) {
         if (data.isEmpty())
             return null;
 
         Double impurity = gini.apply(labelColumnIndex, data);
 
         if (impurity.compareTo(0.0d) == 0) {
-            TreeNode node = new TreeNode();
+            DecisionTreeNode node = new DecisionTreeNode();
             node.setLeaf(true);
             node.setPrediction(data.get(0)[labelColumnIndex]);
             return node;
@@ -101,7 +101,7 @@ public class DecisionTree {
         }
 
         Function<Double[], Boolean> question = questionGenerator.apply(finalIndex, finalValue);
-        TreeNode node = new TreeNode();
+        DecisionTreeNode node = new DecisionTreeNode();
         node.question = question;
 
         if (this.root == null) {
@@ -111,8 +111,8 @@ public class DecisionTree {
         HashMap<String, List<Double[]>> partitionedData = partitionByQuestion(question, data);
 
         try {
-            TreeNode left = this.buildTree(partitionedData.get(LEFT_CHILD), labelColumnIndex);
-            TreeNode right = this.buildTree(partitionedData.get(RIGHT_CHILD), labelColumnIndex);
+            DecisionTreeNode left = this.buildTree(partitionedData.get(LEFT_CHILD), labelColumnIndex);
+            DecisionTreeNode right = this.buildTree(partitionedData.get(RIGHT_CHILD), labelColumnIndex);
 
             node.setRight(right);
             node.setLeft(left);
@@ -133,7 +133,7 @@ public class DecisionTree {
      */
     public double predict(Double[] data) {
         if (data != null && data.length > 0) {
-            TreeNode node = this.root;
+            DecisionTreeNode node = this.root;
             try {
                 while (!node.isLeaf()) {
                     boolean result = node.question.apply(data);
