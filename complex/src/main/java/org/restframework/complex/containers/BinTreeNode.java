@@ -5,10 +5,10 @@ import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class BinTreeNode extends Node<BinTreeNode> {
-    private int key;
+public class BinTreeNode<T> extends Node<BinTreeNode> {
+    private T key;
 
-    public BinTreeNode(int item) {
+    public BinTreeNode(T item) {
         this.key = item;
         this.left = this.right = null;
     }
