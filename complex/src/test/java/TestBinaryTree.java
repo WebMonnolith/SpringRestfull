@@ -33,4 +33,17 @@ public class TestBinaryTree {
         System.out.println("Complete");
 
     }
+
+    @Test
+    public void binaryTreeHeight() {
+        BinaryTree<Integer> tree = new BinaryTree<>(1);
+
+        tree.getRoot().setLeft(new BinTreeNode<>(2));
+        tree.getRoot().setRight(new BinTreeNode<>(3));
+        tree.getRoot().getLeft().setLeft(new BinTreeNode<>(4));
+        tree.getRoot().getLeft().setRight(new BinTreeNode<>(5));
+
+        assertEquals(tree.height(tree.getRoot()), 3);
+        System.out.println("Height of tree is " + tree.height(tree.getRoot()));
+    }
 }
