@@ -41,6 +41,7 @@ public final class WebApp implements RestApp {
             throw new RestException("There must be a class annotated with @" + RestApi.class + ", in order to run web framework.");
 
         WebApp.context = configure(clazz);
+        WebApp.classContext = clazz;
 
         String srcRoot;
 
@@ -52,8 +53,11 @@ public final class WebApp implements RestApp {
             srcRoot = "/src/main/java";
         }
 
-        for (API api : WebApp.info.APIS())
-            WebApp.targetPaths.add(FileHelper.constructPath(clazz, srcRoot, FileHelper.convertPackageToPath(api.basePackage())));
+        for (API api : WebApp.info.APIS()) {
+            String path = FileHelper.constructPath(clazz, srcRoot, FileHelper.convertPackageToPath(api.basePackage()));
+            System.out.println(path);
+            WebApp.targetPaths.add(path);
+        }
     }
 
     @Override
@@ -71,10 +75,10 @@ public final class WebApp implements RestApp {
     }
 
     @Override
-    public synchronized <T> void run(@NotNull Class<T> clazz, String[] args) {
-        WebApp.runSpring(clazz, args);
+    public synchronized <T> void run(String[] args) {
+        WebApp.runSpring(WebApp.classContext(), args);
         try {
-            WebApp.init(clazz);
+            WebApp.init();
         } catch (RestException |
                  InvocationTargetException |
                  InstantiationException |
@@ -85,10 +89,10 @@ public final class WebApp implements RestApp {
     }
 
     @Override
-    public synchronized <T> void run(@NotNull Class<T> clazz, @NotNull AppRunner<RestApp> runnable) {
-        WebApp.runSpring(clazz);
+    public synchronized <T> void run(@NotNull AppRunner<RestApp> runnable) {
+        WebApp.runSpring(WebApp.classContext());
         try {
-            WebApp.init(clazz);
+            WebApp.init();
         } catch (RestException |
                  InvocationTargetException |
                  InstantiationException |
@@ -101,10 +105,10 @@ public final class WebApp implements RestApp {
     }
 
     @Override
-    public synchronized <T> void run(@NotNull Class<T> clazz, String[] args, @NotNull AppRunner<RestApp> runnable) {
-        WebApp.runSpring(clazz);
+    public synchronized <T> void run(String[] args, @NotNull AppRunner<RestApp> runnable) {
+        WebApp.runSpring(WebApp.classContext());
         try {
-            WebApp.init(clazz, args);
+            WebApp.init(args);
         } catch (RestException |
                  InvocationTargetException |
                  InstantiationException |
@@ -116,21 +120,19 @@ public final class WebApp implements RestApp {
         WebApp.internalApp = runnable.call(WebApp.classContext());
     }
 
-    private static <T> void init(@NotNull Class<T> clazz)
+    private static <T> void init()
             throws RestException,
             NoSuchMethodException,
             InvocationTargetException,
             InstantiationException,
             IllegalAccessException
     {
-        WebApp.classContext = clazz;
         WebApp.appContext = WebApp.classContext.getDeclaredConstructor().newInstance();
-
         WebApp.generate(WebApp.info);
     }
 
     @SafeVarargs
-    private static <T, args> void init(@NotNull Class<T> clazz, args ... params)
+    private static <T, args> void init(args ... params)
             throws RestException,
             NoSuchMethodException,
             InvocationTargetException,
@@ -138,9 +140,7 @@ public final class WebApp implements RestApp {
             IllegalAccessException
     {
 
-        WebApp.classContext = clazz;
         WebApp.appContext = WebApp.classContext.getDeclaredConstructor().newInstance();
-
         WebApp.generate(WebApp.info);
     }
 

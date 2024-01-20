@@ -65,8 +65,7 @@ public class ExampleApp {
         System.out.println(cipherText);
         System.out.println(plainText);
 
-        WebApp app = new WebApp(ExampleApp.class);
-        app.run(ExampleApp.class, args);
+        new WebApp(ExampleApp.class).run(args);
     }
 
 }
