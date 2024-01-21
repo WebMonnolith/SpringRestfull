@@ -14,8 +14,12 @@ public class BinTreeNode<T> extends Node<BinTreeNode> {
         this.left = this.right = null;
     }
 
-    public boolean isLeaf() {
-        return this.left != null && this.right != null;
+    public void setLeftData(T item) {
+        this.left = new BinTreeNode<>(item);
+    }
+
+    public void setRightData(T item) {
+        this.right = new BinTreeNode<>(item);
     }
 
 }

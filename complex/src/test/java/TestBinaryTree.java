@@ -46,4 +46,41 @@ public class TestBinaryTree {
         assertEquals(tree.height(tree.getRoot()), 3);
         System.out.println("Height of tree is " + tree.height(tree.getRoot()));
     }
+
+    @Test
+    public void testBinaryTreeInsertion() {
+        BinaryTree<Integer> tree = new BinaryTree<>(1);
+
+        tree.getRoot().setLeft(new BinTreeNode<>(2));
+        tree.getRoot().setRight(new BinTreeNode<>(3));
+        tree.getRoot().getLeft().setLeft(new BinTreeNode<>(4));
+        tree.getRoot().getLeft().setRight(new BinTreeNode<>(5));
+
+        System.out.print("Inorder traversal before insertion:");
+        tree.inorder(tree.getRoot());
+
+        tree.insert(tree.getRoot(), 12);
+
+        System.out.print("Inorder traversal after insertion:");
+        tree.inorder(tree.getRoot());
+    }
+
+    @Test
+    public void testBinaryTreeDeletion() {
+        BinaryTree<Integer> tree = new BinaryTree<>(1);
+
+        tree.getRoot().setLeft(new BinTreeNode<>(2));
+        tree.getRoot().setRight(new BinTreeNode<>(3));
+        tree.getRoot().getLeft().setLeft(new BinTreeNode<>(4));
+        tree.getRoot().getLeft().setRight(new BinTreeNode<>(5));
+
+        System.out.print("Inorder traversal before deletion:");
+        tree.inorder(tree.getRoot());
+
+        int key = 5;
+        tree.delete(key);
+
+        System.out.print("\nInorder traversal after deletion:");
+        tree.inorder(tree.getRoot());
+    }
 }
