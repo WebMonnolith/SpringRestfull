@@ -14,11 +14,11 @@ public interface MvcSupport {
     @Getter
     enum SpringAnnotations {
 
-        REQUEST_MAPPING("org.springframework.web.bind.annotation.RequestMapping"),
-        REST_CONTROLLER("org.springframework.web.bind.annotation.RestController"),
-        SERVICE("org.springframework.stereotype.Service"),
-        REPOSITORY("org.springframework.stereotype.Repository"),
-        SPRING_COMPONENT("org.springframework.stereotype.Component");
+        REQUEST_MAPPING("RequestMapping"),
+        REST_CONTROLLER("RestController"),
+        SERVICE("Service"),
+        REPOSITORY("Repository"),
+        SPRING_COMPONENT("Component");
 
         private final String value;
 
@@ -30,13 +30,13 @@ public interface MvcSupport {
     @Getter
     enum LombokAnnotations {
 
-        EQUALS_AND_HASHCODE("lombok.EqualsAndHashCode(callSuper=true)"),
-        NO_ARGS_CONSTRUCTOR("lombok.NoArgsConstructor"),
-        ALL_ARGS_CONSTRUCTOR("lombok.AllArgsConstructor"),
-        GETTER("lombok.Getter"),
-        SETTER("lombok.Setter"),
-        DATA("lombok.Data"),
-        BUILDER("lombok.Builder");
+        EQUALS_AND_HASHCODE("EqualsAndHashCode(callSuper=true)"),
+        NO_ARGS_CONSTRUCTOR("NoArgsConstructor"),
+        ALL_ARGS_CONSTRUCTOR("AllArgsConstructor"),
+        GETTER("Getter"),
+        SETTER("Setter"),
+        DATA("Data"),
+        BUILDER("Builder");
 
         private final String value;
 
@@ -48,12 +48,12 @@ public interface MvcSupport {
     @Getter
     enum PersistenceAnnotations {
 
-        ENTITY("jakarta.persistence.Entity"),
-        TABLE("jakarta.persistence.Table"),
-        ID("jakarta.persistence.Id"),
-        GENERATED_VALUE("jakarta.persistence.GeneratedValue"),
-        GENERATION_TYPE("jakarta.persistence.GenerationType"),
-        COLUMN("jakarta.persistence.Column");
+        ENTITY("Entity"),
+        TABLE("Table"),
+        ID("Id"),
+        GENERATED_VALUE("GeneratedValue"),
+        GENERATION_TYPE("GenerationType"),
+        COLUMN("Column");
 
         private final String value;
 

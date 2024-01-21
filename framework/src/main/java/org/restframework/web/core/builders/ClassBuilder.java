@@ -126,6 +126,22 @@ public final class ClassBuilder implements Builder, BuilderUtils {
 
     @Override
     public void build(@NotNull String filePath, @NotNull String dir) {
+        /*
+        * TODO Add a way to handle file generation errors
+        *  java.io.FileNotFoundException: D:\Program Files (x86)\Programming\repositories\SpringRestfull\Example\src\main\java\org\example\test\test1\controller\Test1Controller.java (The system cannot find the path specified)
+            at java.base/java.io.FileOutputStream.open0(Native Method)
+            at java.base/java.io.FileOutputStream.open(FileOutputStream.java:293)
+            at java.base/java.io.FileOutputStream.<init>(FileOutputStream.java:235)
+            at java.base/java.io.FileOutputStream.<init>(FileOutputStream.java:184)
+            at java.base/java.io.FileWriter.<init>(FileWriter.java:96)
+            at org.restframework.web.core.builders.ClassBuilder.build(ClassBuilder.java:150)
+            at org.restframework.web.core.generators.MvcGenerator.generateClasses(MvcGenerator.java:82)
+            at org.restframework.web.WebApp.generate(WebApp.java:161)
+            at org.restframework.web.WebApp.init(WebApp.java:133)
+            at org.restframework.web.WebApp.run(WebApp.java:83)
+            at org.example.ExampleApp.main(ExampleApp.java:69)
+        * */
+
         this.classDefinition.append("}");
         String newFilePath;
 

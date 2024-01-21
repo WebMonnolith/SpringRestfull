@@ -9,31 +9,14 @@
         <version>1.1</version>
     </parent>
 
-    <groupId>org.example</groupId>
-    <artifactId>Example</artifactId>
+    <version>1.0</version>
+    <groupId>org.restframework</groupId>
+    <artifactId>complex</artifactId>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.restframework</groupId>
-            <artifactId>api-framework</artifactId>
-            <version>1.1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.restframework</groupId>
-            <artifactId>complex</artifactId>
-            <version>1.0</version>
-        </dependency>
-    </dependencies>
 
 </project>
