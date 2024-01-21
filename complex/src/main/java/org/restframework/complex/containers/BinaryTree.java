@@ -5,21 +5,58 @@ import lombok.*;
 import java.util.LinkedList;
 import java.util.Queue;
 
-
+/**
+ * A simple binary tree implementation with basic operations. Will be expanded in the future.
+ * <pre>
+ *         BinaryTree<Integer> tree = new BinaryTree<>(1);
+ *          ...
+ *         tree.getRoot().setLeft(new BinTreeNode<>(2));
+ *         tree.getRoot().setRight(new BinTreeNode<>(3));
+ *         tree.getRoot().getLeft().setLeft(new BinTreeNode<>(4));
+ *         tree.getRoot().getLeft().setRight(new BinTreeNode<>(5));
+ *         ...
+ *         System.out.print("Inorder traversal before insertion:");
+ *         tree.inorder(tree.getRoot());
+ *          ...
+ *         tree.insert(tree.getRoot(), 12);
+ *          ...
+ *         System.out.print("Inorder traversal after insertion:");
+ *         tree.inorder(tree.getRoot());
+ * </pre>
+ *
+ * @param <T> The type of elements stored in the binary tree.
+ *
+ * @author  Jessy van Polanen
+ * @see     BinTreeNode
+ * @version 1.0
+ */
 @EqualsAndHashCode
 @ToString
 @NoArgsConstructor
 public class BinaryTree <T> {
 
+    /**
+     * The root node of the binary tree.
+     */
     @Getter
     @Setter
     private BinTreeNode<T> root;
 
 
+    /**
+     * Constructs a BinaryTree with a specified key as the root.
+     *
+     * @param key The key to be set as the root of the binary tree.
+     */
     public BinaryTree(T key) {
         this.root = new BinTreeNode<>(key);
     }
 
+    /**
+     * Performs an inorder traversal starting from the given node.
+     *
+     * @param temp The starting node for the inorder traversal.
+     */
     public void inorder(BinTreeNode<T> temp) {
         if (temp == null)
             return;
@@ -29,6 +66,12 @@ public class BinaryTree <T> {
         this.inorder(temp.getRight());
     }
 
+    /**
+     * Inserts a new key into the binary tree.
+     *
+     * @param temp The root node of the subtree where the key should be inserted.
+     * @param key  The key to be inserted into the binary tree.
+     */
     public void insert(BinTreeNode<T> temp, T key) {
         if (temp == null) {
             this.root = new BinTreeNode<>(key);
@@ -54,6 +97,11 @@ public class BinaryTree <T> {
         }
     }
 
+    /**
+     * Deletes the deepest node in the binary tree.
+     *
+     * @param delNode The node to be deleted.
+     */
     public void deleteDeepest(BinTreeNode<T> delNode) {
         Queue<BinTreeNode<T>> q = new LinkedList<>();
         q.add(this.root);
@@ -84,6 +132,11 @@ public class BinaryTree <T> {
         }
     }
 
+    /**
+     * Deletes a key from the binary tree.
+     *
+     * @param key The key to be deleted from the binary tree.
+     */
     public void delete(T key) {
         if (this.root == null)
             return;
@@ -119,6 +172,12 @@ public class BinaryTree <T> {
         }
     }
 
+    /**
+     * Calculates the height of a given node in the binary tree.
+     *
+     * @param node The node for which the height is to be calculated.
+     * @return The height of the specified node.
+     */
     public int height(BinTreeNode<T> node) {
         if (node == null)
             return 0;
