@@ -12,7 +12,7 @@
 
     <groupId>org.mono</groupId>
     <artifactId>RESTful</artifactId>
-    <version>0.2</version>
+    <version>1.1</version>
 
     <packaging>pom</packaging>
     <modules>

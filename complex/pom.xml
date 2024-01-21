@@ -6,10 +6,10 @@
     <parent>
         <groupId>org.mono</groupId>
         <artifactId>RESTful</artifactId>
-        <version>0.2</version>
+        <version>1.1</version>
     </parent>
 
-    <version>0.1</version>
+    <version>1.0</version>
     <groupId>org.restframework</groupId>
     <artifactId>complex</artifactId>
 

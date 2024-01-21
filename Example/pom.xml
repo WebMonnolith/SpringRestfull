@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.mono</groupId>
         <artifactId>RESTful</artifactId>
-        <version>0.2</version>
+        <version>1.1</version>
     </parent>
 
     <groupId>org.example</groupId>
@@ -27,12 +27,12 @@
         <dependency>
             <groupId>org.restframework</groupId>
             <artifactId>api-framework</artifactId>
-            <version>0.2.1</version>
+            <version>1.1.0</version>
         </dependency>
         <dependency>
             <groupId>org.restframework</groupId>
             <artifactId>complex</artifactId>
-            <version>0.1</version>
+            <version>1.0</version>
         </dependency>
     </dependencies>
 
