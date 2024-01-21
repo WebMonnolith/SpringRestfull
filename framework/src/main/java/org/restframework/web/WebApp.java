@@ -214,7 +214,13 @@ public final class WebApp implements RestApp {
                     ruleHolder.add(PersistenceAnnotations.ENTITY.getValue());
                     ruleHolder.add(this.makeTable(value));
                 }
-                case DTO -> {}
+                case DTO -> {
+                    ruleHolder.add(LombokAnnotations.EQUALS_AND_HASHCODE.getValue());
+                    ruleHolder.add(LombokAnnotations.DATA.getValue());
+                    ruleHolder.add(LombokAnnotations.ALL_ARGS_CONSTRUCTOR.getValue());
+                    ruleHolder.add(LombokAnnotations.NO_ARGS_CONSTRUCTOR.getValue());
+                    ruleHolder.add(LombokAnnotations.BUILDER.getValue());
+                }
                 case NONE -> throw new RestException("@" + RestApi.class + " MVC has no templates associated with it");
             }
         }

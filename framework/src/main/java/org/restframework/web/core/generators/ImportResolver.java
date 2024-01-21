@@ -42,7 +42,6 @@ public class ImportResolver {
                 holder.add("import org.springframework.stereotype.Service");
             }
             case MODEL -> {
-                holder.add("import " + apiPackage + ".controller.*");
                 holder.add("import lombok.*");
                 holder.add("import jakarta.persistence.*");
             }
