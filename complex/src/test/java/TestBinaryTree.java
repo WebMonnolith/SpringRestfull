@@ -1,6 +1,9 @@
 import org.junit.jupiter.api.Test;
 import org.restframework.complex.containers.BinTreeNode;
 import org.restframework.complex.containers.BinaryTree;
+import org.restframework.complex.containers.Tree;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -45,6 +48,22 @@ public class TestBinaryTree {
 
         assertEquals(tree.height(tree.getRoot()), 3);
         System.out.println("Height of tree is " + tree.height(tree.getRoot()));
+    }
+
+    @Test
+    public void testConvertBinaryTreeToList() {
+        BinaryTree<Integer> tree = new BinaryTree<>(1);
+
+        tree.getRoot().setLeft(new BinTreeNode<>(2));
+        tree.getRoot().setRight(new BinTreeNode<>(3));
+        tree.getRoot().getLeft().setLeft(new BinTreeNode<>(4));
+        tree.getRoot().getLeft().setRight(new BinTreeNode<>(5));
+
+        System.out.print("Inorder traversal before insertion: ");
+        tree.inorder(tree.getRoot());
+
+        List<Integer> test = Tree.convertToList(tree);
+        System.out.println(test.toString());
     }
 
     @Test
