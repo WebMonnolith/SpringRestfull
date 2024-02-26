@@ -1,7 +1,10 @@
 package org.restframework.web.core.builders;
 
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.sql.Update;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.restframework.web.annotations.UpdateComponent;
 import org.restframework.web.core.templates.ClassTypes;
 
 import java.io.File;
@@ -122,6 +125,12 @@ public final class ClassBuilder implements Builder, BuilderUtils {
     @Override
     public void addField(FieldBuilder builder) {
         this.classDefinition.append(builder.getDefinition());
+    }
+
+    public ClassBuilder prepareBuild(@Nullable UpdateComponent updateAnnotation) {
+
+
+        return this;
     }
 
     @Override
