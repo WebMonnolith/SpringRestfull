@@ -10,9 +10,8 @@ public class ControllerCompilationStrategy implements CompilationStrategy {
     public void execute(@NotNull CompilationContext context) {
         context.getBuilder().addField(
                 new FieldBuilder(
-                        "service" + context.getApi().apiName(),
-                        context.getApi().basePackage() + ".service." +
-                                context.getApi().apiName() + "Service",
+                        context.getApi().apiName() + "Service",
+                        context.getApi().apiName() + "Service",
                         Modifier.PRIVATE_FINAL));
     }
 }

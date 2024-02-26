@@ -15,15 +15,17 @@ import java.util.List;
 @RestApi(
     APIS= {
         @API(
-            endpoint="/tools/api/v1/testing1",
+            endpoint="/tools/api/v1/user",
             model=@Model(generic = "UUID",
-                        tableName = "test_table1",
-                        apiName = "Test1",
+                        tableName = "test_user",
+                        apiName = "User",
                         fields = {
-                                @FieldData(access = Modifier.PRIVATE, datatype = "int", name = "testField"),
+                                @FieldData(access = Modifier.PRIVATE, datatype = "String", name = "fname"),
+                                @FieldData(access = Modifier.PRIVATE, datatype = "String", name = "lname"),
+                                @FieldData(access = Modifier.PRIVATE, datatype = "double", name = "age"),
                         }
                 ),
-            apiName="Test1",
+            apiName="User",
             basePackage = "org.example.test"
         ),
     }
@@ -33,7 +35,7 @@ public class ExampleApp {
     @SneakyThrows
     public static void main(String[] args) {
         new WebApp(ExampleApp.class)
-        .run(args);
+            .run(args);
     }
 
 }
