@@ -1,6 +1,7 @@
 package org.restframework.web.core.generators;
 
 import lombok.extern.slf4j.Slf4j;
+import org.antlr.v4.runtime.misc.Pair;
 import org.restframework.web.annotations.*;
 import org.restframework.web.core.builders.Modifier;
 import org.restframework.web.core.builders.ClassBuilder;
@@ -8,6 +9,8 @@ import org.restframework.web.core.builders.FieldBuilder;
 import org.restframework.web.core.generators.compilation.CompilationContext;
 import org.restframework.web.core.generators.compilation.CompilationFlags;
 import org.restframework.web.core.generators.compilation.CompilationProcessor;
+import org.restframework.web.core.generics.GenericFactory;
+import org.restframework.web.core.generics.GenericGeneration;
 import org.restframework.web.core.templates.ClassTypes;
 import org.restframework.web.core.templates.DtoFrame;
 import org.restframework.web.core.templates.ModelFrame;
@@ -38,6 +41,8 @@ public final class MvcGenerator {
             throw new RestException("@" + RestApi.class + "templates must be annotated with @Template " +
                     api.basePackage() + "\n" + api.apiName());
 
+        GenericGeneration genericResolver = GenericFactory.create(api.model().generic());
+
         CompilationFlags.useModelsApi = false;
 
         ClassBuilder mvcBuilder = new ClassBuilder(
@@ -45,7 +50,7 @@ public final class MvcGenerator {
                 api.basePackage()+'.'+templateAnnotation.templateName().toLowerCase(),
                 this.support.callInner(templateAnnotation.rule(), api.endpoint()),
                 templateAnnotation.type(),
-                new ImportResolver(templateAnnotation.rule(), api.basePackage()).get());
+                new ImportResolver(templateAnnotation.rule(), genericResolver.getImportStatement(), api.basePackage()).get());
 
         MvcGenerator
             .compile(CompilationContext.builder()
@@ -55,6 +60,7 @@ public final class MvcGenerator {
                 .templateAnnotation(templateAnnotation)
                 .modelName(api.model().apiName()+api.model().abbrev())
                 .dtoName(api.model().apiName()+"Dto")
+                .generic(genericResolver.getGeneric())
                 .build());
 
         mvcBuilder.build(buildPath, templateAnnotation.templateName().toLowerCase());
@@ -78,15 +84,17 @@ public final class MvcGenerator {
             name = api.model().apiName()+api.model().abbrev();
         }
 
+        GenericGeneration genericResolver = GenericFactory.create(api.model().generic());
+
         ClassBuilder modelBuilder = new ClassBuilder(
                 name,
                 api.basePackage(),
                 this.support.callInner(component, value),
                 ClassTypes.CLASS,
-                new ImportResolver(component, api.basePackage()).get());
+                new ImportResolver(component, genericResolver.getImportStatement(), api.basePackage()).get());
 
         if (component == SpringComponents.MODEL) {
-            modelBuilder.addExtension(ModelFrame.class, api.model().generic());
+            modelBuilder.addExtension(ModelFrame.class, genericResolver.getGeneric());
 
             MvcSupport support = new MvcSupport() {
                 @Override
@@ -99,9 +107,9 @@ public final class MvcGenerator {
             modelBuilder.addField(
                     new FieldBuilder(
                             "id",
-                            api.model().generic(),
+                            genericResolver.getGeneric(),
                             Modifier.PRIVATE,
-                            support.callInner(SpringComponents.MODEL, api.model().generic())));
+                            support.callInner(SpringComponents.MODEL, genericResolver.getGenerationType())));
         }
         else
             modelBuilder.addExtension(DtoFrame.class);
@@ -112,6 +120,7 @@ public final class MvcGenerator {
                 .builder(modelBuilder)
                 .modelAnnotation(api.model())
                 .dtoName(api.model().apiName()+"Dto")
+                .generic(genericResolver.getGeneric())
                 .build()
         );
 

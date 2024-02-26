@@ -5,6 +5,7 @@ import lombok.SneakyThrows;
 import org.restframework.web.WebApp;
 import org.restframework.web.annotations.*;
 import org.restframework.web.core.builders.Modifier;
+import org.restframework.web.core.generics.Generic;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.util.ArrayList;
@@ -16,7 +17,7 @@ import java.util.List;
     APIS= {
         @API(
             endpoint="/tools/api/v1/user",
-            model=@Model(generic = "UUID",
+            model=@Model(generic = Generic.UUID,
                         tableName = "test_user",
                         apiName = "User",
                         fields = {

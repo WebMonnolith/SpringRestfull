@@ -35,10 +35,10 @@ public class CompilationProcessor {
                 if (context.getTemplateAnnotation().rule() == SpringComponents.REPO)
                     context.getBuilder().addInterface(context.getTemplate(),
                              context.getModelName(),
-                            "UUID");
+                            context.getGeneric());
                 else
                     context.getBuilder().addInterface(context.getTemplate(),
-                            "UUID",
+                            context.getGeneric(),
                                 context.getDtoName(),
                                 context.getModelName()
                             );
@@ -48,7 +48,7 @@ public class CompilationProcessor {
             else
                 context.getBuilder().addExtension(context.getTemplate(),
                         context.getApi().basePackage() + '.' +  context.getModelName(),
-                        "UUID");
+                        context.getGeneric());
 
         if (useImplementation(context.getTemplateAnnotation()) && ! CompilationFlags.customRepoGenerics)
             if (hasGenerics(context.getTemplateAnnotation()))

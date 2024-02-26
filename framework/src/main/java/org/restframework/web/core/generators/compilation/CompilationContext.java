@@ -19,5 +19,5 @@ public class CompilationContext {
     private Model modelAnnotation;
     private String modelName;
     private String dtoName;
-
+    private String generic;
 }
