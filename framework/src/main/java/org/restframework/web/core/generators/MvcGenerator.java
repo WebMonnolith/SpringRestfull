@@ -31,7 +31,6 @@ public final class MvcGenerator {
     public synchronized void generateClasses(
             @NotNull API api,
             @NotNull Class<?> template,
-
             @NotNull String buildPath)
     {
         Template templateAnnotation = AnnotationUtils.findAnnotation(template, Template.class);
@@ -48,7 +47,8 @@ public final class MvcGenerator {
                 templateAnnotation.type(),
                 new ImportResolver(templateAnnotation.rule(), api.basePackage()).get());
 
-        MvcGenerator.compile(CompilationContext.builder()
+        MvcGenerator
+            .compile(CompilationContext.builder()
                 .api(api)
                 .builder(mvcBuilder)
                 .template(template)
@@ -106,7 +106,8 @@ public final class MvcGenerator {
         else
             modelBuilder.addExtension(DtoFrame.class);
 
-        MvcGenerator.compile(CompilationContext.builder()
+        MvcGenerator
+            .compile(CompilationContext.builder()
                 .api(api)
                 .builder(modelBuilder)
                 .modelAnnotation(api.model())

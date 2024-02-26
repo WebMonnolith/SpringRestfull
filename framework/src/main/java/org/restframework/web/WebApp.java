@@ -39,28 +39,8 @@ public final class WebApp implements RestApp {
     private final static List<String> targetPaths = new ArrayList<>();
 
     public WebApp(@NotNull Class<?> clazz) throws UnsupportedEncodingException {
-        WebApp.info = clazz.getAnnotation(RestApi.class);
-        if (!clazz.isAnnotationPresent(RestApi.class))
-            throw new RestException("There must be a class annotated with @" + RestApi.class + ", in order to run web framework.");
-
-        WebApp.context = configure(clazz);
-        WebApp.classContext = clazz;
-
-        String srcRoot;
-
-        if (hasConfiguration(clazz)) {
-            assert WebApp.context != null;
-            srcRoot = WebApp.context.getValueByKey("content-root");
-        }
-        else {
-            srcRoot = "/src/main/java";
-        }
-
-        for (API api : WebApp.info.APIS()) {
-            String path = FileHelper.constructPath(clazz, srcRoot, FileHelper.convertPackageToPath(api.basePackage()));
-            System.out.println(path);
-            WebApp.targetPaths.add(path);
-        }
+        WebApp.start(clazz);
+        WebApp.configurePaths(clazz);
     }
 
     @Override
@@ -164,6 +144,38 @@ public final class WebApp implements RestApp {
             for (Class<?> template : restApi.templates())
                 generator.generateClasses(api, template, WebApp.outputResultPathBase().get(i));
         }
+    }
+
+    private static void configurePaths(Class<?> clazz) throws UnsupportedEncodingException {
+        String srcRoot = getSourceRoot(clazz);
+
+        for (API api : WebApp.info.APIS()) {
+            String path = FileHelper.constructPath(clazz, srcRoot, FileHelper.convertPackageToPath(api.basePackage()));
+            System.out.println(path);
+            WebApp.targetPaths.add(path);
+        }
+    }
+
+    private static String getSourceRoot(Class<?> clazz) {
+        String srcRoot;
+
+        if (hasConfiguration(clazz)) {
+            assert WebApp.context != null;
+            srcRoot = WebApp.context.getValueByKey("content-root");
+        } else {
+            srcRoot = "/src/main/java";
+        }
+
+        return srcRoot;
+    }
+
+    private static void start(@NotNull Class<?> clazz) {
+        WebApp.info = clazz.getAnnotation(RestApi.class);
+        if (!clazz.isAnnotationPresent(RestApi.class))
+            throw new RestException("There must be a class annotated with @" + RestApi.class + ", in order to run web framework.");
+
+        WebApp.context = configure(clazz);
+        WebApp.classContext = clazz;
     }
 
     public static RestApi context() {
