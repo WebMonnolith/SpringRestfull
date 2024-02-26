@@ -25,9 +25,13 @@ import static org.restframework.web.core.helpers.FileHelper.NO_DIR;
 @Slf4j
 public final class MvcGenerator {
 
-    private static MvcSupport support;
+    private MvcSupport support;
 
-    public synchronized static void generateClasses(
+    public MvcGenerator(@NotNull MvcSupport support) {
+        this.support = support;
+    }
+
+    public synchronized void generateClasses(
             @NotNull API api,
             @NotNull Class<?> template,
 

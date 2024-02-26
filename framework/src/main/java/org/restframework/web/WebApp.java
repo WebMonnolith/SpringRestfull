@@ -1,6 +1,7 @@
 package org.restframework.web;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.restframework.web.annotations.API;
 import org.restframework.web.annotations.RestApi;
@@ -189,6 +190,7 @@ public final class WebApp implements RestApp {
         return WebApp.context;
     }
 
+    @NoArgsConstructor
     static class MvcSupportHandler implements MvcSupport {
         @Override
         public void call(@NotNull SpringComponents rules, String value) {
