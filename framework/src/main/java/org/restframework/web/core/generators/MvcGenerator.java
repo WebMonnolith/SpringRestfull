@@ -1,5 +1,6 @@
 package org.restframework.web.core.generators;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.antlr.v4.runtime.misc.Pair;
 import org.restframework.web.annotations.*;
@@ -23,117 +24,34 @@ import static org.restframework.web.core.helpers.FileHelper.NO_DIR;
 
 
 @Slf4j
+@AllArgsConstructor
 public final class MvcGenerator {
 
     private final MvcSupport support;
-
-    public MvcGenerator(@NotNull MvcSupport support) {
-        this.support = support;
-    }
 
     public synchronized void generateClasses(
             @NotNull API api,
             @NotNull Class<?> template,
             @NotNull String buildPath)
     {
-        Template templateAnnotation = AnnotationUtils.findAnnotation(template, Template.class);
-        if (templateAnnotation == null)
-            throw new RestException("@" + RestApi.class + "templates must be annotated with @Template " +
-                    api.basePackage() + "\n" + api.apiName());
-
-        GenericGeneration genericResolver = GenericFactory.create(api.model().generic());
-
-        CompilationFlags.useModelsApi = false;
-
-        ClassBuilder mvcBuilder = new ClassBuilder(
-                api.apiName()+templateAnnotation.templateName(),
-                api.basePackage()+'.'+templateAnnotation.templateName().toLowerCase(),
-                this.support.callInner(templateAnnotation.rule(), api.endpoint()),
-                templateAnnotation.type(),
-                new ImportResolver(templateAnnotation.rule(), genericResolver.getImportStatement(), api.basePackage()).get());
-
-        MvcGenerator
-            .compile(CompilationContext.builder()
-                .api(api)
-                .builder(mvcBuilder)
-                .template(template)
-                .templateAnnotation(templateAnnotation)
-                .modelName(api.model().apiName()+api.model().abbrev())
-                .dtoName(api.model().apiName()+"Dto")
-                .generic(genericResolver.getGeneric())
-                .build());
-
-        mvcBuilder.build(buildPath, templateAnnotation.templateName().toLowerCase());
+        Generator<Class<?>> gen = new ComponentGenerator(this.support);
+        gen.generate(api, template, buildPath);
     }
 
     public synchronized void generateByKey(
             @NotNull API api,
             boolean flag,
             @NotNull SpringComponents component,
-            @NotNull String buildPath) {
-
-        if (CompilationFlags.generateModelsOnce)
-            return;
-
-        CompilationFlags.useModelsApi = true;
-
-        String value = "";
-        String name = api.model().apiName()+"Dto";
-        if (component == SpringComponents.MODEL) {
-            value = api.model().tableName();
-            name = api.model().apiName()+api.model().abbrev();
+            @NotNull String buildPath)
+    {
+        Generator<SpringComponents> gen;
+        switch (component) {
+            case MODEL -> gen = new ModelGenerator(this.support);
+            case DTO -> gen = new DtoGenerator(this.support);
+            default -> throw new RestException("Invalid component!");
         }
 
-        GenericGeneration genericResolver = GenericFactory.create(api.model().generic());
-
-        ClassBuilder modelBuilder = new ClassBuilder(
-                name,
-                api.basePackage(),
-                this.support.callInner(component, value),
-                ClassTypes.CLASS,
-                new ImportResolver(component, genericResolver.getImportStatement(), api.basePackage()).get());
-
-        if (component == SpringComponents.MODEL) {
-            modelBuilder.addExtension(ModelFrame.class, genericResolver.getGeneric());
-
-            MvcSupport support = new MvcSupport() {
-                @Override
-                public void call(SpringComponents rules, String value) {
-                    ruleHolder.add(PersistenceAnnotations.ID.getValue());
-                    ruleHolder.add(this.makeGenerationType(value));
-                }
-            };
-
-            modelBuilder.addField(
-                    new FieldBuilder(
-                            "id",
-                            genericResolver.getGeneric(),
-                            Modifier.PRIVATE,
-                            support.callInner(SpringComponents.MODEL, genericResolver.getGenerationType())));
-        }
-        else
-            modelBuilder.addExtension(DtoFrame.class);
-
-        MvcGenerator
-            .compile(CompilationContext.builder()
-                .api(api)
-                .builder(modelBuilder)
-                .modelAnnotation(api.model())
-                .dtoName(api.model().apiName()+"Dto")
-                .generic(genericResolver.getGeneric())
-                .build()
-        );
-
-        modelBuilder.build(buildPath, NO_DIR);
-
-
-        if (flag) {
-            CompilationFlags.generateModelsOnce = true;
-        }
-    }
-
-    private static void compile(@NotNull CompilationContext context) {
-        CompilationProcessor.compile(context);
+        gen.generate(api, component, buildPath);
     }
 }
 
