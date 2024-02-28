@@ -32,8 +32,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
         ),
     }
 )
-//@GenDto
-//@GenModel(tableName="test")
 @SpringBootApplication
 public class ExampleApp {
     @SneakyThrows

@@ -292,7 +292,14 @@ public final class WebApp implements RestApp {
         if (!clazz.isAnnotationPresent(RestApi.class))
             throw new RestException("There must be a class annotated with @" + RestApi.class + ", in order to run web framework.");
 
+        if (clazz.isAnnotationPresent(GenModel.class))
+            throw new RestException("The class cannot be annotated with both @" + RestApi.class + " and @" + GenModel.class);
 
+        if (clazz.isAnnotationPresent(GenDto.class))
+            throw new RestException("The class cannot be annotated with both @" + RestApi.class + " and @" + GenDto.class);
+
+        if (clazz.isAnnotationPresent(GenDto.class)  && clazz.isAnnotationPresent(GenModel.class))
+            throw new RestException("The class cannot be annotated with both @" + RestApi.class + " and @" + GenDto.class + "and @" + GenModel.class);
     }
 
     private void checkForErrorsInCustomApiGeneratorStrategy(@NotNull Class<?> clazz) {
