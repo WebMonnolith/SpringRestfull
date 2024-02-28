@@ -1,8 +1,10 @@
 package org.restframework.web;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.restframework.web.annotations.gen.GenDto;
+import org.restframework.web.annotations.gen.GenModel;
+import org.restframework.web.annotations.gen.GenSpring;
 import org.restframework.web.annotations.types.API;
 import org.restframework.web.annotations.RestApi;
 import org.restframework.web.core.AppRunner;
@@ -44,9 +46,9 @@ public final class WebApp implements RestApp {
 
     @Override
     public synchronized <T> void run(@NotNull Class<T> clazz) {
-        WebApp.runSpring(clazz);
+        this.runSpring(clazz);
         try {
-            WebApp.init(clazz);
+            this.init(clazz);
         } catch (RestException |
                  InvocationTargetException |
                  InstantiationException |
@@ -58,9 +60,9 @@ public final class WebApp implements RestApp {
 
     @Override
     public synchronized <T> void run(String[] args) {
-        WebApp.runSpring(WebApp.classContext(), args);
+        this.runSpring(WebApp.classContext(), args);
         try {
-            WebApp.init();
+            this.init();
         } catch (RestException |
                  InvocationTargetException |
                  InstantiationException |
@@ -72,9 +74,9 @@ public final class WebApp implements RestApp {
 
     @Override
     public synchronized <T> void run(@NotNull AppRunner<RestApp> runnable) {
-        WebApp.runSpring(WebApp.classContext());
+        this.runSpring(WebApp.classContext());
         try {
-            WebApp.init();
+            this.init();
         } catch (RestException |
                  InvocationTargetException |
                  InstantiationException |
@@ -88,9 +90,9 @@ public final class WebApp implements RestApp {
 
     @Override
     public synchronized <T> void run(String[] args, @NotNull AppRunner<RestApp> runnable) {
-        WebApp.runSpring(WebApp.classContext());
+        this.runSpring(WebApp.classContext());
         try {
-            WebApp.init(args);
+            this.init(args);
         } catch (RestException |
                  InvocationTargetException |
                  InstantiationException |
@@ -102,7 +104,7 @@ public final class WebApp implements RestApp {
         WebApp.internalApp = runnable.call(WebApp.classContext());
     }
 
-    private static <T> void init()
+    private <T> void init()
             throws RestException,
             NoSuchMethodException,
             InvocationTargetException,
@@ -114,7 +116,7 @@ public final class WebApp implements RestApp {
     }
 
     @SafeVarargs
-    private static <T, args> void init(args ... params)
+    private <T, args> void init(args ... params)
             throws RestException,
             NoSuchMethodException,
             InvocationTargetException,
@@ -126,14 +128,6 @@ public final class WebApp implements RestApp {
         WebApp.generate(WebApp.info);
     }
 
-    private synchronized static <T> ConfigurableApplicationContext runSpring(@NotNull Class<T> clazz) {
-        return SpringApplication.run(clazz);
-    }
-
-    private synchronized static <T> ConfigurableApplicationContext runSpring(@NotNull Class<T> clazz, String[] args) {
-        return SpringApplication.run(clazz, args);
-    }
-
     private static void generate(@NotNull RestApi restApi) {
         MvcGenerator generator = new MvcGenerator(new MvcSupportHandler());
         for (int i = 0; i < restApi.APIS().length; i++) {
@@ -142,6 +136,26 @@ public final class WebApp implements RestApp {
             generator.generateByKey(api, WebApp.context.getValueByKey("dto-generation"), WebApp.outputResultPathBase().get(i));
             for (Class<?> template : restApi.templates())
                 generator.generateClasses(api, template, WebApp.outputResultPathBase().get(i));
+        }
+    }
+
+    @NoArgsConstructor
+    @Builder
+    @Getter
+    @Setter
+    private static class _APIBuilder {
+        private GenDto dtoCtx;
+        private GenModel modelCtx;
+        private GenSpring springCtx;
+
+        public _APIBuilder(
+                @NotNull GenDto dtoCtx,
+                @NotNull GenModel modelCtx,
+                @NotNull GenSpring springCtx
+        ) {
+            this.dtoCtx = dtoCtx;
+            this.modelCtx = modelCtx;
+            this.springCtx = springCtx;
         }
     }
 
@@ -175,6 +189,14 @@ public final class WebApp implements RestApp {
 
         WebApp.context = configure(clazz);
         WebApp.classContext = clazz;
+    }
+
+    private synchronized <T> ConfigurableApplicationContext runSpring(@NotNull Class<T> clazz) {
+        return SpringApplication.run(clazz);
+    }
+
+    private synchronized <T> ConfigurableApplicationContext runSpring(@NotNull Class<T> clazz, String[] args) {
+        return SpringApplication.run(clazz, args);
     }
 
     public static RestApi context() {
@@ -238,5 +260,4 @@ public final class WebApp implements RestApp {
             }
         }
     }
-
 }
