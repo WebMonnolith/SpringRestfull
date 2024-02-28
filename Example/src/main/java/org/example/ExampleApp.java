@@ -21,9 +21,9 @@ import java.util.List;
                         tableName = "test_user",
                         apiName = "User",
                         fields = {
-                                @FieldData(access = Modifier.PRIVATE, datatype = "String", name = "fname"),
-                                @FieldData(access = Modifier.PRIVATE, datatype = "String", name = "lname"),
-                                @FieldData(access = Modifier.PRIVATE, datatype = "double", name = "age"),
+                                @FieldData(name = "fname"),
+                                @FieldData(name = "lname"),
+                                @FieldData(datatype = "double", name = "age"),
                         }
                 ),
             apiName="User",

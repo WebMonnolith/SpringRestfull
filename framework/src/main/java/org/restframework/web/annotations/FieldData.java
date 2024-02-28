@@ -11,8 +11,8 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE})
 @SuppressWarnings("unused")
 public @interface FieldData {
-    Modifier access();
-    String datatype();
+    Modifier access() default Modifier.PRIVATE;
+    String datatype() default "String";
     String name();
 
 }
