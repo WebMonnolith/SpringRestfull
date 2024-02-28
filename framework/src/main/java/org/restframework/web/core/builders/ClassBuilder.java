@@ -30,8 +30,8 @@ public final class ClassBuilder implements Builder, BuilderUtils {
     {
         this.name = name;
         this.classDefinition = new StringBuilder("package "+basePackage+";\n\n")
-                .append("import org.restframework.web.core.templates.*;\n\n")
-                .append("import java.util.*;\n\n");
+                .append("import org.restframework.web.core.templates.*;\n")
+                .append("import java.util.*;\n");
 
         for (String annotation : annotations)
             this.addAnnotation(annotation);
@@ -51,7 +51,8 @@ public final class ClassBuilder implements Builder, BuilderUtils {
         this.classDefinition = new StringBuilder("package "+basePackage+";\n\n");
 
         for (String dependency : imports)
-            this.classDefinition.append(dependency).append(";\n\n");
+            this.classDefinition.append(dependency).append(";\n");
+        this.classDefinition.append("\n");
 
         for (String annotation : annotations)
             this.addAnnotation(annotation);

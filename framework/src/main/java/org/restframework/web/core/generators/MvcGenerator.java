@@ -40,7 +40,6 @@ public final class MvcGenerator {
 
     public synchronized void generateByKey(
             @NotNull API api,
-            boolean flag,
             @NotNull SpringComponents component,
             @NotNull String buildPath)
     {
