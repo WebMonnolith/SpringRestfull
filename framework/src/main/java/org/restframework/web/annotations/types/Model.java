@@ -1,4 +1,4 @@
-package org.restframework.web.annotations;
+package org.restframework.web.annotations.types;
 
 import org.restframework.web.core.generics.Generic;
 

@@ -1,5 +1,6 @@
 package org.restframework.web.annotations;
 
+import org.restframework.web.annotations.types.API;
 import org.restframework.web.core.templates.ControllerTemplate;
 import org.restframework.web.core.templates.RepoTemplate;
 import org.restframework.web.core.templates.ServiceTemplate;

@@ -1,7 +1,7 @@
 package org.restframework.web.core.generators;
 
 import org.jetbrains.annotations.NotNull;
-import org.restframework.web.annotations.API;
+import org.restframework.web.annotations.types.API;
 import org.restframework.web.core.generators.compilation.CompilationContext;
 
 public abstract class Generator<T> {

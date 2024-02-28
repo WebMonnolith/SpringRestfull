@@ -3,8 +3,8 @@ package org.restframework.web.core.generators.compilation;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import org.restframework.web.annotations.API;
-import org.restframework.web.annotations.Model;
+import org.restframework.web.annotations.types.API;
+import org.restframework.web.annotations.types.Model;
 import org.restframework.web.annotations.Template;
 import org.restframework.web.core.builders.ClassBuilder;
 

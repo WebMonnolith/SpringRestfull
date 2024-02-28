@@ -1,17 +1,15 @@
 package org.restframework.web.core.builders;
 
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.sql.Update;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.restframework.web.annotations.UpdateComponent;
+import org.restframework.web.annotations.markers.UpdateComponent;
 import org.restframework.web.core.templates.ClassTypes;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.reflect.Method;
 
 import static org.restframework.web.core.helpers.FileHelper.NO_DIR;
 import static org.restframework.web.core.helpers.FileHelper.fileExists;

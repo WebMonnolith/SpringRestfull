@@ -1,4 +1,4 @@
-package org.restframework.web.annotations;
+package org.restframework.web.annotations.markers;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -6,12 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE})
+@Target(ElementType.TYPE)
 @SuppressWarnings("unused")
-public @interface API {
-    String apiName();
-    String endpoint();
-    Model model();
-    String basePackage();
-
+public @interface UpdateComponent {
 }

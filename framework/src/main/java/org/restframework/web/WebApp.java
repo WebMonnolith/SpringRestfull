@@ -3,7 +3,7 @@ package org.restframework.web;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.restframework.web.annotations.API;
+import org.restframework.web.annotations.types.API;
 import org.restframework.web.annotations.RestApi;
 import org.restframework.web.core.AppRunner;
 import org.restframework.web.core.RestAppConfigurationContext;
@@ -19,7 +19,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
