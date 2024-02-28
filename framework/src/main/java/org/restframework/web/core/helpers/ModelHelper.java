@@ -1,6 +1,6 @@
 package org.restframework.web.core.helpers;
 
-import org.restframework.web.annotations.FieldData;
+import org.restframework.web.annotations.types.FieldData;
 import org.restframework.web.core.builders.Modifier;
 import org.restframework.web.core.builders.FieldBuilder;
 import org.jetbrains.annotations.Contract;

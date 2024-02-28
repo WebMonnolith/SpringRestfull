@@ -2,7 +2,7 @@ package org.restframework.web.core.generators;
 
 import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.NotNull;
-import org.restframework.web.annotations.API;
+import org.restframework.web.annotations.types.API;
 import org.restframework.web.annotations.RestApi;
 import org.restframework.web.annotations.Template;
 import org.restframework.web.core.builders.ClassBuilder;

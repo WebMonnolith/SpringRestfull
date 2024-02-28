@@ -1,7 +1,7 @@
 package org.restframework.web.core.generators.compilation;
 
 import org.jetbrains.annotations.NotNull;
-import org.restframework.web.annotations.FieldData;
+import org.restframework.web.annotations.types.FieldData;
 import org.restframework.web.core.templates.SpringComponents;
 
 import static org.restframework.web.core.helpers.ModelHelper.convertToFieldBuilder;
