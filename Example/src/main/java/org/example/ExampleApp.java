@@ -14,26 +14,26 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 
 @EnableRestConfiguration
-//@RestApi(
-//    APIS= {
-//        @API(
-//            endpoint="/tools/api/v1/user",
-//            model=@Model(generic = Generic.UUID,
-//                        tableName = "test_user",
-//                        apiName = "User",
-//                        fields = {
-//                                @FieldData(name = "fname"),
-//                                @FieldData(name = "lname"),
-//                                @FieldData(datatype = "double", name = "age"),
-//                        }
-//                ),
-//            apiName="User",
-//            basePackage = "org.example.test"
-//        ),
-//    }
-//)
-@GenDto
-@GenModel(tableName="test")
+@RestApi(
+    APIS= {
+        @API(
+            endpoint="/tools/api/v1/user",
+            model=@Model(generic = Generic.UUID,
+                        tableName = "test_user",
+                        apiName = "User",
+                        fields = {
+                                @FieldData(name = "fname"),
+                                @FieldData(name = "lname"),
+                                @FieldData(datatype = "double", name = "age"),
+                        }
+                ),
+            apiName="User",
+            basePackage = "org.example.test"
+        ),
+    }
+)
+//@GenDto
+//@GenModel(tableName="test")
 @SpringBootApplication
 public class ExampleApp {
     @SneakyThrows

@@ -2,6 +2,7 @@ package org.restframework.web;
 
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.Contract;
 import org.restframework.web.annotations.gen.GenDto;
 import org.restframework.web.annotations.gen.GenModel;
 import org.restframework.web.annotations.gen.GenSpring;
@@ -32,16 +33,28 @@ import static org.restframework.web.core.RestConfigInit.hasConfiguration;
 @Data
 public final class WebApp implements RestApp {
 
+    private enum WebGenerationStrategy {
+        WEB_REST_API_STRATEGY,
+        WEB_CUSTOM_GENERATION_STRATEGY,
+        NONE
+    }
+
+    private static _APIBuilder builder;
     private static RestAppConfigurationContext context;
     private static RestApp internalApp;
     private static RestApi info;
     private static Object appContext;
     private static Class<?> classContext;
+    private static WebGenerationStrategy buildStrategy;
     private final static List<String> targetPaths = new ArrayList<>();
 
     public WebApp(@NotNull Class<?> clazz) throws UnsupportedEncodingException {
-        WebApp.start(clazz);
-        WebApp.configurePaths(clazz);
+        WebApp.buildStrategy = this.start(clazz);
+        this.configurePaths(clazz);
+        switch (WebApp.buildStrategy) {
+            case WEB_REST_API_STRATEGY -> checkForErrorsInRestApiGeneratorStrategy(clazz);
+            case WEB_CUSTOM_GENERATION_STRATEGY ->  checkForErrorsInCustomApiGeneratorStrategy(clazz);
+        }
     }
 
     @Override
@@ -112,7 +125,7 @@ public final class WebApp implements RestApp {
             IllegalAccessException
     {
         WebApp.appContext = WebApp.classContext.getDeclaredConstructor().newInstance();
-        WebApp.generate(WebApp.info);
+        this.generate(WebApp.info);
     }
 
     @SafeVarargs
@@ -125,10 +138,10 @@ public final class WebApp implements RestApp {
     {
 
         WebApp.appContext = WebApp.classContext.getDeclaredConstructor().newInstance();
-        WebApp.generate(WebApp.info);
+        this.generate(WebApp.info);
     }
 
-    private static void generate(@NotNull RestApi restApi) {
+    private void generate(@NotNull RestApi restApi) {
         MvcGenerator generator = new MvcGenerator(new MvcSupportHandler());
         for (int i = 0; i < restApi.APIS().length; i++) {
             API api = restApi.APIS()[i];
@@ -157,10 +170,33 @@ public final class WebApp implements RestApp {
             this.modelCtx = modelCtx;
             this.springCtx = springCtx;
         }
+
+        @Contract(value = " -> new", pure = true)
+        public API @NotNull [] toAPI() {
+
+            return new API[]{};
+        }
+
+        private _APIBuilder generate(@NotNull Class<?> clazz) {
+
+            return this;
+        }
     }
 
-    private static void configurePaths(Class<?> clazz) throws UnsupportedEncodingException {
-        String srcRoot = getSourceRoot(clazz);
+    private WebGenerationStrategy start(@NotNull Class<?> clazz) {
+        WebApp.context = configure(clazz);
+        WebApp.classContext = clazz;
+        return this.determineWebAppGenerationStrategy(clazz);
+    }
+
+    private WebGenerationStrategy determineWebAppGenerationStrategy(@NotNull Class<?> clazz) {
+        WebApp.info = clazz.getAnnotation(RestApi.class);
+        if (!clazz.isAnnotationPresent(RestApi.class)) return WebGenerationStrategy.WEB_CUSTOM_GENERATION_STRATEGY;
+        return WebGenerationStrategy.WEB_REST_API_STRATEGY;
+    }
+
+    private void configurePaths(Class<?> clazz) throws UnsupportedEncodingException {
+        String srcRoot = this.getSourceRoot(clazz);
 
         for (API api : WebApp.info.APIS()) {
             String path = FileHelper.constructPath(clazz, srcRoot, FileHelper.convertPackageToPath(api.basePackage()));
@@ -169,7 +205,7 @@ public final class WebApp implements RestApp {
         }
     }
 
-    private static String getSourceRoot(Class<?> clazz) {
+    private String getSourceRoot(Class<?> clazz) {
         String srcRoot;
 
         if (hasConfiguration(clazz)) {
@@ -180,15 +216,6 @@ public final class WebApp implements RestApp {
         }
 
         return srcRoot;
-    }
-
-    private static void start(@NotNull Class<?> clazz) {
-        WebApp.info = clazz.getAnnotation(RestApi.class);
-        if (!clazz.isAnnotationPresent(RestApi.class))
-            throw new RestException("There must be a class annotated with @" + RestApi.class + ", in order to run web framework.");
-
-        WebApp.context = configure(clazz);
-        WebApp.classContext = clazz;
     }
 
     private synchronized <T> ConfigurableApplicationContext runSpring(@NotNull Class<T> clazz) {
@@ -259,5 +286,16 @@ public final class WebApp implements RestApp {
                 case NONE -> throw new RestException("@" + RestApi.class + " MVC has no templates associated with it");
             }
         }
+    }
+
+    private void checkForErrorsInRestApiGeneratorStrategy(@NotNull Class<?> clazz) {
+        if (!clazz.isAnnotationPresent(RestApi.class))
+            throw new RestException("There must be a class annotated with @" + RestApi.class + ", in order to run web framework.");
+
+
+    }
+
+    private void checkForErrorsInCustomApiGeneratorStrategy(@NotNull Class<?> clazz) {
+
     }
 }

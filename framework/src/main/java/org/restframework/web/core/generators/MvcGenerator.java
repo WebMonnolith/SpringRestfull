@@ -32,7 +32,7 @@ public final class MvcGenerator {
         switch (component) {
             case MODEL -> gen = new ModelGenerator(this.support);
             case DTO -> gen = new DtoGenerator(this.support);
-            default -> throw new RestException("Invalid component!");
+            default -> throw new RestException("Invalid configured component!");
         }
 
         gen.generate(api, component, buildPath);
