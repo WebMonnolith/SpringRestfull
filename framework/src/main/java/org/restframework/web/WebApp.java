@@ -3,13 +3,18 @@ package org.restframework.web;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.Nullable;
 import org.restframework.web.annotations.gen.GenDto;
 import org.restframework.web.annotations.gen.GenModel;
+import org.restframework.web.annotations.gen.GenProperties;
 import org.restframework.web.annotations.gen.GenSpring;
 import org.restframework.web.annotations.types.API;
 import org.restframework.web.annotations.RestApi;
+import org.restframework.web.annotations.types.FieldData;
+import org.restframework.web.annotations.types.Model;
 import org.restframework.web.core.AppRunner;
 import org.restframework.web.core.RestAppConfigurationContext;
+import org.restframework.web.core.generics.Generic;
 import org.restframework.web.core.helpers.FileHelper;
 import org.restframework.web.core.RestApp;
 import org.restframework.web.core.generators.MvcGenerator;
@@ -21,12 +26,12 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.restframework.web.core.RestConfigInit.configure;
-import static org.restframework.web.core.RestConfigInit.hasConfiguration;
+import static org.restframework.web.core.RestConfigInit.*;
 
 @Slf4j
 @SuppressWarnings("unused")
@@ -39,10 +44,11 @@ public final class WebApp implements RestApp {
         NONE
     }
 
-    private static _APIBuilder builder;
+    private static @Nullable _APIBuilder builder;
+    private static @Nullable RestApi restApiCtx;
+
     private static RestAppConfigurationContext context;
     private static RestApp internalApp;
-    private static RestApi info;
     private static Object appContext;
     private static Class<?> classContext;
     private static WebGenerationStrategy buildStrategy;
@@ -50,11 +56,23 @@ public final class WebApp implements RestApp {
 
     public WebApp(@NotNull Class<?> clazz) throws UnsupportedEncodingException {
         WebApp.buildStrategy = this.start(clazz);
-        this.configurePaths(clazz);
         switch (WebApp.buildStrategy) {
-            case WEB_REST_API_STRATEGY -> checkForErrorsInRestApiGeneratorStrategy(clazz);
-            case WEB_CUSTOM_GENERATION_STRATEGY ->  checkForErrorsInCustomApiGeneratorStrategy(clazz);
+            case WEB_REST_API_STRATEGY -> {
+                checkForErrorsInRestApiGeneratorStrategy(clazz);
+                WebApp.restApiCtx = clazz.getAnnotation(RestApi.class);
+            }
+            case WEB_CUSTOM_GENERATION_STRATEGY ->  {
+                checkForErrorsInCustomApiGeneratorStrategy(clazz);
+                WebApp.builder = _APIBuilder.builder()
+                        .dtoCtx(clazz.getAnnotation(GenDto.class))
+                        .modelCtx(clazz.getAnnotation(GenModel.class))
+                        .propertiesCtx(clazz.getAnnotation(GenProperties.class))
+                        .springCtx(clazz.getAnnotation(GenSpring.class))
+                        .build();
+            }
         }
+
+        this.configurePaths(clazz);
     }
 
     @Override
@@ -125,7 +143,7 @@ public final class WebApp implements RestApp {
             IllegalAccessException
     {
         WebApp.appContext = WebApp.classContext.getDeclaredConstructor().newInstance();
-        this.generate(WebApp.info);
+        this.generate();
     }
 
     @SafeVarargs
@@ -138,17 +156,105 @@ public final class WebApp implements RestApp {
     {
 
         WebApp.appContext = WebApp.classContext.getDeclaredConstructor().newInstance();
-        this.generate(WebApp.info);
+        this.generate();
     }
 
-    private void generate(@NotNull RestApi restApi) {
+    private void generate() {
+        switch (WebApp.buildStrategy) {
+            case WEB_REST_API_STRATEGY -> {
+                assert WebApp.restApiCtx != null;
+                this.generateByUsingRestApiGenerationStrategy(WebApp.restApiCtx);
+            }
+            case WEB_CUSTOM_GENERATION_STRATEGY -> {
+                assert WebApp.builder != null;
+                this.generateByUsingCustomGenerationStrategy(WebApp.builder);
+            }
+        }
+    }
+
+    private void generateByUsingCustomGenerationStrategy(@NotNull _APIBuilder builder) {
+        API api = builder.toAPI();
+        MvcGenerator generator = new MvcGenerator(new MvcSupportHandler());
+
+        if (!hasConfiguration(WebApp.classContext())) {
+            generator.generateByKey(
+                    api, SpringComponents.MODEL, WebApp.outputResultPathBase().get(0));
+            generator.generateByKey(
+                    api, SpringComponents.DTO, WebApp.outputResultPathBase().get(0));
+        }
+        else {
+            generator.generateByKey(
+                    api, WebApp.context.getValueByKey(MODEL_COMPONENT_CONFIG_ID), WebApp.outputResultPathBase().get(0));
+            generator.generateByKey(
+                    api, WebApp.context.getValueByKey(DTO_COMPONENT_CONFIG_ID), WebApp.outputResultPathBase().get(0));
+        }
+
+        if (!builder.nullCheckSpringComponents()) return;
+        for (Class<?> template : builder.springCtx.templates())
+            generator.generateClasses(api, template, WebApp.outputResultPathBase().get(0));
+    }
+
+    private void generateByUsingRestApiGenerationStrategy(@NotNull RestApi restApi) {
         MvcGenerator generator = new MvcGenerator(new MvcSupportHandler());
         for (int i = 0; i < restApi.APIS().length; i++) {
             API api = restApi.APIS()[i];
-            generator.generateByKey(api, WebApp.context.getValueByKey("model-generation"), WebApp.outputResultPathBase().get(i));
-            generator.generateByKey(api, WebApp.context.getValueByKey("dto-generation"), WebApp.outputResultPathBase().get(i));
+            if (!hasConfiguration(WebApp.classContext())) {
+                generator.generateByKey(
+                        api, SpringComponents.MODEL, WebApp.outputResultPathBase().get(i));
+                generator.generateByKey(
+                        api, SpringComponents.DTO, WebApp.outputResultPathBase().get(i));
+            }
+            else {
+                generator.generateByKey(
+                        api, WebApp.context.getValueByKey(MODEL_COMPONENT_CONFIG_ID), WebApp.outputResultPathBase().get(i));
+                generator.generateByKey(
+                        api, WebApp.context.getValueByKey(DTO_COMPONENT_CONFIG_ID), WebApp.outputResultPathBase().get(i));
+            }
             for (Class<?> template : restApi.templates())
                 generator.generateClasses(api, template, WebApp.outputResultPathBase().get(i));
+        }
+    }
+
+    @AllArgsConstructor
+    @Builder
+    @Getter
+    @Setter
+    private static class _ModelBuilder {
+        private GenModel modelCtx;
+        private GenProperties propertiesCtx;
+
+        public @NotNull Model toModel() {
+            return new Model() {
+                @Override
+                public Class<? extends Annotation> annotationType() {
+                    return Model.class;
+                }
+
+                @Override
+                public Generic generic() {
+                    return getPropertiesCtx().indexColumnType();
+                }
+
+                @Override
+                public String tableName() {
+                    return getModelCtx().tableName();
+                }
+
+                @Override
+                public String apiName() {
+                    return getPropertiesCtx().apiName();
+                }
+
+                @Override
+                public String abbrev() {
+                    return "Model";
+                }
+
+                @Override
+                public FieldData[] fields() {
+                    return getModelCtx().fields();
+                }
+            };
         }
     }
 
@@ -159,27 +265,57 @@ public final class WebApp implements RestApp {
     private static class _APIBuilder {
         private GenDto dtoCtx;
         private GenModel modelCtx;
+        private GenProperties propertiesCtx;
         private GenSpring springCtx;
 
         public _APIBuilder(
                 @NotNull GenDto dtoCtx,
                 @NotNull GenModel modelCtx,
-                @NotNull GenSpring springCtx
+                @NotNull GenProperties propertiesCtx,
+                GenSpring springCtx
         ) {
             this.dtoCtx = dtoCtx;
             this.modelCtx = modelCtx;
             this.springCtx = springCtx;
+            this.propertiesCtx = propertiesCtx;
+        }
+
+        public boolean nullCheckSpringComponents() {
+            return this.springCtx != null;
         }
 
         @Contract(value = " -> new", pure = true)
-        public API @NotNull [] toAPI() {
+        public @NotNull API toAPI() {
+            _ModelBuilder modelBuilder = _ModelBuilder.builder()
+                    .modelCtx(this.modelCtx)
+                    .propertiesCtx(this.propertiesCtx)
+                    .build();
+            return new API() {
+                @Override
+                public Class<? extends Annotation> annotationType() {
+                    return API.class;
+                }
 
-            return new API[]{};
-        }
+                @Override
+                public String apiName() {
+                    return getPropertiesCtx().apiName();
+                }
 
-        private _APIBuilder generate(@NotNull Class<?> clazz) {
+                @Override
+                public String endpoint() {
+                    return getPropertiesCtx().endpoint();
+                }
 
-            return this;
+                @Override
+                public Model model() {
+                    return modelBuilder.toModel();
+                }
+
+                @Override
+                public String basePackage() {
+                    return propertiesCtx.basePackage();
+                }
+            };
         }
     }
 
@@ -190,18 +326,30 @@ public final class WebApp implements RestApp {
     }
 
     private WebGenerationStrategy determineWebAppGenerationStrategy(@NotNull Class<?> clazz) {
-        WebApp.info = clazz.getAnnotation(RestApi.class);
-        if (!clazz.isAnnotationPresent(RestApi.class)) return WebGenerationStrategy.WEB_CUSTOM_GENERATION_STRATEGY;
+        if (!hasConfiguration(clazz)) return WebGenerationStrategy.WEB_REST_API_STRATEGY;
+
+        if (WebApp.context.getValueByKey(CUSTOM_GENERATION_CONFIG_ID))
+            return WebGenerationStrategy.WEB_CUSTOM_GENERATION_STRATEGY;
         return WebGenerationStrategy.WEB_REST_API_STRATEGY;
     }
 
     private void configurePaths(Class<?> clazz) throws UnsupportedEncodingException {
         String srcRoot = this.getSourceRoot(clazz);
 
-        for (API api : WebApp.info.APIS()) {
-            String path = FileHelper.constructPath(clazz, srcRoot, FileHelper.convertPackageToPath(api.basePackage()));
-            System.out.println(path);
-            WebApp.targetPaths.add(path);
+        switch (WebApp.buildStrategy) {
+            case WEB_REST_API_STRATEGY -> {
+                assert WebApp.restApiCtx != null;
+                for (API api : WebApp.restApiCtx.APIS()) {
+                    String path = FileHelper.constructPath(clazz, srcRoot, FileHelper.convertPackageToPath(api.basePackage()));
+                    WebApp.targetPaths.add(path);
+                }
+            }
+            case WEB_CUSTOM_GENERATION_STRATEGY -> {
+                assert WebApp.builder != null;
+                API api = WebApp.builder.toAPI();
+                String path = FileHelper.constructPath(clazz, srcRoot, FileHelper.convertPackageToPath(api.basePackage()));
+                WebApp.targetPaths.add(path);
+            }
         }
     }
 
@@ -210,7 +358,7 @@ public final class WebApp implements RestApp {
 
         if (hasConfiguration(clazz)) {
             assert WebApp.context != null;
-            srcRoot = WebApp.context.getValueByKey("content-root");
+            srcRoot = WebApp.context.getValueByKey(CONTENT_ROOT_CONFIG_ID);
         } else {
             srcRoot = "/src/main/java";
         }
@@ -227,7 +375,7 @@ public final class WebApp implements RestApp {
     }
 
     public static RestApi context() {
-        return WebApp.info;
+        return WebApp.restApiCtx;
     }
 
     public static Object appContext() {

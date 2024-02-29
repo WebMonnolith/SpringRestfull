@@ -1,5 +1,7 @@
 package org.restframework.web.annotations.gen;
 
+import org.restframework.web.annotations.types.FieldData;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -10,5 +12,5 @@ import java.lang.annotation.Target;
 @SuppressWarnings("unused")
 public @interface GenModel {
     String tableName();
-    String apiName() default "Api";
+    FieldData[] fields() default {};
 }

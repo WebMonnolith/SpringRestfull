@@ -12,6 +12,7 @@ import java.lang.annotation.Target;
 @SuppressWarnings("unused")
 public @interface EnableRestConfiguration {
     String contentRoot() default "/src/main/java";
+    boolean useCustomGenerationStrategy() default false;
     SpringComponents modelComponent() default SpringComponents.MODEL;
     SpringComponents dtoComponent() default SpringComponents.DTO;
 }
