@@ -438,19 +438,38 @@ public final class WebApp implements RestApp {
 
     private void checkForErrorsInRestApiGeneratorStrategy(@NotNull Class<?> clazz) {
         if (!clazz.isAnnotationPresent(RestApi.class))
-            throw new RestException("There must be a class annotated with @" + RestApi.class + ", in order to run web framework.");
+            throw new RestException("There must be a class annotated with @" + RestApi.class.getSimpleName() + "," +
+                    "\nin order to run web framework.");
 
         if (clazz.isAnnotationPresent(GenModel.class))
-            throw new RestException("The class cannot be annotated with both @" + RestApi.class + " and @" + GenModel.class);
+            throw new RestException("The class cannot be annotated with both @" + RestApi.class.getSimpleName() +
+                    "\nand @" + GenModel.class.getSimpleName());
 
         if (clazz.isAnnotationPresent(GenDto.class))
-            throw new RestException("The class cannot be annotated with both @" + RestApi.class + " and @" + GenDto.class);
+            throw new RestException("The class cannot be annotated with both @" + RestApi.class.getSimpleName() +
+                    "\nand @" + GenDto.class.getSimpleName());
 
         if (clazz.isAnnotationPresent(GenDto.class)  && clazz.isAnnotationPresent(GenModel.class))
-            throw new RestException("The class cannot be annotated with both @" + RestApi.class + " and @" + GenDto.class + "and @" + GenModel.class);
+            throw new RestException("The class cannot be annotated with both @" + RestApi.class.getSimpleName() +
+                    "\nand @" + GenDto.class.getSimpleName() + "and @" + GenModel.class.getSimpleName());
     }
 
     private void checkForErrorsInCustomApiGeneratorStrategy(@NotNull Class<?> clazz) {
+        if (!clazz.isAnnotationPresent(GenProperties.class))
+            throw new RestException("There must be a class annotated with @" + GenProperties.class.getSimpleName() + ",\n" +
+                    "in order to make use of the custom generation strategy.\n" +
+                    "Otherwise use standard generation with @" + RestApi.class.getSimpleName());
 
+        if (clazz.getAnnotationsByType(GenProperties.class).length > 1)
+            throw new RestException("There can only be ONE class annotated with @" + GenProperties.class.getSimpleName() + ",\n" +
+                    "in order to make use of the custom generation strategy.");
+
+        if (!clazz.isAnnotationPresent(GenModel.class))
+            throw new RestException("There must be a class annotated with @" + GenModel.class.getSimpleName() + ",\n" +
+                    "in order to make use of the custom generation strategy.");
+
+        if (!clazz.isAnnotationPresent(GenDto.class))
+            throw new RestException("There must be a class annotated with @" + GenDto.class.getSimpleName() + ",\n" +
+                    "in order to make use of the custom generation strategy.");
     }
 }
