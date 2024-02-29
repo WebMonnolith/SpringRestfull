@@ -55,6 +55,7 @@ public final class WebApp implements RestApp {
     private final static List<String> targetPaths = new ArrayList<>();
 
     public WebApp(@NotNull Class<?> clazz) throws UnsupportedEncodingException {
+        log.info(":: Spring Restframework Compiler ::\t\t\t(V1.2)\n\n");
         WebApp.buildStrategy = this.start(clazz);
         switch (WebApp.buildStrategy) {
             case WEB_REST_API_STRATEGY -> {

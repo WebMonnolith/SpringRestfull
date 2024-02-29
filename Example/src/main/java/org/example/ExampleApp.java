@@ -25,7 +25,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
                 @FieldData(name="index")
         }
 )
-//@GenSpring
+@GenSpring
 @SpringBootApplication
 public class ExampleApp {
     @SneakyThrows
@@ -35,23 +35,3 @@ public class ExampleApp {
     }
 
 }
-
-
-//@RestApi(
-//    APIS= {
-//        @API(
-//            endpoint="/tools/api/v1/user",
-//            model=@Model(generic = Generic.UUID,
-//                        tableName = "test_user",
-//                        apiName = "User",
-//                        fields = {
-//                                @FieldData(name = "fname"),
-//                                @FieldData(name = "lname"),
-//                                @FieldData(datatype = "double", name = "age"),
-//                        }
-//                ),
-//            apiName="User",
-//            basePackage = "org.example.test"
-//        ),
-//    }
-//)
