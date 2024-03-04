@@ -13,9 +13,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @SuppressWarnings("unused")
 public @interface GenSpring {
-    Class<?>[] templates() default {
-            ControllerTemplate.class,
-            ServiceTemplate.class,
-            RepoTemplate.class,
-    };
+    Class<?> controller() default ControllerTemplate.class;
+    Class<?> service() default ServiceTemplate.class;
+    Class<?> repo() default RepoTemplate.class;
 }

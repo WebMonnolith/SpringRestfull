@@ -55,7 +55,7 @@ public final class WebApp implements RestApp {
     private final static List<String> targetPaths = new ArrayList<>();
 
     public WebApp(@NotNull Class<?> clazz) throws UnsupportedEncodingException {
-        log.info(":: Spring Restframework Compiler ::\t\t\t(V1.2)\n\n");
+        log.info(":: Spring RESTframework Compiler ::\t\t\t(V1.2)\n\n");
         WebApp.buildStrategy = this.start(clazz);
         switch (WebApp.buildStrategy) {
             case WEB_REST_API_STRATEGY -> {
@@ -191,7 +191,9 @@ public final class WebApp implements RestApp {
         }
 
         if (!builder.nullCheckSpringComponents()) return;
-        for (Class<?> template : builder.springCtx.templates())
+        GenSpring spring = WebApp.classContext().getAnnotation(GenSpring.class);
+        Class<?>[] templates = { spring.controller(), spring.repo(), spring.service() };
+        for (Class<?> template : templates)
             generator.generateClasses(api, template, WebApp.outputResultPathBase().get(0));
     }
 

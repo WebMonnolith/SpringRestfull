@@ -3,15 +3,12 @@ package org.example;
 
 import lombok.SneakyThrows;
 import org.restframework.web.WebApp;
-import org.restframework.web.annotations.*;
+import org.restframework.web.annotations.EnableRestConfiguration;
 import org.restframework.web.annotations.gen.GenDto;
 import org.restframework.web.annotations.gen.GenModel;
 import org.restframework.web.annotations.gen.GenProperties;
 import org.restframework.web.annotations.gen.GenSpring;
-import org.restframework.web.annotations.types.API;
 import org.restframework.web.annotations.types.FieldData;
-import org.restframework.web.annotations.types.Model;
-import org.restframework.web.core.generics.Generic;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 
