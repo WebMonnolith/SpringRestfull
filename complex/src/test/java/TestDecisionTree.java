@@ -1,6 +1,6 @@
 import org.junit.jupiter.api.Test;
-import org.restframework.complex.containers.Tree;
-import org.restframework.complex.containers.sml.DecisionTree;
+import org.restframework.complex.containers.tree.Tree;
+import org.restframework.complex.containers.tree.decision.DecisionTree;
 
 import java.util.ArrayList;
 import java.util.List;

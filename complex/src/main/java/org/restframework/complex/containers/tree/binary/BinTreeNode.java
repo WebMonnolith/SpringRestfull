@@ -1,7 +1,8 @@
-package org.restframework.complex.containers;
+package org.restframework.complex.containers.tree.binary;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.restframework.complex.containers.tree.Node;
 
 /**
  * A node in a binary tree, extending the generic Node class.
@@ -14,7 +15,7 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class BinTreeNode<T> extends Node<BinTreeNode> {
+public class BinTreeNode<T> extends Node<BinTreeNode<T>> {
 
     /**
      * The key associated with the node.

@@ -1,7 +1,7 @@
 import org.junit.jupiter.api.Test;
-import org.restframework.complex.containers.BinTreeNode;
-import org.restframework.complex.containers.BinaryTree;
-import org.restframework.complex.containers.Tree;
+import org.restframework.complex.containers.tree.binary.BinTreeNode;
+import org.restframework.complex.containers.tree.binary.BinaryTree;
+import org.restframework.complex.containers.tree.Tree;
 
 import java.util.List;
 

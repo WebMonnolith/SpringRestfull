@@ -1,10 +1,10 @@
-package org.restframework.complex.containers.sml;
+package org.restframework.complex.containers.tree.decision;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.restframework.complex.containers.Node;
+import org.restframework.complex.containers.tree.Node;
 
 import java.util.function.Function;
 

@@ -1,4 +1,4 @@
-package org.restframework.complex.containers;
+package org.restframework.complex.containers.tree;
 
 import lombok.Getter;
 import lombok.Setter;

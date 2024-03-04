@@ -1,8 +1,10 @@
-package org.restframework.complex.containers;
+package org.restframework.complex.containers.tree;
 
 import org.jetbrains.annotations.NotNull;
-import org.restframework.complex.containers.sml.DecisionTree;
-import org.restframework.complex.containers.sml.DecisionTreeNode;
+import org.restframework.complex.containers.tree.binary.BinTreeNode;
+import org.restframework.complex.containers.tree.binary.BinaryTree;
+import org.restframework.complex.containers.tree.decision.DecisionTree;
+import org.restframework.complex.containers.tree.decision.DecisionTreeNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +15,7 @@ import java.util.List;
  * @author  Jessy van Polanen
  * @see     BinTreeNode
  * @see     Node
- * @see     org.restframework.complex.containers.sml.DecisionTreeNode
+ * @see     org.restframework.complex.containers.tree.decision.DecisionTreeNode
  * @version 1.0
  */
 public class Tree {

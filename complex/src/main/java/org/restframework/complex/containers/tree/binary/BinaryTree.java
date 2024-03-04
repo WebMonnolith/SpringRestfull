@@ -1,6 +1,7 @@
-package org.restframework.complex.containers;
+package org.restframework.complex.containers.tree.binary;
 
 import lombok.*;
+import org.restframework.complex.containers.ComplexContainer;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -30,15 +31,15 @@ import java.util.Queue;
  * @see     BinTreeNode
  * @version 1.0
  */
-@EqualsAndHashCode
+@Getter
+@EqualsAndHashCode(callSuper = true)
 @ToString
 @NoArgsConstructor
-public class BinaryTree <T> {
+public class BinaryTree <T> extends ComplexContainer<BinaryTree<T>> {
 
     /**
      * The root node of the binary tree.
      */
-    @Getter
     @Setter
     private BinTreeNode<T> root;
 
