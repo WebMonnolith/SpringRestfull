@@ -16,7 +16,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 
 @EnableRestConfiguration(useCustomGenerationStrategy = true)
-@GenProperties(basePackage = "org.example.test", indexColumnType = Generic.LONG)
+@GenProperties(basePackage = "org.example.test")
 @GenDto
 @GenModel(
         tableName = "test_table",
@@ -25,7 +25,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
                 @FieldData(name="index")
         }
 )
-@GenSpring(service = TServiceResponseEntity.class, controller = TControllerResponseEntity.class)
+@GenSpring()
 @SpringBootApplication
 public class ExampleApp {
     @SneakyThrows

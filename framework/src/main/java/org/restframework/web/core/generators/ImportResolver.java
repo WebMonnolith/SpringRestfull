@@ -44,6 +44,7 @@ public class ImportResolver {
                 holder.add("import " + apiPackage + ".service.*");
                 holder.add("import lombok.*");
                 holder.add("import org.springframework.web.bind.annotation.*");
+                holder.add("import org.springframework.http.HttpStatus");
             }
             case SERVICE -> {
                 holder.add("import " + apiPackage + ".repository.*");
