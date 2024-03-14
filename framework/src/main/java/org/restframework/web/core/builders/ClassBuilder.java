@@ -2,13 +2,14 @@ package org.restframework.web.core.builders;
 
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.restframework.web.annotations.markers.UpdateComponent;
 import org.restframework.web.core.templates.ClassTypes;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.reflect.Method;
 
 import static org.restframework.web.core.helpers.FileHelper.NO_DIR;
 import static org.restframework.web.core.helpers.FileHelper.fileExists;
@@ -27,8 +28,8 @@ public final class ClassBuilder implements Builder, BuilderUtils {
     {
         this.name = name;
         this.classDefinition = new StringBuilder("package "+basePackage+";\n\n")
-                .append("import org.restframework.web.core.templates.*;\n\n")
-                .append("import java.util.*;\n\n");
+                .append("import org.restframework.web.core.templates.*;\n")
+                .append("import java.util.*;\n");
 
         for (String annotation : annotations)
             this.addAnnotation(annotation);
@@ -48,7 +49,8 @@ public final class ClassBuilder implements Builder, BuilderUtils {
         this.classDefinition = new StringBuilder("package "+basePackage+";\n\n");
 
         for (String dependency : imports)
-            this.classDefinition.append(dependency).append(";\n\n");
+            this.classDefinition.append(dependency).append(";\n");
+        this.classDefinition.append("\n");
 
         for (String annotation : annotations)
             this.addAnnotation(annotation);
@@ -122,6 +124,12 @@ public final class ClassBuilder implements Builder, BuilderUtils {
     @Override
     public void addField(FieldBuilder builder) {
         this.classDefinition.append(builder.getDefinition());
+    }
+
+    public ClassBuilder prepareBuild(@Nullable UpdateComponent updateAnnotation) {
+
+
+        return this;
     }
 
     @Override

@@ -3,6 +3,7 @@ package org.restframework.web.core.generators;
 import lombok.Getter;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.restframework.web.core.generics.GenericFactory;
 import org.restframework.web.core.templates.SpringComponents;
 import org.restframework.web.exceptions.RestException;
 
@@ -15,7 +16,11 @@ public class ImportResolver {
     private final List<String> imports;
 
     public ImportResolver(SpringComponents component, String apiPackage) {
-        this.imports = this.resolve(component, apiPackage);
+        this.imports = this.resolve(component, GenericFactory.NO_IMPORT, apiPackage);
+    }
+
+    public ImportResolver(SpringComponents component, String genericImportStatement, String apiPackage) {
+        this.imports = this.resolve(component, genericImportStatement, apiPackage);
     }
 
     public  String[] get() {
@@ -23,7 +28,11 @@ public class ImportResolver {
     }
 
     @Contract(pure = true)
-    private @NotNull List<String> resolve(@NotNull SpringComponents component, @NotNull String apiPackage) {
+    private @NotNull List<String> resolve(
+            @NotNull SpringComponents component,
+            @NotNull String genericImportStatement,
+            @NotNull String apiPackage)
+    {
         List<String> holder = new ArrayList<>();
         holder.add("import " + apiPackage + ".*");
         holder.add("import org.restframework.web.core.templates.*");
@@ -42,7 +51,6 @@ public class ImportResolver {
                 holder.add("import org.springframework.stereotype.Service");
             }
             case MODEL -> {
-                holder.add("import " + apiPackage + ".controller.*");
                 holder.add("import lombok.*");
                 holder.add("import jakarta.persistence.*");
             }

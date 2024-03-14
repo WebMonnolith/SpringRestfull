@@ -1,4 +1,6 @@
-package org.restframework.web.annotations;
+package org.restframework.web.annotations.types;
+
+import org.restframework.web.core.builders.Modifier;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -8,10 +10,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE})
 @SuppressWarnings("unused")
-public @interface Model {
-    String generic();
-    String tableName();
-    String apiName();
-    String abbrev() default "Model";
-    FieldData[] fields() default {};
+public @interface FieldData {
+    Modifier access() default Modifier.PRIVATE;
+    String datatype() default "String";
+    String name();
+
 }
