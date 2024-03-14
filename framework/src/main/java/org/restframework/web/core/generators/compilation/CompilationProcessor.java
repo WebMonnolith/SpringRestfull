@@ -47,7 +47,7 @@ public class CompilationProcessor {
                 context.getBuilder().addExtension(context.getTemplate());
             else
                 context.getBuilder().addExtension(context.getTemplate(),
-                        context.getApi().basePackage() + '.' +  context.getModelName(),
+                        context.getModelName(),
                         context.getGeneric());
 
         if (useImplementation(context.getTemplateAnnotation()) && ! CompilationFlags.customRepoGenerics)
