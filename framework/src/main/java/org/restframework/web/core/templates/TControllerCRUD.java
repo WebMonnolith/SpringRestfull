@@ -13,11 +13,7 @@ import java.util.Optional;
         type=ClassTypes.CLASS
 )
 @SuppressWarnings("unused")
-public interface TControllerCRUD<ID, DTO, Model> extends ExceptionAdvice {
-
-    int INSERT_NOT_IMPLEMENTED_CODE = 10000;
-    boolean NOT_IMPLEMENTED = false;
-
+public interface TControllerCRUD<ID, DTO, Model extends ModelFrame<ID>> extends ExceptionAdvice {
     int insertEntity(DTO entity);
     List<DTO> getAllEntities();
     boolean removeEntityById(ID id);

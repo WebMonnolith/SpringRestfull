@@ -20,4 +20,5 @@ public class CompilationContext {
     private String modelName;
     private String dtoName;
     private String generic;
+    private boolean defaultTemplateMethodImpl;
 }

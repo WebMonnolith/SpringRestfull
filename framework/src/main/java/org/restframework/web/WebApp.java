@@ -20,6 +20,9 @@ import org.restframework.web.core.RestApp;
 import org.restframework.web.core.generators.MvcGenerator;
 import org.restframework.web.core.generators.MvcSupport;
 import org.restframework.web.core.templates.SpringComponents;
+import org.restframework.web.core.templates.TControllerCRUD;
+import org.restframework.web.core.templates.TRepo;
+import org.restframework.web.core.templates.TServiceCRUD;
 import org.restframework.web.exceptions.RestException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.SpringApplication;
@@ -29,7 +32,9 @@ import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.restframework.web.core.RestConfigInit.*;
 
@@ -53,6 +58,7 @@ public final class WebApp implements RestApp {
     private static Class<?> classContext;
     private static WebGenerationStrategy buildStrategy;
     private final static List<String> targetPaths = new ArrayList<>();
+    private static boolean defaultTemplateMethodImpl= false;
 
     public WebApp(@NotNull Class<?> clazz) throws UnsupportedEncodingException {
         log.info(":: Spring RESTframework Compiler ::\t\t\t(V1.2)\n\n");
@@ -88,6 +94,8 @@ public final class WebApp implements RestApp {
                  NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
+
+        log.warn("Make sure to implement the methods of the service and controller templates!");
     }
 
     @Override
@@ -102,6 +110,8 @@ public final class WebApp implements RestApp {
                  NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
+
+        log.warn("Make sure to implement the methods of the service and controller templates!");
     }
 
     @Override
@@ -118,6 +128,7 @@ public final class WebApp implements RestApp {
         }
 
         WebApp.internalApp = runnable.call(WebApp.classContext());
+        log.warn("Make sure to implement the methods of the service and controller templates!");
     }
 
     @Override
@@ -134,6 +145,7 @@ public final class WebApp implements RestApp {
         }
 
         WebApp.internalApp = runnable.call(WebApp.classContext());
+        log.warn("Make sure to implement the methods of the service and controller templates!");
     }
 
     private <T> void init()
@@ -193,12 +205,14 @@ public final class WebApp implements RestApp {
         if (!builder.nullCheckSpringComponents()) return;
         GenSpring spring = WebApp.classContext().getAnnotation(GenSpring.class);
         Class<?>[] templates = { spring.controller(), spring.repo(), spring.service() };
+        if (this.checkDefaultTemplates(templates)) WebApp.defaultTemplateMethodImpl = true;
         for (Class<?> template : templates)
             generator.generateClasses(api, template, WebApp.outputResultPathBase().get(0));
     }
 
     private void generateByUsingRestApiGenerationStrategy(@NotNull RestApi restApi) {
         MvcGenerator generator = new MvcGenerator(new MvcSupportHandler());
+        if (this.checkDefaultTemplates(restApi.templates())) WebApp.defaultTemplateMethodImpl = true;
         for (int i = 0; i < restApi.APIS().length; i++) {
             API api = restApi.APIS()[i];
             if (!hasConfiguration(WebApp.classContext())) {
@@ -401,6 +415,10 @@ public final class WebApp implements RestApp {
         return WebApp.context;
     }
 
+    public static boolean defaultMethods() {
+        return WebApp.defaultTemplateMethodImpl;
+    }
+
     @NoArgsConstructor
     static class MvcSupportHandler implements MvcSupport {
         @Override
@@ -474,5 +492,18 @@ public final class WebApp implements RestApp {
         if (!clazz.isAnnotationPresent(GenDto.class))
             throw new RestException("There must be a class annotated with @" + GenDto.class.getSimpleName() + ",\n" +
                     "in order to make use of the custom generation strategy.");
+    }
+
+    private boolean checkDefaultTemplates(Class<?> @NotNull [] templates) {
+        if (templates.length > 3) throw new RestException("Too many templates used [" + templates.length + "] make sure to only use a max of three, service, repo & controller");
+
+        Set<Class<?>> templateSet = new HashSet<>();
+        for (Class<?> template : templates) {
+            templateSet.add(template);
+        }
+
+        return templateSet.contains(TControllerCRUD.class)
+                && templateSet.contains(TServiceCRUD.class)
+                && templateSet.contains(TRepo.class);
     }
 }

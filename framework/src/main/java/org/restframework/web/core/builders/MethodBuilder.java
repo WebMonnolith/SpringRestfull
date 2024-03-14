@@ -19,14 +19,16 @@ public final class MethodBuilder implements Builder, BuilderUtils  {
                 .append(type)
                 .append(" ")
                 .append(methodName)
-                .append(";\n");
+                .append("() {\n")
+                .append("\t\t return null\n")
+                .append("\t}\n");
     }
 
     public MethodBuilder(
             @NotNull String methodName,
             @NotNull String type,
             @NotNull Modifier access,
-            @NotNull String[] annotations)
+            @NotNull String @NotNull [] annotations)
     {
         this.methodDefinition = new StringBuilder();
 
@@ -41,7 +43,9 @@ public final class MethodBuilder implements Builder, BuilderUtils  {
                 .append(type)
                 .append(" ")
                 .append(methodName)
-                .append(";\n");
+                .append("() {\n")
+                .append("\t\t return null;\n")
+                .append("\t}\n");
     }
 
     @Override

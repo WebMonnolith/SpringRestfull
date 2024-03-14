@@ -14,6 +14,8 @@ import org.restframework.web.core.generics.GenericGeneration;
 import org.restframework.web.exceptions.RestException;
 import org.springframework.core.annotation.AnnotationUtils;
 
+import static org.restframework.web.WebApp.defaultMethods;
+
 @AllArgsConstructor
 public class ComponentGenerator extends Generator<Class<?>> {
     private final MvcSupport support;
@@ -42,6 +44,7 @@ public class ComponentGenerator extends Generator<Class<?>> {
                     .modelName(api.model().apiName()+api.model().abbrev())
                     .dtoName(api.model().apiName()+"Dto")
                     .generic(genericResolver.getGeneric())
+                    .defaultTemplateMethodImpl(defaultMethods())
                     .build());
 
         mvcBuilder.build(buildPath, templateAnnotation.templateName().toLowerCase());

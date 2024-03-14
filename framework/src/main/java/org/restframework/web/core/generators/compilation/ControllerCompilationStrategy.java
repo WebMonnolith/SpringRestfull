@@ -13,5 +13,9 @@ public class ControllerCompilationStrategy implements CompilationStrategy {
                         context.getApi().apiName().toLowerCase() + "Service",
                         context.getApi().apiName() + "Service",
                         Modifier.PRIVATE_FINAL));
+
+        if (context.isDefaultTemplateMethodImpl()) {
+            // TODO Add method building construction
+        }
     }
 }
