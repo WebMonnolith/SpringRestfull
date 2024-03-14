@@ -1,9 +1,9 @@
 package org.restframework.web.annotations;
 
 import org.restframework.web.annotations.types.API;
-import org.restframework.web.core.templates.ControllerTemplate;
-import org.restframework.web.core.templates.RepoTemplate;
-import org.restframework.web.core.templates.ServiceTemplate;
+import org.restframework.web.core.templates.TControllerCRUD;
+import org.restframework.web.core.templates.TRepo;
+import org.restframework.web.core.templates.TServiceCRUD;
 import org.springframework.stereotype.Component;
 
 import java.lang.annotation.Inherited;
@@ -16,9 +16,9 @@ import java.lang.annotation.RetentionPolicy;
 @Component
 public @interface RestApi {
     Class<?>[] templates() default {
-        ControllerTemplate.class,
-        ServiceTemplate.class,
-        RepoTemplate.class,
+        TControllerCRUD.class,
+        TServiceCRUD.class,
+        TRepo.class,
     };
     API[] APIS();
 }

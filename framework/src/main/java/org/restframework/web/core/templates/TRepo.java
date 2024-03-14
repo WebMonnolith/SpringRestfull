@@ -13,5 +13,5 @@ import org.springframework.stereotype.Repository;
 )
 @SuppressWarnings("unused")
 @Repository
-public interface RepoTemplate <T extends ModelFrame<ID>, ID> extends JpaRepository<T, ID> {
+public interface TRepo<T extends ModelFrame<ID>, ID> extends JpaRepository<T, ID> {
 }

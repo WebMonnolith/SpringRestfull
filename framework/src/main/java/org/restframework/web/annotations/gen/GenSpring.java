@@ -1,8 +1,8 @@
 package org.restframework.web.annotations.gen;
 
-import org.restframework.web.core.templates.ControllerTemplate;
-import org.restframework.web.core.templates.RepoTemplate;
-import org.restframework.web.core.templates.ServiceTemplate;
+import org.restframework.web.core.templates.TControllerCRUD;
+import org.restframework.web.core.templates.TRepo;
+import org.restframework.web.core.templates.TServiceCRUD;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @SuppressWarnings("unused")
 public @interface GenSpring {
-    Class<?> controller() default ControllerTemplate.class;
-    Class<?> service() default ServiceTemplate.class;
-    Class<?> repo() default RepoTemplate.class;
+    Class<?> controller() default TControllerCRUD.class;
+    Class<?> service() default TServiceCRUD.class;
+    Class<?> repo() default TRepo.class;
 }

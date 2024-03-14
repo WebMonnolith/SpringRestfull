@@ -22,7 +22,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
                 @FieldData(name="index")
         }
 )
-@GenSpring(service = NewServiceTemplate.class)
+@GenSpring
 @SpringBootApplication
 public class ExampleApp {
     @SneakyThrows
