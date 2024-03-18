@@ -2,6 +2,7 @@ package org.restframework.web.core.generators;
 
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.restframework.web.WebApp;
 import org.restframework.web.annotations.Template;
 import org.restframework.web.annotations.types.API;
 import org.restframework.web.core.builders.ClassBuilder;
@@ -38,8 +39,7 @@ public class ServiceGenerator extends Generator<Class<?>> {
                 .modelName(api.model().apiName()+api.model().abbrev())
                 .dtoName(api.model().apiName()+"Dto")
                 .generic(genericResolver.getGeneric())
-                .defaultTemplateMethodImpl(defaultMethods())
-                .methods(new _DefaultCrudServiceMethodImplementations())
+                .methods(defaultMethods() ? new _DefaultCrudServiceMethodImplementations() : WebApp.controllerMethods())
                 .build());
 
         mvcBuilder.build(buildPath, templateAnnotation.templateName().toLowerCase());

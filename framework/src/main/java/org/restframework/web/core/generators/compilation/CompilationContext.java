@@ -21,5 +21,4 @@ public class CompilationContext {
     private String dtoName;
     private String generic;
     private MethodImplementations methods;
-    private boolean defaultTemplateMethodImpl;
 }

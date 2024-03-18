@@ -13,7 +13,7 @@ import java.util.Optional;
         type=ClassTypes.CLASS
 )
 @SuppressWarnings("unused")
-public interface TServiceResponseEntity <ID, DTO, Model extends ModelFrame<ID>> {
+public interface TServiceEntityResponse<ID, DTO, Model extends ModelFrame<ID>> {
     ServiceTemplateUtils utils = new ServiceTemplateUtils();
     ResponseEntity<Integer> insert(DTO dto);
     ResponseEntity<List<DTO>> getAll();

@@ -35,7 +35,6 @@ public class RepoGenerator extends Generator<Class<?>> {
                 .modelName(api.model().apiName()+api.model().abbrev())
                 .dtoName(api.model().apiName()+"Dto")
                 .generic(genericResolver.getGeneric())
-                .defaultTemplateMethodImpl(defaultMethods())
                 .build());
 
         mvcBuilder.build(buildPath, templateAnnotation.templateName().toLowerCase());

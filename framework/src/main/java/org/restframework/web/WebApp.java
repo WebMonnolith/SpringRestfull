@@ -2,6 +2,7 @@ package org.restframework.web;
 
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.antlr.v4.runtime.misc.Pair;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 import org.restframework.web.annotations.gen.GenDto;
@@ -14,15 +15,13 @@ import org.restframework.web.annotations.types.FieldData;
 import org.restframework.web.annotations.types.Model;
 import org.restframework.web.core.AppRunner;
 import org.restframework.web.core.RestAppConfigurationContext;
+import org.restframework.web.core.generators.compilation.MethodImplementations;
 import org.restframework.web.core.generics.Generic;
 import org.restframework.web.core.helpers.FileHelper;
 import org.restframework.web.core.RestApp;
 import org.restframework.web.core.generators.MvcGenerator;
 import org.restframework.web.core.generators.MvcSupport;
-import org.restframework.web.core.templates.SpringComponents;
-import org.restframework.web.core.templates.TControllerCRUD;
-import org.restframework.web.core.templates.TRepo;
-import org.restframework.web.core.templates.TServiceCRUD;
+import org.restframework.web.core.templates.*;
 import org.restframework.web.exceptions.RestException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.SpringApplication;
@@ -31,17 +30,14 @@ import org.springframework.context.ConfigurableApplicationContext;
 import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.restframework.web.core.RestConfigInit.*;
 
 @Slf4j
 @SuppressWarnings("unused")
 @Data
-public final class WebApp implements RestApp {
+public final class WebApp implements RestApp<WebApp> {
 
     private enum WebGenerationStrategy {
         WEB_REST_API_STRATEGY,
@@ -53,12 +49,15 @@ public final class WebApp implements RestApp {
     private static @Nullable RestApi restApiCtx;
 
     private static RestAppConfigurationContext context;
-    private static RestApp internalApp;
+    private static RestApp<WebApp> internalApp;
     private static Object appContext;
     private static Class<?> classContext;
     private static WebGenerationStrategy buildStrategy;
+
+    private static Pair<MethodImplementations, MethodImplementations> implementations;
+    private static boolean defaultTemplatesFlag = false;
+
     private final static List<String> targetPaths = new ArrayList<>();
-    private static boolean defaultTemplateMethodImpl= false;
 
     public WebApp(@NotNull Class<?> clazz) throws UnsupportedEncodingException {
         log.info(":: Spring RESTframework Compiler ::\t\t\t(V1.2)\n\n");
@@ -83,7 +82,7 @@ public final class WebApp implements RestApp {
     }
 
     @Override
-    public synchronized <T> void run(@NotNull Class<T> clazz) {
+    public synchronized <ClazzType> WebApp run(@NotNull Class<ClazzType> clazz) {
         this.runSpring(clazz);
         try {
             this.init(clazz);
@@ -96,10 +95,11 @@ public final class WebApp implements RestApp {
         }
 
         log.warn("Make sure to implement the methods of the service and controller templates!");
+        return this;
     }
 
     @Override
-    public synchronized <T> void run(String[] args) {
+    public synchronized WebApp run(String[] args) {
         this.runSpring(WebApp.classContext(), args);
         try {
             this.init();
@@ -112,10 +112,11 @@ public final class WebApp implements RestApp {
         }
 
         log.warn("Make sure to implement the methods of the service and controller templates!");
+        return this;
     }
 
     @Override
-    public synchronized <T> void run(@NotNull AppRunner<RestApp> runnable) {
+    public synchronized WebApp run(@NotNull AppRunner<RestApp<WebApp>> runnable) {
         this.runSpring(WebApp.classContext());
         try {
             this.init();
@@ -129,10 +130,11 @@ public final class WebApp implements RestApp {
 
         WebApp.internalApp = runnable.call(WebApp.classContext());
         log.warn("Make sure to implement the methods of the service and controller templates!");
+        return this;
     }
 
     @Override
-    public synchronized <T> void run(String[] args, @NotNull AppRunner<RestApp> runnable) {
+    public synchronized WebApp run(String[] args, @NotNull AppRunner<RestApp<WebApp>> runnable) {
         this.runSpring(WebApp.classContext());
         try {
             this.init(args);
@@ -146,6 +148,12 @@ public final class WebApp implements RestApp {
 
         WebApp.internalApp = runnable.call(WebApp.classContext());
         log.warn("Make sure to implement the methods of the service and controller templates!");
+        return this;
+    }
+
+    public WebApp methods(@NotNull MethodImplementations service, @NotNull MethodImplementations controller) {
+        WebApp.implementations = new Pair<>(service, controller);
+        return this;
     }
 
     private <T> void init()
@@ -205,14 +213,14 @@ public final class WebApp implements RestApp {
         if (!builder.nullCheckSpringComponents()) return;
         GenSpring spring = WebApp.classContext().getAnnotation(GenSpring.class);
         Class<?>[] templates = { spring.controller(), spring.repo(), spring.service() };
-        if (this.checkDefaultTemplates(templates)) WebApp.defaultTemplateMethodImpl = true;
+        if (checkMethodImpl(templates)) WebApp.defaultTemplatesFlag = true;
         for (Class<?> template : templates)
             generator.generateClasses(api, template, WebApp.outputResultPathBase().get(0));
     }
 
     private void generateByUsingRestApiGenerationStrategy(@NotNull RestApi restApi) {
         MvcGenerator generator = new MvcGenerator(new MvcSupportHandler());
-        if (this.checkDefaultTemplates(restApi.templates())) WebApp.defaultTemplateMethodImpl = true;
+        if (checkMethodImpl(restApi.templates())) WebApp.defaultTemplatesFlag = true;
         for (int i = 0; i < restApi.APIS().length; i++) {
             API api = restApi.APIS()[i];
             if (!hasConfiguration(WebApp.classContext())) {
@@ -403,7 +411,7 @@ public final class WebApp implements RestApp {
         return WebApp.classContext;
     }
 
-    public static RestApp internalApp() {
+    public static RestApp<WebApp> internalApp() {
         return WebApp.internalApp;
     }
 
@@ -415,14 +423,23 @@ public final class WebApp implements RestApp {
         return WebApp.context;
     }
 
+    public static MethodImplementations serviceMethods() {
+        return WebApp.implementations.a;
+    }
+
+    public static MethodImplementations controllerMethods() {
+        return WebApp.implementations.b;
+    }
+
     public static boolean defaultMethods() {
-        return WebApp.defaultTemplateMethodImpl;
+        return !(WebApp.implementations != null && !defaultTemplatesFlag);
     }
 
     @NoArgsConstructor
     static class MvcSupportHandler implements MvcSupport {
         @Override
         public void call(@NotNull SpringComponents rules, String value) {
+            ruleHolder.add(RestFrameworkAnnotations.COMPILATION_COMPONENT.getValue());
             switch (rules) {
                 case CONTROLLER -> {
                     ruleHolder.add(LombokAnnotations.DATA.getValue());
@@ -494,16 +511,14 @@ public final class WebApp implements RestApp {
                     "in order to make use of the custom generation strategy.");
     }
 
-    private boolean checkDefaultTemplates(Class<?> @NotNull [] templates) {
+    private boolean checkMethodImpl(Class<?> @NotNull [] templates) {
         if (templates.length > 3) throw new RestException("Too many templates used [" + templates.length + "] make sure to only use a max of three, service, repo & controller");
 
         Set<Class<?>> templateSet = new HashSet<>();
-        for (Class<?> template : templates) {
-            templateSet.add(template);
-        }
+        Collections.addAll(templateSet, templates);
 
-        return templateSet.contains(TControllerCRUD.class)
-                && templateSet.contains(TServiceCRUD.class)
+        return (templateSet.contains(TControllerCRUD.class) || templateSet.contains(TControllerEntityResponse.class))
+                && (templateSet.contains(TServiceCRUD.class) || templateSet.contains(TServiceEntityResponse.class))
                 && templateSet.contains(TRepo.class);
     }
 }

@@ -17,8 +17,6 @@ public class ControllerCompilationStrategy implements CompilationStrategy {
                         context.getApi().apiName() + "Service",
                         Modifier.PRIVATE_FINAL));
 
-        if (context.isDefaultTemplateMethodImpl()) {
-            if (context.getMethods() != null) context.getMethods().build(context);
-        }
+        if (context.getMethods() != null) context.getMethods().build(context);
     }
 }

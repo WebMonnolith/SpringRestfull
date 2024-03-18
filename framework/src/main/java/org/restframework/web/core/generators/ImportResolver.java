@@ -36,6 +36,7 @@ public class ImportResolver {
         List<String> holder = new ArrayList<>();
         holder.add("import " + apiPackage + ".*");
         holder.add("import org.restframework.web.core.templates.*");
+        holder.add("import org.restframework.web.annotations.markers.CompilationComponent");
         holder.add("import java.util.*");
 
         switch (component) {
