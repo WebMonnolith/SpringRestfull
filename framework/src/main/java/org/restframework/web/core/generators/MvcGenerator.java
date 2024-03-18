@@ -3,6 +3,8 @@ package org.restframework.web.core.generators;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.restframework.web.annotations.types.API;
+import org.restframework.web.core.builders.MethodBuilder;
+import org.restframework.web.core.generators.compilation.MethodImplementations;
 import org.restframework.web.core.templates.SpringComponents;
 import org.restframework.web.exceptions.RestException;
 import org.jetbrains.annotations.NotNull;
@@ -36,6 +38,20 @@ public final class MvcGenerator {
         }
 
         gen.generate(api, component, buildPath);
+    }
+
+    private static class _DefaultServiceMethodImplementations implements MethodImplementations {
+        @Override
+        public MethodBuilder[] build() {
+            return new MethodBuilder[0];
+        }
+    }
+
+    private static class _DefaultControllerMethodImplementations implements MethodImplementations {
+        @Override
+        public MethodBuilder[] build() {
+            return new MethodBuilder[0];
+        }
     }
 }
 
