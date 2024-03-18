@@ -1,8 +1,10 @@
 package org.restframework.web.core.generators.compilation;
 
+import org.jetbrains.annotations.NotNull;
 import org.restframework.web.core.builders.MethodBuilder;
 
 @SuppressWarnings("unused")
+@FunctionalInterface
 public interface MethodImplementations {
-    MethodBuilder[] build();
+    void build(@NotNull CompilationContext context);
 }

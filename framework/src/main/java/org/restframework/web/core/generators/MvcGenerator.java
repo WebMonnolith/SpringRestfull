@@ -2,12 +2,12 @@ package org.restframework.web.core.generators;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.restframework.web.annotations.types.API;
-import org.restframework.web.core.builders.MethodBuilder;
-import org.restframework.web.core.generators.compilation.MethodImplementations;
 import org.restframework.web.core.templates.SpringComponents;
 import org.restframework.web.exceptions.RestException;
-import org.jetbrains.annotations.NotNull;
+
+import static org.restframework.web.core.generators.GeneratorUtils.findTemplate;
 
 
 @Slf4j
@@ -21,7 +21,14 @@ public final class MvcGenerator {
             @NotNull Class<?> template,
             @NotNull String buildPath)
     {
-        Generator<Class<?>> gen = new ComponentGenerator(this.support);
+        Generator<Class<?>> gen;
+        switch (findTemplate(api, template).rule()) {
+            case CONTROLLER -> gen = new ControllerGenerator(this.support);
+            case SERVICE -> gen = new ServiceGenerator(this.support);
+            case REPO -> gen = new RepoGenerator(this.support);
+            default -> throw new RestException("Invalid configured component!");
+        }
+
         gen.generate(api, template, buildPath);
     }
 
@@ -38,20 +45,6 @@ public final class MvcGenerator {
         }
 
         gen.generate(api, component, buildPath);
-    }
-
-    private static class _DefaultServiceMethodImplementations implements MethodImplementations {
-        @Override
-        public MethodBuilder[] build() {
-            return new MethodBuilder[0];
-        }
-    }
-
-    private static class _DefaultControllerMethodImplementations implements MethodImplementations {
-        @Override
-        public MethodBuilder[] build() {
-            return new MethodBuilder[0];
-        }
     }
 }
 

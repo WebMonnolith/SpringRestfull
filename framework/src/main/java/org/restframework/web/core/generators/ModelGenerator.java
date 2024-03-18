@@ -1,6 +1,7 @@
 package org.restframework.web.core.generators;
 
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.restframework.web.annotations.types.API;
 import org.restframework.web.core.builders.ClassBuilder;
@@ -17,7 +18,7 @@ import org.restframework.web.core.templates.SpringComponents;
 
 import static org.restframework.web.core.helpers.FileHelper.NO_DIR;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ModelGenerator extends Generator<SpringComponents> {
     private final MvcSupport support;
 
