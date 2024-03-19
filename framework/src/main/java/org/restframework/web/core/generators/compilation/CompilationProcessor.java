@@ -29,36 +29,30 @@ public class CompilationProcessor {
             CompilationFlags.customRepoGenerics = true;
 
         if (CompilationFlags.customRepoGenerics && useImplementation(context.getTemplateAnnotation()))
-            if (hasGenerics(context.getTemplateAnnotation()))
-                context.getBuilder().addInterface(context.getTemplate());
-            else
-                if (context.getTemplateAnnotation().rule() == SpringComponents.REPO)
-                    context.getBuilder().addInterface(context.getTemplate(),
-                             context.getModelName(),
-                            context.getGeneric());
-                else
-                    context.getBuilder().addInterface(context.getTemplate(),
-                            context.getGeneric(),
-                                context.getDtoName(),
-                                context.getModelName()
-                            );
-        else if (CompilationFlags.customRepoGenerics && useInheritance(context.getTemplateAnnotation()))
-            if (hasGenerics(context.getTemplateAnnotation()))
-                context.getBuilder().addExtension(context.getTemplate());
-            else
-                context.getBuilder().addExtension(context.getTemplate(),
-                        context.getModelName(),
+            if (context.getTemplateAnnotation().rule() == SpringComponents.REPO)
+                context.getBuilder().addInterface(context.getTemplate(),
+                         context.getModelName(),
                         context.getGeneric());
+            else
+                context.getBuilder().addInterface(context.getTemplate(),
+                        context.getGeneric(),
+                            context.getDtoName(),
+                            context.getModelName()
+                        );
+        else if (CompilationFlags.customRepoGenerics && useInheritance(context.getTemplateAnnotation()))
+            context.getBuilder().addExtension(context.getTemplate(),
+                    context.getModelName(),
+                    context.getGeneric());
 
-        if (useImplementation(context.getTemplateAnnotation()) && ! CompilationFlags.customRepoGenerics)
-            if (hasGenerics(context.getTemplateAnnotation()))
-                context.getBuilder().addInterface(context.getTemplate());
-            else
-                context.getBuilder().addInterface(context.getTemplate(), context.getTemplateAnnotation().generics());
-        else if (useInheritance(context.getTemplateAnnotation()) && ! CompilationFlags.customRepoGenerics)
-            if (hasGenerics(context.getTemplateAnnotation()))
-                context.getBuilder().addExtension(context.getTemplate());
-            else
-                context.getBuilder().addExtension(context.getTemplate(), context.getTemplateAnnotation().generics());
+//        if (useImplementation(context.getTemplateAnnotation()) && ! CompilationFlags.customRepoGenerics)
+//            if (hasGenerics(context.getTemplateAnnotation()))
+//                context.getBuilder().addInterface(context.getTemplate());
+//            else
+//                context.getBuilder().addInterface(context.getTemplate(), context.getTemplateAnnotation().generics());
+//        else if (useInheritance(context.getTemplateAnnotation()) && ! CompilationFlags.customRepoGenerics)
+//            if (hasGenerics(context.getTemplateAnnotation()))
+//                context.getBuilder().addExtension(context.getTemplate());
+//            else
+//                context.getBuilder().addExtension(context.getTemplate(), context.getTemplateAnnotation().generics());
     }
 }

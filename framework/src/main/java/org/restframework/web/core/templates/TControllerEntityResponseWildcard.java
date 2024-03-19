@@ -10,7 +10,6 @@ import java.util.Optional;
 @Template(
         templateName="Controller",
         rule= SpringComponents.CONTROLLER,
-        generics={"UUID"},
         type=ClassTypes.CLASS
 )
 @SuppressWarnings("unused")

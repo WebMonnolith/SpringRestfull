@@ -5,7 +5,6 @@ import org.restframework.web.annotations.Template;
 @Template(
         templateName="Service",
         rule= SpringComponents.SERVICE,
-        generics={"UUID"},
         type=ClassTypes.CLASS
 )
 @Deprecated

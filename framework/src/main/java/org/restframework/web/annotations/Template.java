@@ -14,6 +14,5 @@ import java.lang.annotation.Target;
 public @interface Template {
     String templateName();
     SpringComponents rule() default SpringComponents.NONE;
-    String[] generics() default {};
     ClassTypes type() default ClassTypes.CLASS;
 }

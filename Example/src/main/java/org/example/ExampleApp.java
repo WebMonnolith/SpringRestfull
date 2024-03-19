@@ -49,17 +49,6 @@ public class ExampleApp {
 //            }
 //        }
         new WebApp(ExampleApp.class)
-            .methods(
-                context -> {
-                    context.getBuilder().addMethod(
-                            new MethodBuilder("save", "int", Modifier.PUBLIC, "ApiModel model", "null", new String[]{"Override"})
-                    );
-                },
-                context -> {
-                    context.getBuilder().addMethod(
-                        new MethodBuilder("save", "int", Modifier.PUBLIC, "ApiModel model", "null", new String[]{"Override"})
-                    );
-                })
             .run(args);
     }
 

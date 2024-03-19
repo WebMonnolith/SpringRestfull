@@ -11,7 +11,6 @@ import java.util.List;
 @Template(
         templateName = "Service",
         rule = SpringComponents.SERVICE,
-        generics = "UUID",
         type = ClassTypes.CLASS
 )
 public interface NewServiceTemplate<ID, DTO, Model extends ModelFrame<ID>> {

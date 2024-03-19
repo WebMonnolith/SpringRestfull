@@ -9,7 +9,6 @@ import java.util.Optional;
 @Template(
         templateName="Service",
         rule= SpringComponents.SERVICE,
-        generics={"UUID"},
         type=ClassTypes.CLASS
 )
 @SuppressWarnings("unused")
