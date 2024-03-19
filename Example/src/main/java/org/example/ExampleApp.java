@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 @EnableRestConfiguration(useCustomGenerationStrategy = true)
-@GenProperties(basePackage = "org.example.test")
+@GenProperties(basePackage = "org.example")
 @GenDto
 @GenModel(
         tableName = "test_table",

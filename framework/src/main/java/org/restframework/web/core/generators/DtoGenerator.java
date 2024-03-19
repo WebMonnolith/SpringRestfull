@@ -21,7 +21,11 @@ public class DtoGenerator extends Generator<SpringComponents> {
     private final MvcSupport support;
 
     @Override
-    public void generate(@NotNull API api, @NotNull SpringComponents component, @NotNull String buildPath) {
+    public void generate(
+            @NotNull API api,
+            @NotNull SpringComponents component,
+            @NotNull String buildPath
+    ) {
         if (CompilationFlags.generateModelsOnce) return;
         CompilationFlags.useModelsApi = true;
 

@@ -5,10 +5,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.antlr.v4.runtime.misc.Pair;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
+import org.restframework.scanner.DirectoryScannerAdvanced;
+import org.restframework.scanner.FileRecord;
+import org.restframework.scanner.PackageScanner;
+import org.restframework.scanner.ScannerApplication;
 import org.restframework.web.annotations.gen.GenDto;
 import org.restframework.web.annotations.gen.GenModel;
 import org.restframework.web.annotations.gen.GenProperties;
 import org.restframework.web.annotations.gen.GenSpring;
+import org.restframework.web.annotations.markers.CompilationComponent;
+import org.restframework.web.annotations.markers.UpdateComponent;
 import org.restframework.web.annotations.types.API;
 import org.restframework.web.annotations.RestApi;
 import org.restframework.web.annotations.types.FieldData;
@@ -45,10 +51,13 @@ public final class WebApp implements RestApp<WebApp> {
         NONE
     }
 
+    // Internal Framework usage!
     private static @Nullable _APIBuilder builder;
     private static @Nullable RestApi restApiCtx;
 
     private static RestAppConfigurationContext context;
+    private static ScannerApplication scannerApplication;
+
     private static RestApp<WebApp> internalApp;
     private static Object appContext;
     private static Class<?> classContext;
@@ -58,6 +67,9 @@ public final class WebApp implements RestApp<WebApp> {
     private static boolean defaultTemplatesFlag = false;
 
     private final static List<String> targetPaths = new ArrayList<>();
+
+    // For external usage!
+    private ConfigurableApplicationContext springContext;
 
     public WebApp(@NotNull Class<?> clazz) throws UnsupportedEncodingException {
         log.info(":: Spring RESTframework Compiler ::\t\t\t(V1.2)\n\n");
@@ -83,7 +95,9 @@ public final class WebApp implements RestApp<WebApp> {
 
     @Override
     public synchronized <ClazzType> WebApp run(@NotNull Class<ClazzType> clazz) {
-        this.runSpring(clazz);
+        this.springContext = this.runSpring(clazz);
+        WebApp.scannerApplication = this.scannerApplication().run(clazz);
+
         try {
             this.init(clazz);
         } catch (RestException |
@@ -100,7 +114,9 @@ public final class WebApp implements RestApp<WebApp> {
 
     @Override
     public synchronized WebApp run(String[] args) {
-        this.runSpring(WebApp.classContext(), args);
+        this.springContext = this.runSpring(WebApp.classContext(), args);
+        WebApp.scannerApplication = this.scannerApplication().run(args);
+
         try {
             this.init();
         } catch (RestException |
@@ -111,13 +127,22 @@ public final class WebApp implements RestApp<WebApp> {
             throw new RuntimeException(e);
         }
 
+        for (String packageName : WebApp.scannerApplication.getFiles().keySet()) {
+            System.out.println("Package: " + packageName);
+            List<FileRecord> fileRecords = WebApp.scannerApplication.getFiles().get(packageName);
+            for (FileRecord record : fileRecords) {
+                System.out.println("   Name: " + record.getName() + ", Size: " + record.getSize() + " bytes, " + "update: " + record.isUpdateAble());
+            }
+        }
         log.warn("Make sure to implement the methods of the service and controller templates!");
         return this;
     }
 
     @Override
     public synchronized WebApp run(@NotNull AppRunner<RestApp<WebApp>> runnable) {
-        this.runSpring(WebApp.classContext());
+        this.springContext = this.runSpring(WebApp.classContext());
+        WebApp.scannerApplication = this.scannerApplication().run(new String[]{});
+
         try {
             this.init();
         } catch (RestException |
@@ -135,7 +160,9 @@ public final class WebApp implements RestApp<WebApp> {
 
     @Override
     public synchronized WebApp run(String[] args, @NotNull AppRunner<RestApp<WebApp>> runnable) {
-        this.runSpring(WebApp.classContext());
+        this.springContext = this.runSpring(WebApp.classContext());
+        WebApp.scannerApplication = this.scannerApplication().run(args);
+
         try {
             this.init(args);
         } catch (RestException |
@@ -154,6 +181,20 @@ public final class WebApp implements RestApp<WebApp> {
     public WebApp methods(@NotNull MethodImplementations service, @NotNull MethodImplementations controller) {
         WebApp.implementations = new Pair<>(service, controller);
         return this;
+    }
+
+    public ConfigurableApplicationContext getSpringContext() {
+        return this.springContext;
+    }
+
+    private @NotNull ScannerApplication scannerApplication() {
+        return new ScannerApplication(
+                WebApp.classContext,
+                WebApp.outputResultPathBase().get(0),
+                new PackageScanner(new DirectoryScannerAdvanced(
+                        CompilationComponent.class,
+                        UpdateComponent.class
+                )));
     }
 
     private <T> void init()
@@ -198,15 +239,15 @@ public final class WebApp implements RestApp<WebApp> {
         MvcGenerator generator = new MvcGenerator(new MvcSupportHandler());
 
         if (!hasConfiguration(WebApp.classContext())) {
-            generator.generateByKey(
+            generator.generateDao(
                     api, SpringComponents.MODEL, WebApp.outputResultPathBase().get(0));
-            generator.generateByKey(
+            generator.generateDao(
                     api, SpringComponents.DTO, WebApp.outputResultPathBase().get(0));
         }
         else {
-            generator.generateByKey(
+            generator.generateDao(
                     api, WebApp.context.getValueByKey(MODEL_COMPONENT_CONFIG_ID), WebApp.outputResultPathBase().get(0));
-            generator.generateByKey(
+            generator.generateDao(
                     api, WebApp.context.getValueByKey(DTO_COMPONENT_CONFIG_ID), WebApp.outputResultPathBase().get(0));
         }
 
@@ -215,7 +256,7 @@ public final class WebApp implements RestApp<WebApp> {
         Class<?>[] templates = { spring.controller(), spring.repo(), spring.service() };
         if (checkMethodImpl(templates)) WebApp.defaultTemplatesFlag = true;
         for (Class<?> template : templates)
-            generator.generateClasses(api, template, WebApp.outputResultPathBase().get(0));
+            generator.generateSpringComponent(api, template, WebApp.outputResultPathBase().get(0));
     }
 
     private void generateByUsingRestApiGenerationStrategy(@NotNull RestApi restApi) {
@@ -224,19 +265,19 @@ public final class WebApp implements RestApp<WebApp> {
         for (int i = 0; i < restApi.APIS().length; i++) {
             API api = restApi.APIS()[i];
             if (!hasConfiguration(WebApp.classContext())) {
-                generator.generateByKey(
+                generator.generateDao(
                         api, SpringComponents.MODEL, WebApp.outputResultPathBase().get(i));
-                generator.generateByKey(
+                generator.generateDao(
                         api, SpringComponents.DTO, WebApp.outputResultPathBase().get(i));
             }
             else {
-                generator.generateByKey(
+                generator.generateDao(
                         api, WebApp.context.getValueByKey(MODEL_COMPONENT_CONFIG_ID), WebApp.outputResultPathBase().get(i));
-                generator.generateByKey(
+                generator.generateDao(
                         api, WebApp.context.getValueByKey(DTO_COMPONENT_CONFIG_ID), WebApp.outputResultPathBase().get(i));
             }
             for (Class<?> template : restApi.templates())
-                generator.generateClasses(api, template, WebApp.outputResultPathBase().get(i));
+                generator.generateSpringComponent(api, template, WebApp.outputResultPathBase().get(i));
         }
     }
 
@@ -425,6 +466,10 @@ public final class WebApp implements RestApp<WebApp> {
 
     public static MethodImplementations serviceMethods() {
         return WebApp.implementations.a;
+    }
+
+    public static ScannerApplication scannerApp() {
+        return WebApp.scannerApplication;
     }
 
     public static MethodImplementations controllerMethods() {

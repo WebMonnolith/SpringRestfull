@@ -16,11 +16,11 @@ public final class MvcGenerator {
 
     private final MvcSupport support;
 
-    public synchronized void generateClasses(
+    public synchronized void generateSpringComponent(
             @NotNull API api,
             @NotNull Class<?> template,
-            @NotNull String buildPath)
-    {
+            @NotNull String buildPath
+    ) {
         Generator<Class<?>> gen;
         switch (findTemplate(api, template).rule()) {
             case CONTROLLER -> gen = new ControllerGenerator(this.support);
@@ -32,11 +32,11 @@ public final class MvcGenerator {
         gen.generate(api, template, buildPath);
     }
 
-    public synchronized void generateByKey(
+    public synchronized void generateDao(
             @NotNull API api,
             @NotNull SpringComponents component,
-            @NotNull String buildPath)
-    {
+            @NotNull String buildPath
+    ) {
         Generator<SpringComponents> gen;
         switch (component) {
             case MODEL -> gen = new ModelGenerator(this.support);

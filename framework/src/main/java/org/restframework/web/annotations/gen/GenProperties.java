@@ -14,5 +14,5 @@ public @interface GenProperties {
     Generic indexColumnType() default Generic.UUID;
     String apiName() default "Api";
     String endpoint() default "api/v1/endpoint";
-    String basePackage() default "";
+    String basePackage();
 }

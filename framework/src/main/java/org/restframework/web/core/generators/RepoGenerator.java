@@ -21,7 +21,11 @@ public class RepoGenerator extends Generator<Class<?>> {
     private final MvcSupport support;
 
     @Override
-    public void generate(@NotNull API api, @NotNull Class<?> template, @NotNull String buildPath) {
+    public void generate(
+            @NotNull API api,
+            @NotNull Class<?> template,
+            @NotNull String buildPath
+    ) {
         Template templateAnnotation = findTemplate(api, template);
         CompilationFlags.useModelsApi = false;
         GenericGeneration genericResolver = GenericFactory.create(api.model().generic());

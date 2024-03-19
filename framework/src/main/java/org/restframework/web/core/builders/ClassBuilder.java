@@ -3,6 +3,7 @@ package org.restframework.web.core.builders;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.restframework.scanner.FileRecord;
 import org.restframework.web.annotations.markers.UpdateComponent;
 import org.restframework.web.core.templates.ClassTypes;
 
@@ -10,7 +11,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Optional;
 
+import static org.restframework.scanner.ScannerUtils.with;
 import static org.restframework.web.core.helpers.FileHelper.NO_DIR;
 import static org.restframework.web.core.helpers.FileHelper.fileExists;
 
@@ -165,15 +168,19 @@ public final class ClassBuilder implements Builder, BuilderUtils {
             newFilePath = filePath.replace('.', File.separatorChar) + File.separator + dir + "\\" + name + ".java";
 
         File file = new File(newFilePath);
+        Optional<FileRecord> fileRecord = with(file.getName());
 
-        if (fileExists(file)) {
+        if (fileExists(file) && !(fileRecord.isPresent() && fileRecord.get().isUpdateAble())) {
             log.info("File [{}] already exists at: {}", name, newFilePath);
             return;
         }
 
         try (PrintWriter writer = new PrintWriter(new FileWriter(file))) {
             writer.println(javaCode);
-            log.info("Created file [{}] at: {}", name, newFilePath);
+            if (fileRecord.isPresent() && fileRecord.get().isUpdateAble())
+                log.info("Updated file [{}] at: {}", name, newFilePath);
+            else
+                log.info("Created file [{}] at: {}", name, newFilePath);
         } catch (IOException e) {
             e.printStackTrace();
         }
