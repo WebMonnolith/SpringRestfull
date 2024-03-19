@@ -1,12 +1,13 @@
 package org.example;
 
 import org.example.*;
-import org.restframework.web.core.templates.*;
-import org.restframework.web.annotations.markers.CompilationComponent;
-import java.util.*;
 import lombok.*;
 import jakarta.persistence.*;
+import org.restframework.web.core.templates.*;
+import org.restframework.web.annotations.markers.*;
+import java.util.*;
 
+@UpdateComponent
 @CompilationComponent
 @EqualsAndHashCode(callSuper=true)
 @Data

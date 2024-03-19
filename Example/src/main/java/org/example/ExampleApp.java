@@ -18,6 +18,8 @@ import org.restframework.web.core.builders.MethodBuilder;
 import org.restframework.web.core.builders.Modifier;
 import org.restframework.web.core.generators.compilation.CompilationContext;
 import org.restframework.web.core.generators.compilation.MethodImplementations;
+import org.restframework.web.core.templates.TControllerEntityResponse;
+import org.restframework.web.core.templates.TControllerEntityResponseWildcard;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.util.List;
@@ -33,7 +35,7 @@ import java.util.Map;
                 @FieldData(name="index")
         }
 )
-@GenSpring()
+@GenSpring(controller=TControllerEntityResponse.class)
 @SpringBootApplication
 public class ExampleApp {
     @SneakyThrows

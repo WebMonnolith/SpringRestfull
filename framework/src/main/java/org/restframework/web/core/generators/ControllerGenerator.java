@@ -59,40 +59,117 @@ public class ControllerGenerator extends Generator<Class<?>> {
         public void build(@NotNull CompilationContext context) {
             String serviceID = context.getApi().apiName().toLowerCase() + "Service";
 
-            context.getBuilder().addMethod(new MethodBuilder(
-                    "insertEntity",
-                    "int",
-                    Modifier.PUBLIC,
-                    context.getDtoName() + " " + context.getDtoName().toLowerCase(),
-                    serviceID+".insert("+context.getDtoName().toLowerCase()+")",
-                    new String[]{"Override", "PostMapping", "ResponseStatus(HttpStatus.ACCEPTED)"}
-            ));
+            TemplateResolver.TemplateID templateId = TemplateResolver.resolveTemplate(context.getTemplate());
+            switch (templateId) {
+                case TControllerCRUD -> {
+                    context.getBuilder().addMethod(new MethodBuilder(
+                            "insertEntity",
+                            "int",
+                            Modifier.PUBLIC,
+                            context.getDtoName() + " " + context.getDtoName().toLowerCase(),
+                            serviceID+".insert("+context.getDtoName().toLowerCase()+")",
+                            new String[]{"Override", "PostMapping", "ResponseStatus(HttpStatus.ACCEPTED)"}
+                    ));
 
-            context.getBuilder().addMethod(new MethodBuilder(
-                    "getAllEntities",
-                    "List<"+context.getDtoName()+">",
-                    Modifier.PUBLIC, "",
-                    serviceID+".getAll()",
-                    new String[]{"Override", "GetMapping", "ResponseStatus(HttpStatus.OK)"}
-            ));
+                    context.getBuilder().addMethod(new MethodBuilder(
+                            "getAllEntities",
+                            "List<"+context.getDtoName()+">",
+                            Modifier.PUBLIC, "",
+                            serviceID+".getAll()",
+                            new String[]{"Override", "GetMapping", "ResponseStatus(HttpStatus.OK)"}
+                    ));
 
-            context.getBuilder().addMethod(new MethodBuilder(
-                    "removeEntityById",
-                    "boolean",
-                    Modifier.PUBLIC,
-                    context.getGeneric() + " id",
-                    serviceID+".removeById(id)",
-                    new String[]{"Override", "DeleteMapping", "ResponseStatus(HttpStatus.FOUND)"}
-            ));
+                    context.getBuilder().addMethod(new MethodBuilder(
+                            "removeEntityById",
+                            "boolean",
+                            Modifier.PUBLIC,
+                            context.getGeneric() + " id",
+                            serviceID+".removeById(id)",
+                            new String[]{"Override", "DeleteMapping", "ResponseStatus(HttpStatus.FOUND)"}
+                    ));
 
-            context.getBuilder().addMethod(new MethodBuilder(
-                    "updateEntity",
-                    "boolean",
-                    Modifier.PUBLIC,
-                    context.getGeneric() + " id, " + context.getModelName() + " " + context.getModelName().toLowerCase(),
-                    serviceID+".update(id, "+context.getModelName().toLowerCase()+")",
-                    new String[]{"Override", "PutMapping", "ResponseStatus(HttpStatus.OK)"}
-            ));
+                    context.getBuilder().addMethod(new MethodBuilder(
+                            "updateEntity",
+                            "boolean",
+                            Modifier.PUBLIC,
+                            context.getGeneric() + " id, " + context.getModelName() + " " + context.getModelName().toLowerCase(),
+                            serviceID+".update(id, "+context.getModelName().toLowerCase()+")",
+                            new String[]{"Override", "PutMapping", "ResponseStatus(HttpStatus.OK)"}
+                    ));
+                }
+                case TControllerEntityResponse -> {
+                    context.getBuilder().addMethod(new MethodBuilder(
+                            "insertEntity",
+                            "ResponseEntity<Integer>",
+                            Modifier.PUBLIC,
+                            context.getDtoName() + " " + context.getDtoName().toLowerCase(),
+                            "ResponseEntity.ok(" + serviceID+".insert("+context.getDtoName().toLowerCase()+"))",
+                            new String[]{"Override", "PostMapping"}
+                    ));
+
+                    context.getBuilder().addMethod(new MethodBuilder(
+                            "getAllEntities",
+                            "ResponseEntity<List<"+context.getDtoName()+">>",
+                            Modifier.PUBLIC, "",
+                            "ResponseEntity.ok(" + serviceID+".getAll())",
+                            new String[]{"Override", "GetMapping"}
+                    ));
+
+                    context.getBuilder().addMethod(new MethodBuilder(
+                            "removeEntityById",
+                            "ResponseEntity<Boolean>",
+                            Modifier.PUBLIC,
+                            context.getGeneric() + " id",
+                            "ResponseEntity.ok(" + serviceID+".removeById(id))",
+                            new String[]{"Override", "DeleteMapping"}
+                    ));
+
+                    context.getBuilder().addMethod(new MethodBuilder(
+                            "updateEntity",
+                            "ResponseEntity<Boolean>",
+                            Modifier.PUBLIC,
+                            context.getGeneric() + " id, " + context.getModelName() + " " + context.getModelName().toLowerCase(),
+                            "ResponseEntity.ok(" + serviceID+".update(id, "+context.getModelName().toLowerCase()+"))",
+                            new String[]{"Override", "PutMapping"}
+                    ));
+                }
+                case TControllerEntityResponseWildcard -> {
+                    context.getBuilder().addMethod(new MethodBuilder(
+                            "insertEntity",
+                            "ResponseEntity<?>",
+                            Modifier.PUBLIC,
+                            context.getDtoName() + " " + context.getDtoName().toLowerCase(),
+                            "ResponseEntity.ok(" + serviceID+".insert("+context.getDtoName().toLowerCase()+"))",
+                            new String[]{"Override", "PostMapping"}
+                    ));
+
+                    context.getBuilder().addMethod(new MethodBuilder(
+                            "getAllEntities",
+                            "ResponseEntity<?>",
+                            Modifier.PUBLIC, "",
+                            "ResponseEntity.ok(" + serviceID+".getAll())",
+                            new String[]{"Override", "GetMapping"}
+                    ));
+
+                    context.getBuilder().addMethod(new MethodBuilder(
+                            "removeEntityById",
+                            "ResponseEntity<?>",
+                            Modifier.PUBLIC,
+                            context.getGeneric() + " id",
+                            "ResponseEntity.ok(" + serviceID+".removeById(id))",
+                            new String[]{"Override", "DeleteMapping"}
+                    ));
+
+                    context.getBuilder().addMethod(new MethodBuilder(
+                            "updateEntity",
+                            "ResponseEntity<?>",
+                            Modifier.PUBLIC,
+                            context.getGeneric() + " id, " + context.getModelName() + " " + context.getModelName().toLowerCase(),
+                            "ResponseEntity.ok(" + serviceID+".update(id, "+context.getModelName().toLowerCase()+"))",
+                            new String[]{"Override", "PutMapping"}
+                    ));
+                }
+            }
         }
     }
 }

@@ -1,43 +1,40 @@
 package org.example.controller;
 
 import org.example.*;
-import org.restframework.web.core.templates.*;
-import org.restframework.web.annotations.markers.CompilationComponent;
-import java.util.*;
 import org.example.service.*;
 import lombok.*;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.*;
+import org.restframework.web.core.templates.*;
+import org.restframework.web.annotations.markers.*;
+import java.util.*;
 
+@UpdateComponent
 @CompilationComponent
 @Data
 @AllArgsConstructor
 @RestController
 @RequestMapping("api/v1/endpoint")
-public class ApiController implements TControllerCRUD<UUID, ApiDto, ApiModel> {
+public class ApiController implements TControllerEntityResponse<UUID, ApiDto, ApiModel> {
 	private final ApiService apiService;
 	@Override
 	@PostMapping
-	@ResponseStatus(HttpStatus.ACCEPTED)
-	public int insertEntity(ApiDto apidto) {
-		 return apiService.insert(apidto);
+	public ResponseEntity<Integer> insertEntity(ApiDto apidto) {
+		 return ResponseEntity.ok(apiService.insert(apidto));
 	}
 	@Override
 	@GetMapping
-	@ResponseStatus(HttpStatus.OK)
-	public List<ApiDto> getAllEntities() {
-		 return apiService.getAll();
+	public ResponseEntity<List<ApiDto>> getAllEntities() {
+		 return ResponseEntity.ok(apiService.getAll());
 	}
 	@Override
 	@DeleteMapping
-	@ResponseStatus(HttpStatus.FOUND)
-	public boolean removeEntityById(UUID id) {
-		 return apiService.removeById(id);
+	public ResponseEntity<Boolean> removeEntityById(UUID id) {
+		 return ResponseEntity.ok(apiService.removeById(id));
 	}
 	@Override
 	@PutMapping
-	@ResponseStatus(HttpStatus.OK)
-	public boolean updateEntity(UUID id, ApiModel apimodel) {
-		 return apiService.update(id, apimodel);
+	public ResponseEntity<Boolean> updateEntity(UUID id, ApiModel apimodel) {
+		 return ResponseEntity.ok(apiService.update(id, apimodel));
 	}
 }

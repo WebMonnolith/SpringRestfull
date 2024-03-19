@@ -156,8 +156,6 @@ public final class ClassBuilder implements Builder, BuilderUtils {
         this.classDefinition.append("}");
         String newFilePath;
 
-        String javaCode = classDefinition.toString();
-
         File directory = new File(filePath+"\\"+dir);
         if (!directory.exists())
             directory.mkdir();
@@ -176,11 +174,15 @@ public final class ClassBuilder implements Builder, BuilderUtils {
         }
 
         try (PrintWriter writer = new PrintWriter(new FileWriter(file))) {
-            writer.println(javaCode);
-            if (fileRecord.isPresent() && fileRecord.get().isUpdateAble())
+            if (fileRecord.isPresent() && fileRecord.get().isUpdateAble()) {
+                this.classDefinition.insert(this.classDefinition.indexOf("@CompilationComponent"), "@UpdateComponent\n");
                 log.info("Updated file [{}] at: {}", name, newFilePath);
+            }
             else
                 log.info("Created file [{}] at: {}", name, newFilePath);
+
+            String javaCode = classDefinition.toString();
+            writer.println(javaCode);
         } catch (IOException e) {
             e.printStackTrace();
         }
