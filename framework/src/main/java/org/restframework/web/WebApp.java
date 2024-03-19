@@ -517,8 +517,8 @@ public final class WebApp implements RestApp<WebApp> {
         Set<Class<?>> templateSet = new HashSet<>();
         Collections.addAll(templateSet, templates);
 
-        return (templateSet.contains(TControllerCRUD.class) || templateSet.contains(TControllerEntityResponse.class))
-                && (templateSet.contains(TServiceCRUD.class) || templateSet.contains(TServiceEntityResponse.class))
+        return (templateSet.contains(TControllerCRUD.class) || templateSet.contains(TControllerEntityResponse.class) || templateSet.contains(TControllerEntityResponseWildcard.class))
+                && (templateSet.contains(TServiceCRUD.class) || templateSet.contains(TServiceEntityResponse.class) || templateSet.contains(TServiceEntityResponseWildcard.class))
                 && templateSet.contains(TRepo.class);
     }
 }
