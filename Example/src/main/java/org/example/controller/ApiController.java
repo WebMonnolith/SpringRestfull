@@ -15,7 +15,7 @@ import java.util.*;
 @AllArgsConstructor
 @RestController
 @RequestMapping("api/v1/endpoint")
-public class ApiController implements TControllerEntityResponse<UUID, ApiDto, ApiModel> {
+public class ApiController implements TControllerEntityResponse<Integer, ApiDto, ApiModel> {
 	private final ApiService apiService;
 	@Override
 	@PostMapping
@@ -29,12 +29,12 @@ public class ApiController implements TControllerEntityResponse<UUID, ApiDto, Ap
 	}
 	@Override
 	@DeleteMapping
-	public ResponseEntity<Boolean> removeEntityById(UUID id) {
+	public ResponseEntity<Boolean> removeEntityById(Integer id) {
 		 return ResponseEntity.ok(apiService.removeById(id));
 	}
 	@Override
 	@PutMapping
-	public ResponseEntity<Boolean> updateEntity(UUID id, ApiModel apimodel) {
+	public ResponseEntity<Boolean> updateEntity(Integer id, ApiModel apimodel) {
 		 return ResponseEntity.ok(apiService.update(id, apimodel));
 	}
 }

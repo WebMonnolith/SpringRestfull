@@ -1,11 +1,12 @@
 package org.example;
 
 import org.example.*;
-import org.restframework.web.core.templates.*;
-import org.restframework.web.annotations.markers.CompilationComponent;
-import java.util.*;
 import lombok.*;
+import org.restframework.web.core.templates.*;
+import org.restframework.web.annotations.markers.*;
+import java.util.*;
 
+@UpdateComponent
 @CompilationComponent
 @EqualsAndHashCode(callSuper=true)
 @Data
@@ -16,5 +17,7 @@ public class ApiDto extends DtoFrame {
 	private String fname;
 
 	private String index;
+
+	private String age;
 
 }

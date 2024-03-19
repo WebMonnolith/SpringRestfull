@@ -16,12 +16,14 @@ import java.util.*;
 @Builder
 @Entity
 @Table(name="test_table")
-public class ApiModel extends ModelFrame<UUID> {
+public class ApiModel extends ModelFrame<Integer> {
 	@Id
-	@GeneratedValue(strategy=GenerationType.UUID)
-	private UUID id;
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	private Integer id;
 	private String fname;
 
 	private String index;
+
+	private String age;
 
 }
