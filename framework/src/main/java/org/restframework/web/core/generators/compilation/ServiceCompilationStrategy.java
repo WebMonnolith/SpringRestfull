@@ -15,8 +15,6 @@ public class ServiceCompilationStrategy implements CompilationStrategy {
                         context.getApi().apiName() + "Repository",
                         Modifier.PRIVATE_FINAL));
 
-        if (context.isDefaultTemplateMethodImpl()) {
-            // TODO Add method building construction
-        }
+        if (context.getMethods() != null) context.getMethods().build(context);
     }
 }

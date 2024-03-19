@@ -36,8 +36,4 @@ public class TemplateUtils {
 
         return false;
     }
-
-    public static boolean hasGenerics(@NotNull Template template) {
-        return template.generics().length == 0;
-    }
 }

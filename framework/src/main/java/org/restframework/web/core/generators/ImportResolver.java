@@ -35,15 +35,13 @@ public class ImportResolver {
     {
         List<String> holder = new ArrayList<>();
         holder.add("import " + apiPackage + ".*");
-        holder.add("import org.restframework.web.core.templates.*");
-        holder.add("import java.util.*");
-
         switch (component) {
 
             case CONTROLLER -> {
                 holder.add("import " + apiPackage + ".service.*");
                 holder.add("import lombok.*");
                 holder.add("import org.springframework.web.bind.annotation.*");
+                holder.add("import org.springframework.http.*");
             }
             case SERVICE -> {
                 holder.add("import " + apiPackage + ".repository.*");
@@ -62,6 +60,10 @@ public class ImportResolver {
             }
             case NONE -> throw new RestException("");
         }
+
+        holder.add("import org.restframework.web.core.templates.*");
+        holder.add("import org.restframework.web.annotations.markers.*");
+        holder.add("import java.util.*");
 
         return holder;
     }

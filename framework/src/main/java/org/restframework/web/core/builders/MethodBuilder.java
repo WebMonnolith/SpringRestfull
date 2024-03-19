@@ -10,23 +10,6 @@ public final class MethodBuilder implements Builder, BuilderUtils  {
     public MethodBuilder(
             @NotNull String methodName,
             @NotNull String type,
-            @NotNull Modifier access)
-    {
-        this.methodDefinition = new StringBuilder()
-                .append("\t")
-                .append(access.getValue())
-                .append(" ")
-                .append(type)
-                .append(" ")
-                .append(methodName)
-                .append("() {\n")
-                .append("\t\t return null\n")
-                .append("\t}\n");
-    }
-
-    public MethodBuilder(
-            @NotNull String methodName,
-            @NotNull String type,
             @NotNull Modifier access,
             @NotNull String @NotNull [] annotations)
     {
@@ -45,6 +28,83 @@ public final class MethodBuilder implements Builder, BuilderUtils  {
                 .append(methodName)
                 .append("() {\n")
                 .append("\t\t return null;\n")
+                .append("\t}\n");
+    }
+
+    public MethodBuilder(
+            @NotNull String methodName,
+            @NotNull String type,
+            @NotNull Modifier access,
+            @NotNull String args)
+    {
+        this.methodDefinition = new StringBuilder()
+                .append("\t")
+                .append(access.getValue())
+                .append(" ")
+                .append(type)
+                .append(" ")
+                .append(methodName)
+                .append("(")
+                .append(args)
+                .append(") {\n")
+                .append("\t\t return null\n")
+                .append("\t}\n");
+    }
+
+    public MethodBuilder(
+            @NotNull String methodName,
+            @NotNull String type,
+            @NotNull Modifier access,
+            @NotNull String args,
+            @NotNull String @NotNull [] annotations)
+    {
+        this.methodDefinition = new StringBuilder();
+
+
+        for (String annotation : annotations)
+            this.addAnnotation(annotation);
+
+        this.methodDefinition
+                .append("\t")
+                .append(access.getValue())
+                .append(" ")
+                .append(type)
+                .append(" ")
+                .append(methodName)
+                .append("(")
+                .append(args)
+                .append(") {\n")
+                .append("\t\t return null;\n")
+                .append("\t}\n");
+    }
+
+    public MethodBuilder(
+            @NotNull String methodName,
+            @NotNull String type,
+            @NotNull Modifier access,
+            @NotNull String args,
+            @NotNull String retValue,
+            @NotNull String @NotNull [] annotations)
+    {
+        this.methodDefinition = new StringBuilder();
+
+
+        for (String annotation : annotations)
+            this.addAnnotation(annotation);
+
+        this.methodDefinition
+                .append("\t")
+                .append(access.getValue())
+                .append(" ")
+                .append(type)
+                .append(" ")
+                .append(methodName)
+                .append("(")
+                .append(args)
+                .append(") {\n")
+                .append("\t\t return ")
+                .append(retValue)
+                .append(";\n")
                 .append("\t}\n");
     }
 

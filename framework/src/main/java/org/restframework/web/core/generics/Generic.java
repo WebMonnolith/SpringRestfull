@@ -5,6 +5,7 @@ import lombok.Getter;
 @Getter
 public enum Generic {
     UUID("UUID"),
+    INTEGER("Integer"),
     LONG("Long");
 
     private final String value;

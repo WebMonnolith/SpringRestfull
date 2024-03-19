@@ -13,7 +13,6 @@ import java.lang.annotation.Target;
 @SuppressWarnings("unused")
 public @interface Template {
     String templateName();
-    SpringComponents rule() default SpringComponents.NONE;
-    String[] generics() default {};
+    SpringComponents rule();
     ClassTypes type() default ClassTypes.CLASS;
 }

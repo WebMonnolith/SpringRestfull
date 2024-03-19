@@ -28,6 +28,19 @@ public interface MvcSupport {
     }
 
     @Getter
+    enum RestFrameworkAnnotations {
+
+        COMPILATION_COMPONENT("CompilationComponent"),
+        UPDATE_COMPONENT("UpdateComponent");
+
+        private final String value;
+
+        RestFrameworkAnnotations(String value) {
+            this.value = value;
+        }
+    }
+
+    @Getter
     enum LombokAnnotations {
 
         EQUALS_AND_HASHCODE("EqualsAndHashCode(callSuper=true)"),

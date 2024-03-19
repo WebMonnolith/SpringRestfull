@@ -10,22 +10,21 @@ import org.restframework.web.annotations.gen.GenProperties;
 import org.restframework.web.annotations.gen.GenSpring;
 import org.restframework.web.annotations.types.FieldData;
 import org.restframework.web.core.generics.Generic;
-import org.restframework.web.core.templates.TControllerResponseEntity;
-import org.restframework.web.core.templates.TServiceResponseEntity;
+import org.restframework.web.core.templates.TControllerEntityResponse;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-
 @EnableRestConfiguration(useCustomGenerationStrategy = true)
-@GenProperties(basePackage = "org.example.test", indexColumnType = Generic.LONG)
+@GenProperties(basePackage = "org.example", indexColumnType = Generic.INTEGER)
 @GenDto
 @GenModel(
         tableName = "test_table",
         fields = {
                 @FieldData(name="fname"),
-                @FieldData(name="index")
+                @FieldData(name="index"),
+                @FieldData(name="age")
         }
 )
-@GenSpring(service = TServiceResponseEntity.class, controller = TControllerResponseEntity.class)
+@GenSpring(controller=TControllerEntityResponse.class)
 @SpringBootApplication
 public class ExampleApp {
     @SneakyThrows

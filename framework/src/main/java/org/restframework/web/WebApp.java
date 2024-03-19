@@ -2,27 +2,32 @@ package org.restframework.web;
 
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.antlr.v4.runtime.misc.Pair;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
+import org.restframework.scanner.DirectoryScannerAdvanced;
+import org.restframework.scanner.FileRecord;
+import org.restframework.scanner.PackageScanner;
+import org.restframework.scanner.ScannerApplication;
 import org.restframework.web.annotations.gen.GenDto;
 import org.restframework.web.annotations.gen.GenModel;
 import org.restframework.web.annotations.gen.GenProperties;
 import org.restframework.web.annotations.gen.GenSpring;
+import org.restframework.web.annotations.markers.CompilationComponent;
+import org.restframework.web.annotations.markers.UpdateComponent;
 import org.restframework.web.annotations.types.API;
 import org.restframework.web.annotations.RestApi;
 import org.restframework.web.annotations.types.FieldData;
 import org.restframework.web.annotations.types.Model;
 import org.restframework.web.core.AppRunner;
 import org.restframework.web.core.RestAppConfigurationContext;
+import org.restframework.web.core.generators.compilation.MethodImplementations;
 import org.restframework.web.core.generics.Generic;
 import org.restframework.web.core.helpers.FileHelper;
 import org.restframework.web.core.RestApp;
 import org.restframework.web.core.generators.MvcGenerator;
 import org.restframework.web.core.generators.MvcSupport;
-import org.restframework.web.core.templates.SpringComponents;
-import org.restframework.web.core.templates.TControllerCRUD;
-import org.restframework.web.core.templates.TRepo;
-import org.restframework.web.core.templates.TServiceCRUD;
+import org.restframework.web.core.templates.*;
 import org.restframework.web.exceptions.RestException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.SpringApplication;
@@ -31,17 +36,14 @@ import org.springframework.context.ConfigurableApplicationContext;
 import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.restframework.web.core.RestConfigInit.*;
 
 @Slf4j
 @SuppressWarnings("unused")
 @Data
-public final class WebApp implements RestApp {
+public final class WebApp implements RestApp<WebApp> {
 
     private enum WebGenerationStrategy {
         WEB_REST_API_STRATEGY,
@@ -49,16 +51,25 @@ public final class WebApp implements RestApp {
         NONE
     }
 
+    // Internal Framework usage!
     private static @Nullable _APIBuilder builder;
     private static @Nullable RestApi restApiCtx;
 
     private static RestAppConfigurationContext context;
-    private static RestApp internalApp;
+    private static ScannerApplication scannerApplication;
+
+    private static RestApp<WebApp> internalApp;
     private static Object appContext;
     private static Class<?> classContext;
     private static WebGenerationStrategy buildStrategy;
+
+    private static Pair<MethodImplementations, MethodImplementations> implementations;
+    private static boolean defaultTemplatesFlag = false;
+
     private final static List<String> targetPaths = new ArrayList<>();
-    private static boolean defaultTemplateMethodImpl= false;
+
+    // For external usage!
+    private ConfigurableApplicationContext springContext;
 
     public WebApp(@NotNull Class<?> clazz) throws UnsupportedEncodingException {
         log.info(":: Spring RESTframework Compiler ::\t\t\t(V1.2)\n\n");
@@ -83,8 +94,10 @@ public final class WebApp implements RestApp {
     }
 
     @Override
-    public synchronized <T> void run(@NotNull Class<T> clazz) {
-        this.runSpring(clazz);
+    public synchronized <ClazzType> WebApp run(@NotNull Class<ClazzType> clazz) {
+        this.springContext = this.runSpring(clazz);
+        WebApp.scannerApplication = this.scannerApplication().run(clazz);
+
         try {
             this.init(clazz);
         } catch (RestException |
@@ -96,11 +109,14 @@ public final class WebApp implements RestApp {
         }
 
         log.warn("Make sure to implement the methods of the service and controller templates!");
+        return this;
     }
 
     @Override
-    public synchronized <T> void run(String[] args) {
-        this.runSpring(WebApp.classContext(), args);
+    public synchronized WebApp run(String[] args) {
+        this.springContext = this.runSpring(WebApp.classContext(), args);
+        WebApp.scannerApplication = this.scannerApplication().run(args);
+
         try {
             this.init();
         } catch (RestException |
@@ -111,12 +127,22 @@ public final class WebApp implements RestApp {
             throw new RuntimeException(e);
         }
 
+        for (String packageName : WebApp.scannerApplication.getFiles().keySet()) {
+            System.out.println("Package: " + packageName);
+            List<FileRecord> fileRecords = WebApp.scannerApplication.getFiles().get(packageName);
+            for (FileRecord record : fileRecords) {
+                System.out.println("   Name: " + record.getName() + ", Size: " + record.getSize() + " bytes, " + "update: " + record.isUpdateAble());
+            }
+        }
         log.warn("Make sure to implement the methods of the service and controller templates!");
+        return this;
     }
 
     @Override
-    public synchronized <T> void run(@NotNull AppRunner<RestApp> runnable) {
-        this.runSpring(WebApp.classContext());
+    public synchronized WebApp run(@NotNull AppRunner<RestApp<WebApp>> runnable) {
+        this.springContext = this.runSpring(WebApp.classContext());
+        WebApp.scannerApplication = this.scannerApplication().run(new String[]{});
+
         try {
             this.init();
         } catch (RestException |
@@ -129,11 +155,14 @@ public final class WebApp implements RestApp {
 
         WebApp.internalApp = runnable.call(WebApp.classContext());
         log.warn("Make sure to implement the methods of the service and controller templates!");
+        return this;
     }
 
     @Override
-    public synchronized <T> void run(String[] args, @NotNull AppRunner<RestApp> runnable) {
-        this.runSpring(WebApp.classContext());
+    public synchronized WebApp run(String[] args, @NotNull AppRunner<RestApp<WebApp>> runnable) {
+        this.springContext = this.runSpring(WebApp.classContext());
+        WebApp.scannerApplication = this.scannerApplication().run(args);
+
         try {
             this.init(args);
         } catch (RestException |
@@ -146,6 +175,26 @@ public final class WebApp implements RestApp {
 
         WebApp.internalApp = runnable.call(WebApp.classContext());
         log.warn("Make sure to implement the methods of the service and controller templates!");
+        return this;
+    }
+
+    public WebApp methods(@NotNull MethodImplementations service, @NotNull MethodImplementations controller) {
+        WebApp.implementations = new Pair<>(service, controller);
+        return this;
+    }
+
+    public ConfigurableApplicationContext getSpringContext() {
+        return this.springContext;
+    }
+
+    private @NotNull ScannerApplication scannerApplication() {
+        return new ScannerApplication(
+                WebApp.classContext,
+                WebApp.outputResultPathBase().get(0),
+                new PackageScanner(new DirectoryScannerAdvanced(
+                        CompilationComponent.class,
+                        UpdateComponent.class
+                )));
     }
 
     private <T> void init()
@@ -190,45 +239,45 @@ public final class WebApp implements RestApp {
         MvcGenerator generator = new MvcGenerator(new MvcSupportHandler());
 
         if (!hasConfiguration(WebApp.classContext())) {
-            generator.generateByKey(
+            generator.generateDao(
                     api, SpringComponents.MODEL, WebApp.outputResultPathBase().get(0));
-            generator.generateByKey(
+            generator.generateDao(
                     api, SpringComponents.DTO, WebApp.outputResultPathBase().get(0));
         }
         else {
-            generator.generateByKey(
+            generator.generateDao(
                     api, WebApp.context.getValueByKey(MODEL_COMPONENT_CONFIG_ID), WebApp.outputResultPathBase().get(0));
-            generator.generateByKey(
+            generator.generateDao(
                     api, WebApp.context.getValueByKey(DTO_COMPONENT_CONFIG_ID), WebApp.outputResultPathBase().get(0));
         }
 
         if (!builder.nullCheckSpringComponents()) return;
         GenSpring spring = WebApp.classContext().getAnnotation(GenSpring.class);
         Class<?>[] templates = { spring.controller(), spring.repo(), spring.service() };
-        if (this.checkDefaultTemplates(templates)) WebApp.defaultTemplateMethodImpl = true;
+        if (checkMethodImpl(templates)) WebApp.defaultTemplatesFlag = true;
         for (Class<?> template : templates)
-            generator.generateClasses(api, template, WebApp.outputResultPathBase().get(0));
+            generator.generateSpringComponent(api, template, WebApp.outputResultPathBase().get(0));
     }
 
     private void generateByUsingRestApiGenerationStrategy(@NotNull RestApi restApi) {
         MvcGenerator generator = new MvcGenerator(new MvcSupportHandler());
-        if (this.checkDefaultTemplates(restApi.templates())) WebApp.defaultTemplateMethodImpl = true;
+        if (checkMethodImpl(restApi.templates())) WebApp.defaultTemplatesFlag = true;
         for (int i = 0; i < restApi.APIS().length; i++) {
             API api = restApi.APIS()[i];
             if (!hasConfiguration(WebApp.classContext())) {
-                generator.generateByKey(
+                generator.generateDao(
                         api, SpringComponents.MODEL, WebApp.outputResultPathBase().get(i));
-                generator.generateByKey(
+                generator.generateDao(
                         api, SpringComponents.DTO, WebApp.outputResultPathBase().get(i));
             }
             else {
-                generator.generateByKey(
+                generator.generateDao(
                         api, WebApp.context.getValueByKey(MODEL_COMPONENT_CONFIG_ID), WebApp.outputResultPathBase().get(i));
-                generator.generateByKey(
+                generator.generateDao(
                         api, WebApp.context.getValueByKey(DTO_COMPONENT_CONFIG_ID), WebApp.outputResultPathBase().get(i));
             }
             for (Class<?> template : restApi.templates())
-                generator.generateClasses(api, template, WebApp.outputResultPathBase().get(i));
+                generator.generateSpringComponent(api, template, WebApp.outputResultPathBase().get(i));
         }
     }
 
@@ -403,7 +452,7 @@ public final class WebApp implements RestApp {
         return WebApp.classContext;
     }
 
-    public static RestApp internalApp() {
+    public static RestApp<WebApp> internalApp() {
         return WebApp.internalApp;
     }
 
@@ -415,14 +464,27 @@ public final class WebApp implements RestApp {
         return WebApp.context;
     }
 
+    public static MethodImplementations serviceMethods() {
+        return WebApp.implementations.a;
+    }
+
+    public static ScannerApplication scannerApp() {
+        return WebApp.scannerApplication;
+    }
+
+    public static MethodImplementations controllerMethods() {
+        return WebApp.implementations.b;
+    }
+
     public static boolean defaultMethods() {
-        return WebApp.defaultTemplateMethodImpl;
+        return !(WebApp.implementations != null && !defaultTemplatesFlag);
     }
 
     @NoArgsConstructor
     static class MvcSupportHandler implements MvcSupport {
         @Override
         public void call(@NotNull SpringComponents rules, String value) {
+            ruleHolder.add(RestFrameworkAnnotations.COMPILATION_COMPONENT.getValue());
             switch (rules) {
                 case CONTROLLER -> {
                     ruleHolder.add(LombokAnnotations.DATA.getValue());
@@ -494,16 +556,14 @@ public final class WebApp implements RestApp {
                     "in order to make use of the custom generation strategy.");
     }
 
-    private boolean checkDefaultTemplates(Class<?> @NotNull [] templates) {
+    private boolean checkMethodImpl(Class<?> @NotNull [] templates) {
         if (templates.length > 3) throw new RestException("Too many templates used [" + templates.length + "] make sure to only use a max of three, service, repo & controller");
 
         Set<Class<?>> templateSet = new HashSet<>();
-        for (Class<?> template : templates) {
-            templateSet.add(template);
-        }
+        Collections.addAll(templateSet, templates);
 
-        return templateSet.contains(TControllerCRUD.class)
-                && templateSet.contains(TServiceCRUD.class)
+        return (templateSet.contains(TControllerCRUD.class) || templateSet.contains(TControllerEntityResponse.class) || templateSet.contains(TControllerEntityResponseWildcard.class))
+                && (templateSet.contains(TServiceCRUD.class) || templateSet.contains(TServiceEntityResponse.class) || templateSet.contains(TServiceEntityResponseWildcard.class))
                 && templateSet.contains(TRepo.class);
     }
 }
