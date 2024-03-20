@@ -1,8 +1,8 @@
 package org.restframework.web.core.generators;
 
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.restframework.web.WebApp;
 import org.restframework.web.annotations.types.API;
 import org.restframework.web.core.builders.ClassBuilder;
 import org.restframework.web.core.generators.compilation.CompilationContext;
@@ -32,14 +32,24 @@ public class DtoGenerator extends Generator<SpringComponents> {
         GenericGeneration genericResolver = GenericFactory.create(api.model().generic());
 
         String value = "";
-        String name = api.model().apiName()+"Dto";
+        String name = api.apiName()+"Dto";
+        String packageName = "";
+        switch (WebApp.strategy()) {
+            case WEB_REST_API_STRATEGY -> packageName = String.format("%s.%s", WebApp.context().basePackage(), api.apiPackage());
+            case WEB_CUSTOM_GENERATION_STRATEGY ->  packageName = api.apiPackage();
+        }
 
         ClassBuilder modelBuilder = new ClassBuilder(
                 name,
-                api.basePackage(),
+                packageName,
                 this.support.callInner(component, value),
                 ClassTypes.CLASS,
-                new ImportResolver(component, genericResolver.getImportStatement(), api.basePackage()).get());
+                new ImportResolver(
+                        component,
+                        genericResolver.getImportStatement(),
+                        packageName)
+                        .get()
+        );
 
         modelBuilder.addExtension(DtoFrame.class);
 
@@ -47,7 +57,7 @@ public class DtoGenerator extends Generator<SpringComponents> {
                 .api(api)
                 .builder(modelBuilder)
                 .modelAnnotation(api.model())
-                .dtoName(api.model().apiName()+"Dto")
+                .dtoName(api.apiName()+"Dto")
                 .generic(genericResolver.getGeneric())
                 .build()
         );

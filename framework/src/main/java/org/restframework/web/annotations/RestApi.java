@@ -15,10 +15,9 @@ import java.lang.annotation.RetentionPolicy;
 @SuppressWarnings("unused")
 @Component
 public @interface RestApi {
-    Class<?>[] templates() default {
-        TControllerCRUD.class,
-        TServiceCRUD.class,
-        TRepo.class,
-    };
+    Class<?> controller() default TControllerCRUD.class;
+    Class<?> service() default TServiceCRUD.class;
+    Class<?> repo() default TRepo.class;
+    String basePackage();
     API[] APIS();
 }

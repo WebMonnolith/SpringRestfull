@@ -12,6 +12,6 @@ public @interface API {
     String apiName();
     String endpoint();
     Model model();
-    String basePackage();
+    String apiPackage();
 
 }

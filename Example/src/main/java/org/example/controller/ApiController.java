@@ -9,7 +9,6 @@ import org.restframework.web.core.templates.*;
 import org.restframework.web.annotations.markers.*;
 import java.util.*;
 
-@UpdateComponent
 @CompilationComponent
 @Data
 @AllArgsConstructor

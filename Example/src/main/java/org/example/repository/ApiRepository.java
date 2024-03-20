@@ -6,7 +6,6 @@ import org.restframework.web.core.templates.*;
 import org.restframework.web.annotations.markers.*;
 import java.util.*;
 
-@UpdateComponent
 @CompilationComponent
 @Repository
 public interface ApiRepository extends TRepo<ApiModel, Integer> {

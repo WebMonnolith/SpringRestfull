@@ -1,8 +1,8 @@
 package org.restframework.web.core.generators;
 
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.restframework.web.WebApp;
 import org.restframework.web.annotations.types.API;
 import org.restframework.web.core.builders.ClassBuilder;
 import org.restframework.web.core.builders.FieldBuilder;
@@ -34,14 +34,20 @@ public class ModelGenerator extends Generator<SpringComponents> {
         GenericGeneration genericResolver = GenericFactory.create(api.model().generic());
 
         String value = api.model().tableName();
-        String name = api.model().apiName()+api.model().abbrev();
+        String name = api.apiName()+api.model().abbrev();
+
+        String packageName = "";
+        switch (WebApp.strategy()) {
+            case WEB_REST_API_STRATEGY -> packageName = String.format("%s.%s", WebApp.context().basePackage(), api.apiPackage());
+            case WEB_CUSTOM_GENERATION_STRATEGY ->  packageName = api.apiPackage();
+        }
 
         ClassBuilder modelBuilder = new ClassBuilder(
                 name,
-                api.basePackage(),
+                packageName,
                 this.support.callInner(component, value),
                 ClassTypes.CLASS,
-                new ImportResolver(component, genericResolver.getImportStatement(), api.basePackage()).get());
+                new ImportResolver(component, genericResolver.getImportStatement(), packageName).get());
         modelBuilder.addExtension(ModelFrame.class, genericResolver.getGeneric());
 
         MvcSupport support = new MvcSupport() {
@@ -64,7 +70,7 @@ public class ModelGenerator extends Generator<SpringComponents> {
                         .api(api)
                         .builder(modelBuilder)
                         .modelAnnotation(api.model())
-                        .dtoName(api.model().apiName()+"Dto")
+                        .dtoName(api.apiName()+"Dto")
                         .generic(genericResolver.getGeneric())
                         .build()
                 );

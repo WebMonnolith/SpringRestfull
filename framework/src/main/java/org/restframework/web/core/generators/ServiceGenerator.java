@@ -40,8 +40,8 @@ public class ServiceGenerator extends Generator<Class<?>> {
                 .builder(mvcBuilder)
                 .template(template)
                 .templateAnnotation(templateAnnotation)
-                .modelName(api.model().apiName()+api.model().abbrev())
-                .dtoName(api.model().apiName()+"Dto")
+                .modelName(api.apiName()+api.model().abbrev())
+                .dtoName(api.apiName()+"Dto")
                 .generic(genericResolver.getGeneric())
                 .methods(defaultMethods() ? new _DefaultCrudServiceMethodImplementations() : WebApp.controllerMethods())
                 .build());
