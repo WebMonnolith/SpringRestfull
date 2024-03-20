@@ -26,28 +26,15 @@ public final class ScannerApplication implements RestApp<ScannerApplication> {
     }
 
     @Override
-    public <ClazzType> ScannerApplication run(@NotNull Class<ClazzType> clazz) {
+    public ScannerApplication run() {
         this.scan();
         return this;
     }
 
-    @Override
-    public ScannerApplication run(@NotNull AppRunner<RestApp<ScannerApplication>> runnable) {
-        this.scan();
-        runnable.call(this.classContext);
-        return this;
-    }
 
     @Override
     public ScannerApplication run(String[] args) {
         this.scan();
-        return this;
-    }
-
-    @Override
-    public ScannerApplication run(String[] args, @NotNull AppRunner<RestApp<ScannerApplication>> runnable) {
-        this.scan();
-        runnable.call(this.classContext);
         return this;
     }
 }

@@ -1,11 +1,11 @@
 package org.restframework.web.core.generators;
 
 import org.jetbrains.annotations.NotNull;
+import org.restframework.web.WebApp;
 import org.restframework.web.annotations.RestApi;
 import org.restframework.web.annotations.Template;
 import org.restframework.web.annotations.types.API;
 import org.restframework.web.core.builders.ClassBuilder;
-import org.restframework.web.core.generators.compilation.CompilationContext;
 import org.restframework.web.core.generics.GenericGeneration;
 import org.restframework.web.exceptions.RestException;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -15,7 +15,7 @@ public class GeneratorUtils {
         Template templateAnnotation = AnnotationUtils.findAnnotation(template, Template.class);
         if (templateAnnotation == null)
             throw new RestException("@" + RestApi.class.getSimpleName() + "templates must be annotated with @Template " +
-                    api.basePackage() + "." + api.apiName());
+                    api.apiPackage() + "." + api.apiName());
 
         return templateAnnotation;
     }
@@ -26,12 +26,17 @@ public class GeneratorUtils {
             @NotNull MvcSupport support,
             @NotNull GenericGeneration resolver
     ) {
+        String packageName = "";
+        switch (WebApp.strategy()) {
+            case WEB_REST_API_STRATEGY -> packageName = String.format("%s.%s", WebApp.context().basePackage(), api.apiPackage());
+            case WEB_CUSTOM_GENERATION_STRATEGY ->  packageName = api.apiPackage();
+        }
         return new ClassBuilder(
                 api.apiName()+templateAnnotation.templateName(),
-                api.basePackage()+'.'+templateAnnotation.templateName().toLowerCase(),
+                packageName+'.'+templateAnnotation.templateName().toLowerCase(),
                 support.callInner(templateAnnotation.rule(), api.endpoint()),
                 templateAnnotation.type(),
-                new ImportResolver(templateAnnotation.rule(), resolver.getImportStatement(), api.basePackage()).get());
+                new ImportResolver(templateAnnotation.rule(), resolver.getImportStatement(), packageName).get());
     }
 
 }

@@ -1,6 +1,7 @@
 package org.restframework.scanner;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -9,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @RequiredArgsConstructor
 public class PackageScanner {
 
@@ -18,7 +20,7 @@ public class PackageScanner {
         Map<String, List<FileRecord>> packageMap = new HashMap<>();
         File root = new File(rootPath);
         if (!root.exists() || !root.isDirectory()) {
-            System.err.println("Invalid directory: " + rootPath);
+            log.warn("Invalid directory: " + rootPath);
             return packageMap;
         }
         scanner.scanDirectory(root, packageMap, "");

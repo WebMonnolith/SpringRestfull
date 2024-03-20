@@ -39,13 +39,15 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 import static org.restframework.web.core.RestConfigInit.*;
+import static org.restframework.web.core.helpers.FileHelper.constructPath;
+import static org.restframework.web.core.helpers.FileHelper.convertPackageToPath;
 
 @Slf4j
 @SuppressWarnings("unused")
 @Data
 public final class WebApp implements RestApp<WebApp> {
 
-    private enum WebGenerationStrategy {
+    public enum WebGenerationStrategy {
         WEB_REST_API_STRATEGY,
         WEB_CUSTOM_GENERATION_STRATEGY,
         NONE
@@ -67,6 +69,7 @@ public final class WebApp implements RestApp<WebApp> {
     private static boolean defaultTemplatesFlag = false;
 
     private final static List<String> targetPaths = new ArrayList<>();
+    private static String basePath;
 
     // For external usage!
     private ConfigurableApplicationContext springContext;
@@ -94,12 +97,12 @@ public final class WebApp implements RestApp<WebApp> {
     }
 
     @Override
-    public synchronized <ClazzType> WebApp run(@NotNull Class<ClazzType> clazz) {
-        this.springContext = this.runSpring(clazz);
-        WebApp.scannerApplication = this.scannerApplication().run(clazz);
+    public synchronized WebApp run() {
+        this.springContext = this.runSpring(WebApp.classContext);
+        WebApp.scannerApplication = this.scannerApplication().run();
 
         try {
-            this.init(clazz);
+            this.init(WebApp.classContext);
         } catch (RestException |
                  InvocationTargetException |
                  InstantiationException |
@@ -138,33 +141,12 @@ public final class WebApp implements RestApp<WebApp> {
         return this;
     }
 
-    @Override
     public synchronized WebApp run(@NotNull AppRunner<RestApp<WebApp>> runnable) {
         this.springContext = this.runSpring(WebApp.classContext());
         WebApp.scannerApplication = this.scannerApplication().run(new String[]{});
 
         try {
             this.init();
-        } catch (RestException |
-                 InvocationTargetException |
-                 InstantiationException |
-                 IllegalAccessException |
-                 NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
-
-        WebApp.internalApp = runnable.call(WebApp.classContext());
-        log.warn("Make sure to implement the methods of the service and controller templates!");
-        return this;
-    }
-
-    @Override
-    public synchronized WebApp run(String[] args, @NotNull AppRunner<RestApp<WebApp>> runnable) {
-        this.springContext = this.runSpring(WebApp.classContext());
-        WebApp.scannerApplication = this.scannerApplication().run(args);
-
-        try {
-            this.init(args);
         } catch (RestException |
                  InvocationTargetException |
                  InstantiationException |
@@ -190,7 +172,7 @@ public final class WebApp implements RestApp<WebApp> {
     private @NotNull ScannerApplication scannerApplication() {
         return new ScannerApplication(
                 WebApp.classContext,
-                WebApp.outputResultPathBase().get(0),
+                WebApp.basePath,
                 new PackageScanner(new DirectoryScannerAdvanced(
                         CompilationComponent.class,
                         UpdateComponent.class
@@ -240,15 +222,15 @@ public final class WebApp implements RestApp<WebApp> {
 
         if (!hasConfiguration(WebApp.classContext())) {
             generator.generateDao(
-                    api, SpringComponents.MODEL, WebApp.outputResultPathBase().get(0));
+                    api, SpringComponents.MODEL, WebApp.basePath);
             generator.generateDao(
-                    api, SpringComponents.DTO, WebApp.outputResultPathBase().get(0));
+                    api, SpringComponents.DTO, WebApp.basePath);
         }
         else {
             generator.generateDao(
-                    api, WebApp.context.getValueByKey(MODEL_COMPONENT_CONFIG_ID), WebApp.outputResultPathBase().get(0));
+                    api, WebApp.context.getValueByKey(MODEL_COMPONENT_CONFIG_ID), WebApp.basePath);
             generator.generateDao(
-                    api, WebApp.context.getValueByKey(DTO_COMPONENT_CONFIG_ID), WebApp.outputResultPathBase().get(0));
+                    api, WebApp.context.getValueByKey(DTO_COMPONENT_CONFIG_ID), WebApp.basePath);
         }
 
         if (!builder.nullCheckSpringComponents()) return;
@@ -256,12 +238,13 @@ public final class WebApp implements RestApp<WebApp> {
         Class<?>[] templates = { spring.controller(), spring.repo(), spring.service() };
         if (checkMethodImpl(templates)) WebApp.defaultTemplatesFlag = true;
         for (Class<?> template : templates)
-            generator.generateSpringComponent(api, template, WebApp.outputResultPathBase().get(0));
+            generator.generateSpringComponent(api, template, WebApp.basePath);
     }
 
     private void generateByUsingRestApiGenerationStrategy(@NotNull RestApi restApi) {
         MvcGenerator generator = new MvcGenerator(new MvcSupportHandler());
-        if (checkMethodImpl(restApi.templates())) WebApp.defaultTemplatesFlag = true;
+        Class<?>[] templates = { restApi.controller(), restApi.repo(), restApi.service() };
+        if (checkMethodImpl(templates)) WebApp.defaultTemplatesFlag = true;
         for (int i = 0; i < restApi.APIS().length; i++) {
             API api = restApi.APIS()[i];
             if (!hasConfiguration(WebApp.classContext())) {
@@ -276,7 +259,7 @@ public final class WebApp implements RestApp<WebApp> {
                 generator.generateDao(
                         api, WebApp.context.getValueByKey(DTO_COMPONENT_CONFIG_ID), WebApp.outputResultPathBase().get(i));
             }
-            for (Class<?> template : restApi.templates())
+            for (Class<?> template : templates)
                 generator.generateSpringComponent(api, template, WebApp.outputResultPathBase().get(i));
         }
     }
@@ -304,11 +287,6 @@ public final class WebApp implements RestApp<WebApp> {
                 @Override
                 public String tableName() {
                     return getModelCtx().tableName();
-                }
-
-                @Override
-                public String apiName() {
-                    return getPropertiesCtx().apiName();
                 }
 
                 @Override
@@ -378,7 +356,7 @@ public final class WebApp implements RestApp<WebApp> {
                 }
 
                 @Override
-                public String basePackage() {
+                public String apiPackage() {
                     return propertiesCtx.basePackage();
                 }
             };
@@ -405,16 +383,17 @@ public final class WebApp implements RestApp<WebApp> {
         switch (WebApp.buildStrategy) {
             case WEB_REST_API_STRATEGY -> {
                 assert WebApp.restApiCtx != null;
+                final String packagePath = convertPackageToPath(WebApp.restApiCtx.basePackage());
+                WebApp.basePath = constructPath(clazz, srcRoot, packagePath);
                 for (API api : WebApp.restApiCtx.APIS()) {
-                    String path = FileHelper.constructPath(clazz, srcRoot, FileHelper.convertPackageToPath(api.basePackage()));
+                    String path = constructPath(clazz, srcRoot, String.format("%s/%s", packagePath, api.apiPackage()));
                     WebApp.targetPaths.add(path);
                 }
             }
             case WEB_CUSTOM_GENERATION_STRATEGY -> {
                 assert WebApp.builder != null;
                 API api = WebApp.builder.toAPI();
-                String path = FileHelper.constructPath(clazz, srcRoot, FileHelper.convertPackageToPath(api.basePackage()));
-                WebApp.targetPaths.add(path);
+                WebApp.basePath = constructPath(clazz, srcRoot, convertPackageToPath(api.apiPackage()));
             }
         }
     }
@@ -474,6 +453,10 @@ public final class WebApp implements RestApp<WebApp> {
 
     public static MethodImplementations controllerMethods() {
         return WebApp.implementations.b;
+    }
+
+    public static WebGenerationStrategy strategy() {
+        return WebApp.buildStrategy;
     }
 
     public static boolean defaultMethods() {
