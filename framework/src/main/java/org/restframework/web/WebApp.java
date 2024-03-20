@@ -94,12 +94,12 @@ public final class WebApp implements RestApp<WebApp> {
     }
 
     @Override
-    public synchronized <ClazzType> WebApp run(@NotNull Class<ClazzType> clazz) {
-        this.springContext = this.runSpring(clazz);
-        WebApp.scannerApplication = this.scannerApplication().run(clazz);
+    public synchronized WebApp run() {
+        this.springContext = this.runSpring(WebApp.classContext);
+        WebApp.scannerApplication = this.scannerApplication().run();
 
         try {
-            this.init(clazz);
+            this.init(WebApp.classContext);
         } catch (RestException |
                  InvocationTargetException |
                  InstantiationException |
@@ -138,33 +138,12 @@ public final class WebApp implements RestApp<WebApp> {
         return this;
     }
 
-    @Override
     public synchronized WebApp run(@NotNull AppRunner<RestApp<WebApp>> runnable) {
         this.springContext = this.runSpring(WebApp.classContext());
         WebApp.scannerApplication = this.scannerApplication().run(new String[]{});
 
         try {
             this.init();
-        } catch (RestException |
-                 InvocationTargetException |
-                 InstantiationException |
-                 IllegalAccessException |
-                 NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
-
-        WebApp.internalApp = runnable.call(WebApp.classContext());
-        log.warn("Make sure to implement the methods of the service and controller templates!");
-        return this;
-    }
-
-    @Override
-    public synchronized WebApp run(String[] args, @NotNull AppRunner<RestApp<WebApp>> runnable) {
-        this.springContext = this.runSpring(WebApp.classContext());
-        WebApp.scannerApplication = this.scannerApplication().run(args);
-
-        try {
-            this.init(args);
         } catch (RestException |
                  InvocationTargetException |
                  InstantiationException |
