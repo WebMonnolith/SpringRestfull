@@ -13,5 +13,6 @@ public @interface API {
     String endpoint();
     Model model();
     String apiPackage();
-
+    String modelAbbrev() default "Model";
+    String dtoAbbrev() default "Dto";
 }

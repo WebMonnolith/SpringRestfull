@@ -34,7 +34,7 @@ public class ModelGenerator extends Generator<SpringComponents> {
         GenericGeneration genericResolver = GenericFactory.create(api.model().generic());
 
         String value = api.model().tableName();
-        String name = api.apiName()+api.model().abbrev();
+        String name = api.apiName()+api.modelAbbrev();
 
         String packageName = "";
         switch (WebApp.strategy()) {
@@ -70,7 +70,7 @@ public class ModelGenerator extends Generator<SpringComponents> {
                         .api(api)
                         .builder(modelBuilder)
                         .modelAnnotation(api.model())
-                        .dtoName(api.apiName()+"Dto")
+                        .dtoName(api.apiName()+api.dtoAbbrev())
                         .generic(genericResolver.getGeneric())
                         .build()
                 );
