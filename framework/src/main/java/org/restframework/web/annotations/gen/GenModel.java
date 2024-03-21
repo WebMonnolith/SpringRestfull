@@ -13,4 +13,5 @@ import java.lang.annotation.Target;
 public @interface GenModel {
     String tableName();
     FieldData[] fields() default {};
+    String abbrev() default "Model";
 }

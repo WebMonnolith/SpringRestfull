@@ -130,13 +130,6 @@ public final class WebApp implements RestApp<WebApp> {
             throw new RuntimeException(e);
         }
 
-        for (String packageName : WebApp.scannerApplication.getFiles().keySet()) {
-            System.out.println("Package: " + packageName);
-            List<FileRecord> fileRecords = WebApp.scannerApplication.getFiles().get(packageName);
-            for (FileRecord record : fileRecords) {
-                System.out.println("   Name: " + record.getName() + ", Size: " + record.getSize() + " bytes, " + "update: " + record.isUpdateAble());
-            }
-        }
         log.warn("Make sure to implement the methods of the service and controller templates!");
         return this;
     }
@@ -289,10 +282,6 @@ public final class WebApp implements RestApp<WebApp> {
                     return getModelCtx().tableName();
                 }
 
-                @Override
-                public String abbrev() {
-                    return "Model";
-                }
 
                 @Override
                 public FieldData[] fields() {
@@ -358,6 +347,16 @@ public final class WebApp implements RestApp<WebApp> {
                 @Override
                 public String apiPackage() {
                     return propertiesCtx.basePackage();
+                }
+
+                @Override
+                public String modelAbbrev() {
+                    return getModelCtx().abbrev();
+                }
+
+                @Override
+                public String dtoAbbrev() {
+                    return getDtoCtx().abbrev();
                 }
             };
         }

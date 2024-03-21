@@ -32,7 +32,7 @@ public class DtoGenerator extends Generator<SpringComponents> {
         GenericGeneration genericResolver = GenericFactory.create(api.model().generic());
 
         String value = "";
-        String name = api.apiName()+"Dto";
+        String name = api.apiName()+api.dtoAbbrev();
         String packageName = "";
         switch (WebApp.strategy()) {
             case WEB_REST_API_STRATEGY -> packageName = String.format("%s.%s", WebApp.context().basePackage(), api.apiPackage());
@@ -57,7 +57,7 @@ public class DtoGenerator extends Generator<SpringComponents> {
                 .api(api)
                 .builder(modelBuilder)
                 .modelAnnotation(api.model())
-                .dtoName(api.apiName()+"Dto")
+                .dtoName(api.apiName()+api.dtoAbbrev())
                 .generic(genericResolver.getGeneric())
                 .build()
         );

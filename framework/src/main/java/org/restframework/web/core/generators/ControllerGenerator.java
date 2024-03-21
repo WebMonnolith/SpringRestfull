@@ -40,8 +40,8 @@ public class ControllerGenerator extends Generator<Class<?>> {
                     .builder(mvcBuilder)
                     .template(template)
                     .templateAnnotation(templateAnnotation)
-                    .modelName(api.apiName()+api.model().abbrev())
-                    .dtoName(api.apiName()+"Dto")
+                    .modelName(api.apiName()+api.modelAbbrev())
+                    .dtoName(api.apiName()+api.dtoAbbrev())
                     .generic(genericResolver.getGeneric())
                     .methods(defaultMethods() ? new _DefaultCrudControllerMethodImplementations() : WebApp.controllerMethods())
                     .build());

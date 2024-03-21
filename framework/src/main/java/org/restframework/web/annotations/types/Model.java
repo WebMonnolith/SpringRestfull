@@ -13,7 +13,5 @@ import java.lang.annotation.Target;
 public @interface Model {
     Generic generic();
     String tableName();
-//    String apiName();
-    String abbrev() default "Model";
     FieldData[] fields() default {};
 }
