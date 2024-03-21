@@ -39,6 +39,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
                         apiPackage = "api",
                         endpoint = "/api/v1/test",
                         apiName = "Api",
+                        modelAbbrev = "Response",
+                        dtoAbbrev = "Request",
                         model = @Model(
                                 generic = Generic.UUID,
                                 tableName ="test_table",
