@@ -7,13 +7,22 @@ import org.restframework.web.core.templates.SpringComponents;
 public class CompilationStrategyFactory {
     @Contract("_ -> new")
     public static @NotNull CompilationStrategy createStrategy(@NotNull CompilationContext context) {
-        if (context.getTemplateAnnotation().rule() == SpringComponents.SERVICE)
-            return new ServiceCompilationStrategy();
-        else if (context.getTemplateAnnotation().rule() == SpringComponents.CONTROLLER)
-            return new ControllerCompilationStrategy();
-        else if (context.getTemplateAnnotation().rule() == SpringComponents.REPO)
-            return new RepoCompilationStrategy();
-        else
-            return new DefaultCompilationStrategy();
+        switch (context.getComponentType()) {
+            case REPO -> {
+                return new RepoCompilationStrategy();
+            }
+            case SERVICE -> {
+                return new ServiceCompilationStrategy();
+            }
+            case COMPONENT -> {
+                return new ComponentCompilationStrategy();
+            }
+            case CONTROLLER -> {
+                return new ControllerCompilationStrategy();
+            }
+            default -> {
+                return new DefaultCompilationStrategy();
+            }
+        }
     }
 }

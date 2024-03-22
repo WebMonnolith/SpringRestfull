@@ -6,13 +6,9 @@ import org.antlr.v4.runtime.misc.Pair;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 import org.restframework.scanner.DirectoryScannerAdvanced;
-import org.restframework.scanner.FileRecord;
 import org.restframework.scanner.PackageScanner;
 import org.restframework.scanner.ScannerApplication;
-import org.restframework.web.annotations.gen.GenDto;
-import org.restframework.web.annotations.gen.GenModel;
-import org.restframework.web.annotations.gen.GenProperties;
-import org.restframework.web.annotations.gen.GenSpring;
+import org.restframework.web.annotations.gen.*;
 import org.restframework.web.annotations.markers.CompilationComponent;
 import org.restframework.web.annotations.markers.UpdateComponent;
 import org.restframework.web.annotations.types.API;
@@ -23,7 +19,6 @@ import org.restframework.web.core.AppRunner;
 import org.restframework.web.core.RestAppConfigurationContext;
 import org.restframework.web.core.generators.compilation.MethodImplementations;
 import org.restframework.web.core.generics.Generic;
-import org.restframework.web.core.helpers.FileHelper;
 import org.restframework.web.core.RestApp;
 import org.restframework.web.core.generators.MvcGenerator;
 import org.restframework.web.core.generators.MvcSupport;
@@ -197,6 +192,13 @@ public final class WebApp implements RestApp<WebApp> {
     }
 
     private void generate() {
+        if (WebApp.classContext().isAnnotationPresent(GenComponent.class)) {
+            MvcGenerator generator = new MvcGenerator(new MvcSupportHandler());
+            GenComponent[] componentAnnotations = WebApp.classContext().getAnnotationsByType(GenComponent.class);
+            for (GenComponent component : componentAnnotations)
+                generator.generateComponent(component, WebApp.buildStrategy == WebGenerationStrategy.WEB_REST_API_STRATEGY ? WebApp.basePath : WebApp.basePath);
+        }
+
         switch (WebApp.buildStrategy) {
             case WEB_REST_API_STRATEGY -> {
                 assert WebApp.restApiCtx != null;
@@ -231,7 +233,7 @@ public final class WebApp implements RestApp<WebApp> {
         Class<?>[] templates = { spring.controller(), spring.repo(), spring.service() };
         if (checkMethodImpl(templates)) WebApp.defaultTemplatesFlag = true;
         for (Class<?> template : templates)
-            generator.generateSpringComponent(api, template, WebApp.basePath);
+            generator.generateMVC(api, template, WebApp.basePath);
     }
 
     private void generateByUsingRestApiGenerationStrategy(@NotNull RestApi restApi) {
@@ -253,7 +255,7 @@ public final class WebApp implements RestApp<WebApp> {
                         api, WebApp.context.getValueByKey(DTO_COMPONENT_CONFIG_ID), WebApp.outputResultPathBase().get(i));
             }
             for (Class<?> template : templates)
-                generator.generateSpringComponent(api, template, WebApp.outputResultPathBase().get(i));
+                generator.generateMVC(api, template, WebApp.outputResultPathBase().get(i));
         }
     }
 
@@ -495,6 +497,9 @@ public final class WebApp implements RestApp<WebApp> {
                     ruleHolder.add(LombokAnnotations.ALL_ARGS_CONSTRUCTOR.getValue());
                     ruleHolder.add(LombokAnnotations.NO_ARGS_CONSTRUCTOR.getValue());
                     ruleHolder.add(LombokAnnotations.BUILDER.getValue());
+                }
+                case COMPONENT -> {
+                    ruleHolder.add(SpringAnnotations.SPRING_COMPONENT.getValue());
                 }
                 case NONE -> throw new RestException("@" + RestApi.class + " MVC has no templates associated with it");
             }
