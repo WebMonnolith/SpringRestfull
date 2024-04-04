@@ -16,9 +16,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @EnableRestConfiguration(useCustomGenerationStrategy = true)
 @GenProperties(basePackage = "org.example", indexColumnType = Generic.INTEGER, apiName = "File")
-@GenDto(abbrev = "Request")
+@GenDto()
 @GenModel(
-        abbrev = "Response",
         tableName = "test_table",
         fields = {
                 @FieldData(name="fname"),

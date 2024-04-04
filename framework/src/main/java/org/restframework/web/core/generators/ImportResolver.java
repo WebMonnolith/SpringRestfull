@@ -78,7 +78,7 @@ public class ImportResolver {
             }
             case COMPONENT -> {
                 holder.add("import org.springframework.stereotype.Component");
-                holder.add("import org.restframework.web.annotations.markers.CompilationComponent");
+                holder.add("import org.restframework.web.annotations.markers.*");
             }
             case NONE -> throw new RestException("");
         }
