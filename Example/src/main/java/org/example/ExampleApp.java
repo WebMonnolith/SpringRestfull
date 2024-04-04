@@ -5,10 +5,7 @@ import lombok.SneakyThrows;
 import org.restframework.web.WebApp;
 import org.restframework.web.annotations.EnableRestConfiguration;
 import org.restframework.web.annotations.RestApi;
-import org.restframework.web.annotations.gen.GenDto;
-import org.restframework.web.annotations.gen.GenModel;
-import org.restframework.web.annotations.gen.GenProperties;
-import org.restframework.web.annotations.gen.GenSpring;
+import org.restframework.web.annotations.gen.*;
 import org.restframework.web.annotations.types.API;
 import org.restframework.web.annotations.types.FieldData;
 import org.restframework.web.annotations.types.Model;
@@ -30,6 +27,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
         }
 )
 @GenSpring(controller= TControllerEntityResponse.class)
+@GenComponent(name="Test1", packageName = "components")
+@GenComponent(name="Test2", packageName = "components")
 @SpringBootApplication
 public class ExampleApp {
     @SneakyThrows

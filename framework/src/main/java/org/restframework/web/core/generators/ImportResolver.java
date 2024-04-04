@@ -34,10 +34,9 @@ public class ImportResolver {
             @NotNull String apiPackage)
     {
         List<String> holder = new ArrayList<>();
-        holder.add("import " + apiPackage + ".*");
         switch (component) {
-
             case CONTROLLER -> {
+                holder.add("import " + apiPackage + ".*");
                 holder.add("import " + apiPackage + ".service.*");
                 holder.add("import lombok.*");
                 holder.add("import org.springframework.web.bind.annotation.*");
@@ -47,6 +46,7 @@ public class ImportResolver {
                 holder.add("import java.util.*");
             }
             case SERVICE -> {
+                holder.add("import " + apiPackage + ".*");
                 holder.add("import " + apiPackage + ".repository.*");
                 holder.add("import lombok.*");
                 holder.add("import org.springframework.stereotype.Service");
@@ -55,6 +55,7 @@ public class ImportResolver {
                 holder.add("import java.util.*");
             }
             case MODEL -> {
+                holder.add("import " + apiPackage + ".*");
                 holder.add("import lombok.*");
                 holder.add("import jakarta.persistence.*");
                 holder.add("import org.restframework.web.core.templates.*");
@@ -62,12 +63,14 @@ public class ImportResolver {
                 holder.add("import java.util.*");
             }
             case REPO -> {
+                holder.add("import " + apiPackage + ".*");
                 holder.add("import org.springframework.stereotype.Repository");
                 holder.add("import org.restframework.web.core.templates.*");
                 holder.add("import org.restframework.web.annotations.markers.*");
                 holder.add("import java.util.*");
             }
             case DTO -> {
+                holder.add("import " + apiPackage + ".*");
                 holder.add("import lombok.*");
                 holder.add("import org.restframework.web.core.templates.*");
                 holder.add("import org.restframework.web.annotations.markers.*");

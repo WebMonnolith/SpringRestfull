@@ -192,7 +192,7 @@ public final class WebApp implements RestApp<WebApp> {
     }
 
     private void generate() {
-        if (WebApp.classContext().isAnnotationPresent(GenComponent.class)) {
+        if (WebApp.classContext().isAnnotationPresent(GenComponents.class)) {
             MvcGenerator generator = new MvcGenerator(new MvcSupportHandler());
             GenComponent[] componentAnnotations = WebApp.classContext().getAnnotationsByType(GenComponent.class);
             for (GenComponent component : componentAnnotations)

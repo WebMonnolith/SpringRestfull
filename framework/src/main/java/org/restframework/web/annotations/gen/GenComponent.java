@@ -8,7 +8,7 @@ import java.lang.annotation.*;
 @SuppressWarnings("unused")
 public @interface GenComponent {
     String name();
-    String packageName() default "";
+    String packageName();
     String abbrev() default "Component";
 
 }

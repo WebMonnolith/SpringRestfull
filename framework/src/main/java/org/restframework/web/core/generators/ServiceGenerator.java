@@ -43,6 +43,7 @@ public class ServiceGenerator extends Generator<Class<?>> {
                 .modelName(api.apiName()+api.modelAbbrev())
                 .dtoName(api.apiName()+api.dtoAbbrev())
                 .generic(genericResolver.getGeneric())
+                .componentType(templateAnnotation.rule())
                 .methods(defaultMethods() ? new _DefaultCrudServiceMethodImplementations() : WebApp.controllerMethods())
                 .build());
 
