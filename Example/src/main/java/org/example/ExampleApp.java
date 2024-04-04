@@ -15,7 +15,7 @@ import org.restframework.web.core.templates.TControllerEntityResponseWildcard;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @EnableRestConfiguration(useCustomGenerationStrategy = true)
-@GenProperties(basePackage = "org.example", indexColumnType = Generic.INTEGER, apiName = "File")
+@GenProperties(basePackage = "org.example", indexColumnType = Generic.INTEGER, apiName = "Api")
 @GenDto()
 @GenModel(
         tableName = "test_table",
@@ -28,6 +28,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @GenSpring(controller= TControllerEntityResponse.class)
 @GenComponent(name="Test1", packageName = "components")
 @GenComponent(name="Test2", packageName = "components")
+@GenService(name = "FileUploader")
+@GenService(name = "FileDownloader")
 @SpringBootApplication
 public class ExampleApp {
     @SneakyThrows

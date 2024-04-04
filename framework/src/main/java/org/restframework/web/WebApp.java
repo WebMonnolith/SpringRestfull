@@ -67,8 +67,6 @@ public final class WebApp implements RestApp<WebApp> {
     private static String basePath;
     private static String basePackage;
 
-    private final MvcGenerator generator = new MvcGenerator(new MvcSupportHandler());
-
     // For external usage!
     @Getter
     private ConfigurableApplicationContext springContext;
@@ -192,70 +190,102 @@ public final class WebApp implements RestApp<WebApp> {
     }
 
     private void generate() {
-        processGenComponents();
-        switch (WebApp.buildStrategy) {
-            case WEB_REST_API_STRATEGY -> generateByUsingRestApiGenerationStrategy(WebApp.restApiCtx);
-            case WEB_CUSTOM_GENERATION_STRATEGY -> generateByUsingCustomGenerationStrategy(WebApp.builder);
+        new GenerationHelper(
+                new MvcGenerator(
+                        new MvcSupportHandler()));
+    }
+
+    public static class GenerationHelper {
+
+        private final MvcGenerator generator;
+
+        public GenerationHelper(@NotNull MvcGenerator generator) {
+            this.generator = generator;
+
+            processGenComponents();
+            switch (WebApp.buildStrategy) {
+                case WEB_REST_API_STRATEGY -> {
+                    assert WebApp.restApiCtx != null;
+                    generateByUsingRestApiGenerationStrategy(WebApp.restApiCtx);
+                }
+                case WEB_CUSTOM_GENERATION_STRATEGY -> {
+                    assert WebApp.builder != null;
+                    generateByUsingCustomGenerationStrategy(WebApp.builder);
+                }
+            }
         }
-    }
 
-    private void processGenComponents() {
-        if (!WebApp.classContext().isAnnotationPresent(GenComponents.class)) {
-            return;
+        private void processGenComponents() {
+            if (!WebApp.classContext().isAnnotationPresent(GenComponents.class)) return;
+            final GenComponent[] componentAnnotations = WebApp.classContext().getAnnotationsByType(GenComponent.class);
+            for (GenComponent component : componentAnnotations) {
+                this.generator.generateComponent(component, WebApp.basePath);
+            }
         }
-        GenComponent[] componentAnnotations = WebApp.classContext().getAnnotationsByType(GenComponent.class);
-        for (GenComponent component : componentAnnotations) {
-            this.generator.generateComponent(component, WebApp.basePath);
+
+        private void generateByUsingCustomGenerationStrategy(@NotNull _APIBuilder builder) {
+            API api = builder.toAPI();
+            if (!builder.nullCheckSpringComponents()) return;
+            GenSpring spring = WebApp.classContext().getAnnotation(GenSpring.class);
+            final Class<?>[] templates = {spring.controller(), spring.repo(), spring.service()};
+            this.checkAndGenerateMVC(api, templates);
         }
-    }
 
-    private void generateByUsingCustomGenerationStrategy(@NotNull _APIBuilder builder) {
-        API api = builder.toAPI();
-        if (!builder.nullCheckSpringComponents()) return;
-        GenSpring spring = WebApp.classContext().getAnnotation(GenSpring.class);
-        Class<?>[] templates = {spring.controller(), spring.repo(), spring.service()};
-        this.checkAndGenerateMVC(api, templates);
-    }
-
-    private void generateByUsingRestApiGenerationStrategy(@NotNull RestApi restApi) {
-        Class<?>[] templates = {restApi.controller(), restApi.repo(), restApi.service()};
-        this.checkAndGenerateMVC(restApi.APIS(), templates);
-    }
-
-    private void checkAndGenerateMVC(API[] apis, Class<?>[] templates) {
-        for (int i = 0; i < apis.length; i++) {
-            API api = apis[i];
-            this.checkConfigAndGenerateDao(api, WebApp.outputResultPathBase().get(i));
-            this.generateMVC(api, templates, WebApp.outputResultPathBase().get(i));
+        private void generateByUsingRestApiGenerationStrategy(@NotNull RestApi restApi) {
+            final Class<?>[] templates = {restApi.controller(), restApi.repo(), restApi.service()};
+            this.checkAndGenerateMVC(restApi.APIS(), templates);
         }
-    }
 
-    private void checkAndGenerateMVC(API api, Class<?>[] templates) {
-        this.checkConfigAndGenerateDao(api, WebApp.basePath);
-        this.generateMVC(api, templates, WebApp.basePath);
-    }
-
-    private void checkConfigAndGenerateDao(@NotNull API api, String buildpath) {
-        if (!hasConfiguration(WebApp.classContext())) {
-            this.generateDao(api, SpringComponents.MODEL, buildpath);
-            this.generateDao(api, SpringComponents.DTO, buildpath);
-        } else {
-            this.generateDao(api, WebApp.context.getValueByKey(MODEL_COMPONENT_CONFIG_ID), buildpath);
-            this.generateDao(api, WebApp.context.getValueByKey(DTO_COMPONENT_CONFIG_ID), buildpath);
+        private void checkAndGenerateMVC(API[] apis, Class<?>[] templates) {
+            for (int i = 0; i < apis.length; i++) {
+                API api = apis[i];
+                this.checkConfigAndGenerateDao(api, WebApp.outputResultPathBase().get(i));
+                this.generateMVC(api, templates, WebApp.outputResultPathBase().get(i));
+            }
         }
-    }
 
-    private void generateDao(API api, SpringComponents component) {
-        this.generator.generateDao(api, component, WebApp.basePath);
-    }
+        private void checkAndGenerateMVC(API api, Class<?>[] templates) {
+            this.checkConfigAndGenerateDao(api, WebApp.basePath);
+            this.generateMVC(api, templates, WebApp.basePath);
+        }
 
-    private void generateDao(API api, SpringComponents component, String outputPath) {
-        this.generator.generateDao(api, component, outputPath);
-    }
+        private void checkConfigAndGenerateDao(@NotNull API api, String buildpath) {
+            if (!hasConfiguration(WebApp.classContext())) {
+                this.generateDao(api, SpringComponents.MODEL, buildpath);
+                this.generateDao(api, SpringComponents.DTO, buildpath);
+            } else {
+                this.generateDao(api, WebApp.context.getValueByKey(MODEL_COMPONENT_CONFIG_ID), buildpath);
+                this.generateDao(api, WebApp.context.getValueByKey(DTO_COMPONENT_CONFIG_ID), buildpath);
+            }
+        }
 
-    private void generateMVC(API api, Class<?>[] templates, String basePath) {
-        if (checkMethodImpl(templates)) WebApp.defaultTemplatesFlag = true;
-        for (Class<?> template : templates) this.generator.generateMVC(api, template, basePath);
+        private void generateDao(API api, SpringComponents component) {
+            this.generator.generateDao(api, component, WebApp.basePath);
+        }
+
+        private void generateDao(API api, SpringComponents component, String outputPath) {
+            this.generator.generateDao(api, component, outputPath);
+        }
+
+        private void generateMVC(API api, Class<?>[] templates, String basePath) {
+            if (this.checkMethodImpl(templates)) WebApp.defaultTemplatesFlag = true;
+            for (Class<?> template : templates) this.generator.generateMVC(api, template, basePath);
+        }
+
+        private void generateStandaloneService() {
+
+        }
+
+        private boolean checkMethodImpl(Class<?> @NotNull [] templates) {
+            if (templates.length > 3) throw new RestException("Too many templates used [" + templates.length + "] make sure to only use a max of three, service, repo & controller");
+
+            Set<Class<?>> templateSet = new HashSet<>();
+            Collections.addAll(templateSet, templates);
+
+            return (templateSet.contains(TControllerCRUD.class) || templateSet.contains(TControllerEntityResponse.class) || templateSet.contains(TControllerEntityResponseWildcard.class))
+                    && (templateSet.contains(TServiceCRUD.class) || templateSet.contains(TServiceEntityResponse.class) || templateSet.contains(TServiceEntityResponseWildcard.class))
+                    && templateSet.contains(TRepo.class);
+        }
     }
 
     @AllArgsConstructor
@@ -546,16 +576,5 @@ public final class WebApp implements RestApp<WebApp> {
         if (!clazz.isAnnotationPresent(GenDto.class))
             throw new RestException("There must be a class annotated with @" + GenDto.class.getSimpleName() + ",\n" +
                     "in order to make use of the custom generation strategy.");
-    }
-
-    private boolean checkMethodImpl(Class<?> @NotNull [] templates) {
-        if (templates.length > 3) throw new RestException("Too many templates used [" + templates.length + "] make sure to only use a max of three, service, repo & controller");
-
-        Set<Class<?>> templateSet = new HashSet<>();
-        Collections.addAll(templateSet, templates);
-
-        return (templateSet.contains(TControllerCRUD.class) || templateSet.contains(TControllerEntityResponse.class) || templateSet.contains(TControllerEntityResponseWildcard.class))
-                && (templateSet.contains(TServiceCRUD.class) || templateSet.contains(TServiceEntityResponse.class) || templateSet.contains(TServiceEntityResponseWildcard.class))
-                && templateSet.contains(TRepo.class);
     }
 }

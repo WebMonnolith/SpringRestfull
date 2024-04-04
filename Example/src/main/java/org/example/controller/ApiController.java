@@ -14,26 +14,26 @@ import java.util.*;
 @AllArgsConstructor
 @RestController
 @RequestMapping("api/v1/endpoint")
-public class FileController implements TControllerEntityResponse<Integer, FileDto, FileModel> {
-	private final FileService fileService;
+public class ApiController implements TControllerEntityResponse<Integer, ApiDto, ApiModel> {
+	private final ApiService apiService;
 	@Override
 	@PostMapping
-	public ResponseEntity<Integer> insertEntity(FileDto filedto) {
-		 return ResponseEntity.ok(fileService.insert(filedto));
+	public ResponseEntity<Integer> insertEntity(ApiDto apidto) {
+		 return ResponseEntity.ok(apiService.insert(apidto));
 	}
 	@Override
 	@GetMapping
-	public ResponseEntity<List<FileDto>> getAllEntities() {
-		 return ResponseEntity.ok(fileService.getAll());
+	public ResponseEntity<List<ApiDto>> getAllEntities() {
+		 return ResponseEntity.ok(apiService.getAll());
 	}
 	@Override
 	@DeleteMapping
 	public ResponseEntity<Boolean> removeEntityById(Integer id) {
-		 return ResponseEntity.ok(fileService.removeById(id));
+		 return ResponseEntity.ok(apiService.removeById(id));
 	}
 	@Override
 	@PutMapping
-	public ResponseEntity<Boolean> updateEntity(Integer id, FileModel filemodel) {
-		 return ResponseEntity.ok(fileService.update(id, filemodel));
+	public ResponseEntity<Boolean> updateEntity(Integer id, ApiModel apimodel) {
+		 return ResponseEntity.ok(apiService.update(id, apimodel));
 	}
 }

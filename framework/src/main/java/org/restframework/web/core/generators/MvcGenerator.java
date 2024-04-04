@@ -27,7 +27,7 @@ public final class MvcGenerator {
         Generator<Class<?>> gen;
         switch (findTemplate(api, template).rule()) {
             case CONTROLLER -> gen = new ControllerGenerator(this.support);
-            case SERVICE -> gen = new ServiceGenerator(this.support);
+            case SERVICE -> gen = this.generateService(api, template, buildPath);
             case REPO -> gen = new RepoGenerator(this.support);
             default -> throw new RestException("Invalid configured component!");
         }
@@ -41,6 +41,15 @@ public final class MvcGenerator {
     ) {
         Generator<GenComponent> gen = new ComponentGenerator(this.support);
         gen.generate(null, component, buildPath);
+    }
+
+    private synchronized Generator<Class<?>> generateService(
+            @NotNull API api,
+            @NotNull Class<?> template,
+            @NotNull String buildPath
+    ) {
+        Generator<Class<?>> serviceGen = new ServiceGenerator(this.support);
+
     }
 
     public synchronized void generateDao(

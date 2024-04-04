@@ -12,14 +12,14 @@ import java.util.*;
 @Data
 @AllArgsConstructor
 @Service
-public class FileService implements TServiceCRUD<Integer, FileDto, FileModel> {
-	private final FileRepository repository;
+public class ApiService implements TServiceCRUD<Integer, ApiDto, ApiModel> {
+	private final ApiRepository repository;
 	@Override
-	public int insert(FileDto filedto) {
+	public int insert(ApiDto apidto) {
 		 return 0;
 	}
 	@Override
-	public List<FileDto> getAll() {
+	public List<ApiDto> getAll() {
 		 return null;
 	}
 	@Override
@@ -27,7 +27,7 @@ public class FileService implements TServiceCRUD<Integer, FileDto, FileModel> {
 		 return false;
 	}
 	@Override
-	public boolean update(Integer id, FileModel filemodel) {
+	public boolean update(Integer id, ApiModel apimodel) {
 		 return false;
 	}
 }

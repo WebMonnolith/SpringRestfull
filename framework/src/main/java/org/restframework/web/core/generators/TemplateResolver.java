@@ -12,6 +12,7 @@ public class TemplateResolver {
         TServiceCRUD,
         TServiceEntityResponse,
         TServiceEntityResponseWildcard,
+        TServiceBasic
     }
 
     public static TemplateID resolveTemplate(@NotNull Class<?> clazz) throws RestException {
@@ -37,6 +38,9 @@ public class TemplateResolver {
                 }
                 case "TServiceEntityResponseWildcard" -> {
                     return TemplateID.TServiceEntityResponseWildcard;
+                }
+                case "TServiceBasic" -> {
+                    return TemplateID.TServiceBasic;
                 }
             }
         }

@@ -58,39 +58,106 @@ public class ServiceGenerator extends Generator<Class<?>> {
     private static class _DefaultCrudServiceMethodImplementations implements MethodImplementations {
         @Override
         public void build(@NotNull CompilationContext context) {
-            context.getBuilder().addMethod(new MethodBuilder(
-                    "insert",
-                    "int",
-                    Modifier.PUBLIC,
-                    context.getDtoName() + " " + context.getDtoName().toLowerCase(),
-                    "0",
-                    new String[]{"Override"}
-            ));
+            TemplateResolver.TemplateID templateID = TemplateResolver.resolveTemplate(context.getTemplate());
+            switch (templateID) {
+                case TServiceCRUD -> {
+                    context.getBuilder().addMethod(new MethodBuilder(
+                            "insert",
+                            "int",
+                            Modifier.PUBLIC,
+                            context.getDtoName() + " " + context.getDtoName().toLowerCase(),
+                            "0",
+                            new String[]{"Override"}
+                    ));
 
-            context.getBuilder().addMethod(new MethodBuilder(
-                    "getAll",
-                    "List<"+context.getDtoName()+">",
-                    Modifier.PUBLIC,
-                    new String[]{"Override"}
-            ));
+                    context.getBuilder().addMethod(new MethodBuilder(
+                            "getAll",
+                            "List<" + context.getDtoName() + ">",
+                            Modifier.PUBLIC,
+                            new String[]{"Override"}
+                    ));
 
-            context.getBuilder().addMethod(new MethodBuilder(
-                    "removeById",
-                    "boolean",
-                    Modifier.PUBLIC,
-                    context.getGeneric() + " id",
-                    "false",
-                    new String[]{"Override"}
-            ));
+                    context.getBuilder().addMethod(new MethodBuilder(
+                            "removeById",
+                            "boolean",
+                            Modifier.PUBLIC,
+                            context.getGeneric() + " id",
+                            "false",
+                            new String[]{"Override"}
+                    ));
 
-            context.getBuilder().addMethod(new MethodBuilder(
-                    "update",
-                    "boolean",
-                    Modifier.PUBLIC,
-                    context.getGeneric() + " id, " + context.getModelName() + " " + context.getModelName().toLowerCase(),
-                    "false",
-                    new String[]{"Override"}
-            ));
+                    context.getBuilder().addMethod(new MethodBuilder(
+                            "update",
+                            "boolean",
+                            Modifier.PUBLIC,
+                            context.getGeneric() + " id, " + context.getModelName() + " " + context.getModelName().toLowerCase(),
+                            "false",
+                            new String[]{"Override"}
+                    ));
+                }
+                case TServiceBasic -> {
+                    context.getBuilder().addMethod(new MethodBuilder(
+                            "insert",
+                            "int",
+                            Modifier.PUBLIC,
+                            "T dto",
+                            "0",
+                            new String[]{"Override"}
+                    ));
+
+                    context.getBuilder().addMethod(new MethodBuilder(
+                            "getAll",
+                            "List<?>",
+                            Modifier.PUBLIC,
+                            new String[]{"Override"}
+                    ));
+
+                    context.getBuilder().addMethod(new MethodBuilder(
+                            "removeById",
+                            "boolean",
+                            Modifier.PUBLIC,
+                            "ID id",
+                            "false",
+                            new String[]{"Override"}
+                    ));
+
+                    context.getBuilder().addMethod(new MethodBuilder(
+                            "update",
+                            "boolean",
+                            Modifier.PUBLIC,
+                            "ID id, T entity",
+                            "false",
+                            new String[]{"Override"}
+                    ));
+
+                    context.getBuilder().addMethod(new MethodBuilder(
+                            "remove",
+                            "Optional<Boolean>",
+                            Modifier.PUBLIC,
+                            "T entity",
+                            "Optional.empty()",
+                            new String[]{"Override"}
+                    ));
+
+                    context.getBuilder().addMethod(new MethodBuilder(
+                            "getById",
+                            "Optional<T>",
+                            Modifier.PUBLIC,
+                            "ID id",
+                            "Optional.empty()",
+                            new String[]{"Override"}
+                    ));
+
+                    context.getBuilder().addMethod(new MethodBuilder(
+                            "removeAll",
+                            "Optional<Boolean>",
+                            Modifier.PUBLIC,
+                            "",
+                            "Optional.empty()",
+                            new String[]{"Override"}
+                    ));
+                }
+            }
         }
     }
 

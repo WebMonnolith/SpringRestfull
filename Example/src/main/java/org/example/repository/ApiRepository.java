@@ -8,5 +8,5 @@ import java.util.*;
 
 @CompilationComponent
 @Repository
-public interface FileRepository extends TRepo<FileModel, Integer> {
+public interface ApiRepository extends TRepo<ApiModel, Integer> {
 }
