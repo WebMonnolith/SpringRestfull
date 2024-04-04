@@ -62,6 +62,10 @@ public final class ClassBuilder implements Builder, BuilderUtils {
                 .append(classType.getValue()).append(name);
     }
 
+    public void start() {
+        this.classDefinition.append(" {\n\n");
+    }
+
     @Override
     public <T> void addAnnotation(@NotNull T annotation) {
         classDefinition.append("@").append(annotation).append("\n");
@@ -127,12 +131,6 @@ public final class ClassBuilder implements Builder, BuilderUtils {
     @Override
     public void addField(FieldBuilder builder) {
         this.classDefinition.append(builder.getDefinition());
-    }
-
-    public ClassBuilder prepareBuild(@Nullable UpdateComponent updateAnnotation) {
-
-
-        return this;
     }
 
     @Override

@@ -65,8 +65,12 @@ public final class WebApp implements RestApp<WebApp> {
 
     private final static List<String> targetPaths = new ArrayList<>();
     private static String basePath;
+    private static String basePackage;
+
+    private final MvcGenerator generator = new MvcGenerator(new MvcSupportHandler());
 
     // For external usage!
+    @Getter
     private ConfigurableApplicationContext springContext;
 
     public WebApp(@NotNull Class<?> clazz) throws UnsupportedEncodingException {
@@ -153,10 +157,6 @@ public final class WebApp implements RestApp<WebApp> {
         return this;
     }
 
-    public ConfigurableApplicationContext getSpringContext() {
-        return this.springContext;
-    }
-
     private @NotNull ScannerApplication scannerApplication() {
         return new ScannerApplication(
                 WebApp.classContext,
@@ -193,10 +193,9 @@ public final class WebApp implements RestApp<WebApp> {
 
     private void generate() {
         if (WebApp.classContext().isAnnotationPresent(GenComponents.class)) {
-            MvcGenerator generator = new MvcGenerator(new MvcSupportHandler());
             GenComponent[] componentAnnotations = WebApp.classContext().getAnnotationsByType(GenComponent.class);
             for (GenComponent component : componentAnnotations)
-                generator.generateComponent(component, WebApp.buildStrategy == WebGenerationStrategy.WEB_REST_API_STRATEGY ? WebApp.basePath : WebApp.basePath);
+                this.generator.generateComponent(component, WebApp.basePath);
         }
 
         switch (WebApp.buildStrategy) {
@@ -213,18 +212,17 @@ public final class WebApp implements RestApp<WebApp> {
 
     private void generateByUsingCustomGenerationStrategy(@NotNull _APIBuilder builder) {
         API api = builder.toAPI();
-        MvcGenerator generator = new MvcGenerator(new MvcSupportHandler());
 
         if (!hasConfiguration(WebApp.classContext())) {
-            generator.generateDao(
+            this.generator.generateDao(
                     api, SpringComponents.MODEL, WebApp.basePath);
-            generator.generateDao(
+            this.generator.generateDao(
                     api, SpringComponents.DTO, WebApp.basePath);
         }
         else {
-            generator.generateDao(
+            this.generator.generateDao(
                     api, WebApp.context.getValueByKey(MODEL_COMPONENT_CONFIG_ID), WebApp.basePath);
-            generator.generateDao(
+            this.generator.generateDao(
                     api, WebApp.context.getValueByKey(DTO_COMPONENT_CONFIG_ID), WebApp.basePath);
         }
 
@@ -233,29 +231,29 @@ public final class WebApp implements RestApp<WebApp> {
         Class<?>[] templates = { spring.controller(), spring.repo(), spring.service() };
         if (checkMethodImpl(templates)) WebApp.defaultTemplatesFlag = true;
         for (Class<?> template : templates)
-            generator.generateMVC(api, template, WebApp.basePath);
+            this.generator.generateMVC(api, template, WebApp.basePath);
     }
 
     private void generateByUsingRestApiGenerationStrategy(@NotNull RestApi restApi) {
-        MvcGenerator generator = new MvcGenerator(new MvcSupportHandler());
         Class<?>[] templates = { restApi.controller(), restApi.repo(), restApi.service() };
         if (checkMethodImpl(templates)) WebApp.defaultTemplatesFlag = true;
         for (int i = 0; i < restApi.APIS().length; i++) {
             API api = restApi.APIS()[i];
             if (!hasConfiguration(WebApp.classContext())) {
-                generator.generateDao(
+                this.generator.generateDao(
                         api, SpringComponents.MODEL, WebApp.outputResultPathBase().get(i));
-                generator.generateDao(
+                this.generator.generateDao(
                         api, SpringComponents.DTO, WebApp.outputResultPathBase().get(i));
             }
             else {
-                generator.generateDao(
+                this.generator.generateDao(
                         api, WebApp.context.getValueByKey(MODEL_COMPONENT_CONFIG_ID), WebApp.outputResultPathBase().get(i));
-                generator.generateDao(
+                this.generator.generateDao(
                         api, WebApp.context.getValueByKey(DTO_COMPONENT_CONFIG_ID), WebApp.outputResultPathBase().get(i));
             }
+
             for (Class<?> template : templates)
-                generator.generateMVC(api, template, WebApp.outputResultPathBase().get(i));
+                this.generator.generateMVC(api, template, WebApp.outputResultPathBase().get(i));
         }
     }
 
@@ -385,6 +383,7 @@ public final class WebApp implements RestApp<WebApp> {
             case WEB_REST_API_STRATEGY -> {
                 assert WebApp.restApiCtx != null;
                 final String packagePath = convertPackageToPath(WebApp.restApiCtx.basePackage());
+                WebApp.basePackage = WebApp.restApiCtx.basePackage();
                 WebApp.basePath = constructPath(clazz, srcRoot, packagePath);
                 for (API api : WebApp.restApiCtx.APIS()) {
                     String path = constructPath(clazz, srcRoot, String.format("%s/%s", packagePath, api.apiPackage()));
@@ -394,6 +393,7 @@ public final class WebApp implements RestApp<WebApp> {
             case WEB_CUSTOM_GENERATION_STRATEGY -> {
                 assert WebApp.builder != null;
                 API api = WebApp.builder.toAPI();
+                WebApp.basePackage = api.apiPackage();
                 WebApp.basePath = constructPath(clazz, srcRoot, convertPackageToPath(api.apiPackage()));
             }
         }
@@ -462,6 +462,10 @@ public final class WebApp implements RestApp<WebApp> {
 
     public static boolean defaultMethods() {
         return !(WebApp.implementations != null && !defaultTemplatesFlag);
+    }
+
+    public static String basePackage() {
+        return WebApp.basePackage;
     }
 
     @NoArgsConstructor

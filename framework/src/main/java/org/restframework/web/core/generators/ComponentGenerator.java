@@ -28,15 +28,16 @@ public class ComponentGenerator extends Generator<GenComponent> {
         String packageName = "";
         switch (WebApp.strategy()) {
             case WEB_REST_API_STRATEGY -> packageName = "%s.%s".formatted(WebApp.context().basePackage(), type.packageName());
-            case WEB_CUSTOM_GENERATION_STRATEGY ->  packageName = type.packageName();
+            case WEB_CUSTOM_GENERATION_STRATEGY ->  packageName = "%s.%s".formatted(WebApp.basePackage(), type.packageName());
         }
 
         ClassBuilder componentBuilder = new ClassBuilder(
                 type.name()+type.abbrev(),
-                "%s.components".formatted(packageName),
+                packageName,
                 support.callInner(SpringComponents.COMPONENT, ""),
                 ClassTypes.CLASS,
                 new ImportResolver(SpringComponents.COMPONENT, packageName).get());
+        componentBuilder.start();
 
         this.compile(CompilationContext.builder()
                 .api(api)
@@ -44,7 +45,7 @@ public class ComponentGenerator extends Generator<GenComponent> {
                 .componentType(SpringComponents.COMPONENT)
                 .build());
 
-        componentBuilder.build(buildPath, "components");
+        componentBuilder.build(buildPath, type.packageName());
     }
 
     @Override
