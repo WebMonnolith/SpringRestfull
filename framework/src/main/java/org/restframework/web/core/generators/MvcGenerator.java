@@ -49,7 +49,7 @@ public final class MvcGenerator {
             @NotNull String buildPath
     ) {
         Generator<Class<?>> serviceGen = new ServiceGenerator(this.support);
-
+        return serviceGen;
     }
 
     public synchronized void generateDao(

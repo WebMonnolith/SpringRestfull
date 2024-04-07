@@ -28,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
+import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -90,11 +91,18 @@ public final class WebApp implements RestApp<WebApp> {
             }
         }
 
-        this.configurePaths(clazz);
+        try {
+            this.configurePaths(clazz);
+        } catch (IllegalArgumentException e) {
+            log.error("Rest compilation error - {}", e.getMessage());
+            this.springContext = this.runSpring(WebApp.classContext);
+        }
     }
 
     @Override
     public synchronized WebApp run() {
+        if (this.springContext != null) return this;
+
         this.springContext = this.runSpring(WebApp.classContext);
         WebApp.scannerApplication = this.scannerApplication().run();
 
@@ -114,6 +122,8 @@ public final class WebApp implements RestApp<WebApp> {
 
     @Override
     public synchronized WebApp run(String[] args) {
+        if (this.springContext != null) return this;
+
         this.springContext = this.runSpring(WebApp.classContext(), args);
         WebApp.scannerApplication = this.scannerApplication().run(args);
 
@@ -132,6 +142,8 @@ public final class WebApp implements RestApp<WebApp> {
     }
 
     public synchronized WebApp run(@NotNull AppRunner<RestApp<WebApp>> runnable) {
+        if (this.springContext != null) return this;
+
         this.springContext = this.runSpring(WebApp.classContext());
         WebApp.scannerApplication = this.scannerApplication().run(new String[]{});
 
