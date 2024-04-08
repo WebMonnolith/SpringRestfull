@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.restframework.web.WebApp;
 import org.restframework.web.annotations.Template;
+import org.restframework.web.annotations.gen.GenService;
 import org.restframework.web.annotations.types.API;
 import org.restframework.web.core.builders.ClassBuilder;
 import org.restframework.web.core.builders.MethodBuilder;
@@ -14,6 +15,8 @@ import org.restframework.web.core.generators.compilation.CompilationProcessor;
 import org.restframework.web.core.generators.compilation.MethodImplementations;
 import org.restframework.web.core.generics.GenericFactory;
 import org.restframework.web.core.generics.GenericGeneration;
+import org.restframework.web.core.templates.ClassTypes;
+import org.restframework.web.core.templates.SpringComponents;
 
 import static org.restframework.web.WebApp.defaultMethods;
 import static org.restframework.web.core.generators.GeneratorUtils.buildComponent;
@@ -48,6 +51,33 @@ public class ServiceGenerator extends Generator<Class<?>> {
                 .build());
 
         mvcBuilder.build(buildPath, templateAnnotation.templateName().toLowerCase());
+    }
+
+    public void generate(
+            @NotNull GenService service,
+            @NotNull String buildPath
+    ) {
+        CompilationFlags.useModelsApi = false;
+        String packageName = "";
+        switch (WebApp.strategy()) {
+            case WEB_REST_API_STRATEGY -> packageName = "%s.%s".formatted(WebApp.context().basePackage(), service.packageName());
+            case WEB_CUSTOM_GENERATION_STRATEGY ->  packageName = "%s.%s".formatted(WebApp.basePackage(), service.packageName());
+        }
+
+        ClassBuilder serviceBuilder = new ClassBuilder(
+                service.name()+service.abbrev(),
+                packageName,
+                support.callInner(SpringComponents.SERVICE, ""),
+                ClassTypes.CLASS,
+                new ImportResolver(SpringComponents.SERVICE, WebApp.determinePackage()).get());
+        serviceBuilder.start();
+
+        this.compile(CompilationContext.builder()
+                .builder(serviceBuilder)
+                .componentType(SpringComponents.NONE)
+                .build());
+
+        serviceBuilder.build(buildPath, service.packageName());
     }
 
     @Override

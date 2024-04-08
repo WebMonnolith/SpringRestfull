@@ -215,6 +215,7 @@ public final class WebApp implements RestApp<WebApp> {
             this.generator = generator;
 
             processGenComponents();
+            processGenServices();
             switch (WebApp.buildStrategy) {
                 case WEB_REST_API_STRATEGY -> {
                     assert WebApp.restApiCtx != null;
@@ -232,6 +233,14 @@ public final class WebApp implements RestApp<WebApp> {
             final GenComponent[] componentAnnotations = WebApp.classContext().getAnnotationsByType(GenComponent.class);
             for (GenComponent component : componentAnnotations) {
                 this.generator.generateComponent(component, WebApp.basePath);
+            }
+        }
+
+        private void processGenServices() {
+            if (!WebApp.classContext().isAnnotationPresent(GenServices.class)) return;
+            final GenService[] componentAnnotations = WebApp.classContext().getAnnotationsByType(GenService.class);
+            for (GenService service : componentAnnotations) {
+                this.generator.generateService(service, WebApp.basePath);
             }
         }
 
@@ -509,6 +518,10 @@ public final class WebApp implements RestApp<WebApp> {
 
     public static String basePackage() {
         return WebApp.basePackage;
+    }
+
+    public static String determinePackage() {
+        return WebApp.strategy() == WebApp.WebGenerationStrategy.WEB_REST_API_STRATEGY ? WebApp.context().basePackage() : WebApp.basePackage();
     }
 
     @NoArgsConstructor

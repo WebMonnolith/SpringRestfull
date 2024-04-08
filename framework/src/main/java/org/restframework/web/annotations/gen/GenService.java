@@ -10,6 +10,6 @@ import java.lang.annotation.*;
 @SuppressWarnings("unused")
 public @interface GenService {
     String name();
-    Class<?> template() default TServiceBasic.class;
+    String packageName() default "service";
     String abbrev() default "Service";
 }

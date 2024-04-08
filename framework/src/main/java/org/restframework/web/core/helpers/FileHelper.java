@@ -36,7 +36,7 @@ public class FileHelper {
             String absolutePath = currentPath.toString();
             return Paths.get(absolutePath.toString(), basePackage).toString();
         }
-        throw new IllegalArgumentException("Source path not found in the expected structure!");
+        throw new IllegalArgumentException("Source path not found in the expected structure! - %s".formatted(classPath.toString()));
     }
 
     public static boolean fileExists(@NotNull File file) {
