@@ -19,10 +19,4 @@ public class ApiModel extends ModelFrame<Integer> {
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Integer id;
-	private String fname;
-
-	private String index;
-
-	private String age;
-
 }

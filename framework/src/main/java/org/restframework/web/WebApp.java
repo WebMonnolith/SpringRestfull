@@ -538,7 +538,7 @@ public final class WebApp implements RestApp<WebApp> {
                 }
                 case SERVICE -> {
                     ruleHolder.add(LombokAnnotations.DATA.getValue());
-                    ruleHolder.add(LombokAnnotations.ALL_ARGS_CONSTRUCTOR.getValue());
+                    ruleHolder.add(LombokAnnotations.REQUIRED_ARGS_CONSTRUCTOR.getValue());
                     ruleHolder.add(SpringAnnotations.SERVICE.getValue());
                 }
                 case REPO -> ruleHolder.add(SpringAnnotations.REPOSITORY.getValue());
@@ -555,7 +555,6 @@ public final class WebApp implements RestApp<WebApp> {
                     ruleHolder.add(LombokAnnotations.EQUALS_AND_HASHCODE.getValue());
                     ruleHolder.add(LombokAnnotations.DATA.getValue());
                     ruleHolder.add(LombokAnnotations.ALL_ARGS_CONSTRUCTOR.getValue());
-                    ruleHolder.add(LombokAnnotations.NO_ARGS_CONSTRUCTOR.getValue());
                     ruleHolder.add(LombokAnnotations.BUILDER.getValue());
                 }
                 case COMPONENT -> {

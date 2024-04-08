@@ -20,9 +20,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @GenModel(
         tableName = "test_table",
         fields = {
-                @FieldData(name="fname"),
-                @FieldData(name="index"),
-                @FieldData(name="age")
         }
 )
 @GenSpring(controller= TControllerEntityResponse.class)

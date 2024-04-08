@@ -10,7 +10,7 @@ import java.util.*;
 
 @CompilationComponent
 @Data
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Service
 public class FileDownloaderService {
 
