@@ -19,12 +19,14 @@ public class ApiController implements TControllerEntityResponse<Integer, ApiDto,
 	@Override
 	@PostMapping
 	public ResponseEntity<Integer> insertEntity(ApiDto apidto) {
-		 return ResponseEntity.ok(apiService.insert(apidto));
+		throw new NullPointerException("hello there");
+//		return ResponseEntity.ok(apiService.insert(apidto));
 	}
 	@Override
 	@GetMapping
 	public ResponseEntity<List<ApiDto>> getAllEntities() {
-		 return ResponseEntity.ok(apiService.getAll());
+		throw new NullPointerException("");
+//		 return ResponseEntity.ok(apiService.getAll());
 	}
 	@Override
 	@DeleteMapping
