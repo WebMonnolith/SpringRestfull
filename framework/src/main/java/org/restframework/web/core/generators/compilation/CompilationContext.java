@@ -7,6 +7,7 @@ import org.restframework.web.annotations.types.API;
 import org.restframework.web.annotations.types.Model;
 import org.restframework.web.annotations.Template;
 import org.restframework.web.core.builders.ClassBuilder;
+import org.restframework.web.core.templates.SpringComponents;
 
 @Data
 @AllArgsConstructor
@@ -16,6 +17,7 @@ public class CompilationContext {
     private ClassBuilder builder;
     private Class<?> template;
     private Template templateAnnotation;
+    private SpringComponents componentType;
     private Model modelAnnotation;
     private String modelName;
     private String dtoName;

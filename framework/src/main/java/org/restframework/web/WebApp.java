@@ -6,13 +6,9 @@ import org.antlr.v4.runtime.misc.Pair;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 import org.restframework.scanner.DirectoryScannerAdvanced;
-import org.restframework.scanner.FileRecord;
 import org.restframework.scanner.PackageScanner;
 import org.restframework.scanner.ScannerApplication;
-import org.restframework.web.annotations.gen.GenDto;
-import org.restframework.web.annotations.gen.GenModel;
-import org.restframework.web.annotations.gen.GenProperties;
-import org.restframework.web.annotations.gen.GenSpring;
+import org.restframework.web.annotations.gen.*;
 import org.restframework.web.annotations.markers.CompilationComponent;
 import org.restframework.web.annotations.markers.UpdateComponent;
 import org.restframework.web.annotations.types.API;
@@ -23,7 +19,6 @@ import org.restframework.web.core.AppRunner;
 import org.restframework.web.core.RestAppConfigurationContext;
 import org.restframework.web.core.generators.compilation.MethodImplementations;
 import org.restframework.web.core.generics.Generic;
-import org.restframework.web.core.helpers.FileHelper;
 import org.restframework.web.core.RestApp;
 import org.restframework.web.core.generators.MvcGenerator;
 import org.restframework.web.core.generators.MvcSupport;
@@ -33,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
+import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -70,8 +66,10 @@ public final class WebApp implements RestApp<WebApp> {
 
     private final static List<String> targetPaths = new ArrayList<>();
     private static String basePath;
+    private static String basePackage;
 
     // For external usage!
+    @Getter
     private ConfigurableApplicationContext springContext;
 
     public WebApp(@NotNull Class<?> clazz) throws UnsupportedEncodingException {
@@ -93,11 +91,18 @@ public final class WebApp implements RestApp<WebApp> {
             }
         }
 
-        this.configurePaths(clazz);
+        try {
+            this.configurePaths(clazz);
+        } catch (IllegalArgumentException e) {
+            log.error("Rest compilation error - {}", e.getMessage());
+            this.springContext = this.runSpring(WebApp.classContext);
+        }
     }
 
     @Override
     public synchronized WebApp run() {
+        if (this.springContext != null) return this;
+
         this.springContext = this.runSpring(WebApp.classContext);
         WebApp.scannerApplication = this.scannerApplication().run();
 
@@ -117,6 +122,8 @@ public final class WebApp implements RestApp<WebApp> {
 
     @Override
     public synchronized WebApp run(String[] args) {
+        if (this.springContext != null) return this;
+
         this.springContext = this.runSpring(WebApp.classContext(), args);
         WebApp.scannerApplication = this.scannerApplication().run(args);
 
@@ -135,6 +142,8 @@ public final class WebApp implements RestApp<WebApp> {
     }
 
     public synchronized WebApp run(@NotNull AppRunner<RestApp<WebApp>> runnable) {
+        if (this.springContext != null) return this;
+
         this.springContext = this.runSpring(WebApp.classContext());
         WebApp.scannerApplication = this.scannerApplication().run(new String[]{});
 
@@ -156,10 +165,6 @@ public final class WebApp implements RestApp<WebApp> {
     public WebApp methods(@NotNull MethodImplementations service, @NotNull MethodImplementations controller) {
         WebApp.implementations = new Pair<>(service, controller);
         return this;
-    }
-
-    public ConfigurableApplicationContext getSpringContext() {
-        return this.springContext;
     }
 
     private @NotNull ScannerApplication scannerApplication() {
@@ -197,63 +202,110 @@ public final class WebApp implements RestApp<WebApp> {
     }
 
     private void generate() {
-        switch (WebApp.buildStrategy) {
-            case WEB_REST_API_STRATEGY -> {
-                assert WebApp.restApiCtx != null;
-                this.generateByUsingRestApiGenerationStrategy(WebApp.restApiCtx);
-            }
-            case WEB_CUSTOM_GENERATION_STRATEGY -> {
-                assert WebApp.builder != null;
-                this.generateByUsingCustomGenerationStrategy(WebApp.builder);
-            }
-        }
+        new GenerationHelper(
+                new MvcGenerator(
+                        new MvcSupportHandler()));
     }
 
-    private void generateByUsingCustomGenerationStrategy(@NotNull _APIBuilder builder) {
-        API api = builder.toAPI();
-        MvcGenerator generator = new MvcGenerator(new MvcSupportHandler());
+    public static class GenerationHelper {
 
-        if (!hasConfiguration(WebApp.classContext())) {
-            generator.generateDao(
-                    api, SpringComponents.MODEL, WebApp.basePath);
-            generator.generateDao(
-                    api, SpringComponents.DTO, WebApp.basePath);
+        private final MvcGenerator generator;
+
+        public GenerationHelper(@NotNull MvcGenerator generator) {
+            this.generator = generator;
+
+            processGenComponents();
+            processGenServices();
+            switch (WebApp.buildStrategy) {
+                case WEB_REST_API_STRATEGY -> {
+                    assert WebApp.restApiCtx != null;
+                    generateByUsingRestApiGenerationStrategy(WebApp.restApiCtx);
+                }
+                case WEB_CUSTOM_GENERATION_STRATEGY -> {
+                    assert WebApp.builder != null;
+                    generateByUsingCustomGenerationStrategy(WebApp.builder);
+                }
+            }
         }
-        else {
-            generator.generateDao(
-                    api, WebApp.context.getValueByKey(MODEL_COMPONENT_CONFIG_ID), WebApp.basePath);
-            generator.generateDao(
-                    api, WebApp.context.getValueByKey(DTO_COMPONENT_CONFIG_ID), WebApp.basePath);
+
+        private void processGenComponents() {
+            if (!WebApp.classContext().isAnnotationPresent(GenComponents.class)) return;
+            final GenComponent[] componentAnnotations = WebApp.classContext().getAnnotationsByType(GenComponent.class);
+            for (GenComponent component : componentAnnotations) {
+                this.generator.generateComponent(component, WebApp.basePath);
+            }
         }
 
-        if (!builder.nullCheckSpringComponents()) return;
-        GenSpring spring = WebApp.classContext().getAnnotation(GenSpring.class);
-        Class<?>[] templates = { spring.controller(), spring.repo(), spring.service() };
-        if (checkMethodImpl(templates)) WebApp.defaultTemplatesFlag = true;
-        for (Class<?> template : templates)
-            generator.generateSpringComponent(api, template, WebApp.basePath);
-    }
+        private void processGenServices() {
+            if (!WebApp.classContext().isAnnotationPresent(GenServices.class)) return;
+            final GenService[] componentAnnotations = WebApp.classContext().getAnnotationsByType(GenService.class);
+            for (GenService service : componentAnnotations) {
+                this.generator.generateService(service, WebApp.basePath);
+            }
+        }
 
-    private void generateByUsingRestApiGenerationStrategy(@NotNull RestApi restApi) {
-        MvcGenerator generator = new MvcGenerator(new MvcSupportHandler());
-        Class<?>[] templates = { restApi.controller(), restApi.repo(), restApi.service() };
-        if (checkMethodImpl(templates)) WebApp.defaultTemplatesFlag = true;
-        for (int i = 0; i < restApi.APIS().length; i++) {
-            API api = restApi.APIS()[i];
+        private void generateByUsingCustomGenerationStrategy(@NotNull _APIBuilder builder) {
+            API api = builder.toAPI();
+            if (!builder.nullCheckSpringComponents()) return;
+            GenSpring spring = WebApp.classContext().getAnnotation(GenSpring.class);
+            final Class<?>[] templates = {spring.controller(), spring.repo(), spring.service()};
+            this.checkAndGenerateMVC(api, templates);
+        }
+
+        private void generateByUsingRestApiGenerationStrategy(@NotNull RestApi restApi) {
+            final Class<?>[] templates = {restApi.controller(), restApi.repo(), restApi.service()};
+            this.checkAndGenerateMVC(restApi.APIS(), templates);
+        }
+
+        private void checkAndGenerateMVC(API[] apis, Class<?>[] templates) {
+            for (int i = 0; i < apis.length; i++) {
+                API api = apis[i];
+                this.checkConfigAndGenerateDao(api, WebApp.outputResultPathBase().get(i));
+                this.generateMVC(api, templates, WebApp.outputResultPathBase().get(i));
+            }
+        }
+
+        private void checkAndGenerateMVC(API api, Class<?>[] templates) {
+            this.checkConfigAndGenerateDao(api, WebApp.basePath);
+            this.generateMVC(api, templates, WebApp.basePath);
+        }
+
+        private void checkConfigAndGenerateDao(@NotNull API api, String buildpath) {
             if (!hasConfiguration(WebApp.classContext())) {
-                generator.generateDao(
-                        api, SpringComponents.MODEL, WebApp.outputResultPathBase().get(i));
-                generator.generateDao(
-                        api, SpringComponents.DTO, WebApp.outputResultPathBase().get(i));
+                this.generateDao(api, SpringComponents.MODEL, buildpath);
+                this.generateDao(api, SpringComponents.DTO, buildpath);
+            } else {
+                this.generateDao(api, WebApp.context.getValueByKey(MODEL_COMPONENT_CONFIG_ID), buildpath);
+                this.generateDao(api, WebApp.context.getValueByKey(DTO_COMPONENT_CONFIG_ID), buildpath);
             }
-            else {
-                generator.generateDao(
-                        api, WebApp.context.getValueByKey(MODEL_COMPONENT_CONFIG_ID), WebApp.outputResultPathBase().get(i));
-                generator.generateDao(
-                        api, WebApp.context.getValueByKey(DTO_COMPONENT_CONFIG_ID), WebApp.outputResultPathBase().get(i));
-            }
-            for (Class<?> template : templates)
-                generator.generateSpringComponent(api, template, WebApp.outputResultPathBase().get(i));
+        }
+
+        private void generateDao(API api, SpringComponents component) {
+            this.generator.generateDao(api, component, WebApp.basePath);
+        }
+
+        private void generateDao(API api, SpringComponents component, String outputPath) {
+            this.generator.generateDao(api, component, outputPath);
+        }
+
+        private void generateMVC(API api, Class<?>[] templates, String basePath) {
+            if (this.checkMethodImpl(templates)) WebApp.defaultTemplatesFlag = true;
+            for (Class<?> template : templates) this.generator.generateMVC(api, template, basePath);
+        }
+
+        private void generateStandaloneService() {
+
+        }
+
+        private boolean checkMethodImpl(Class<?> @NotNull [] templates) {
+            if (templates.length > 3) throw new RestException("Too many templates used [" + templates.length + "] make sure to only use a max of three, service, repo & controller");
+
+            Set<Class<?>> templateSet = new HashSet<>();
+            Collections.addAll(templateSet, templates);
+
+            return (templateSet.contains(TControllerCRUD.class) || templateSet.contains(TControllerEntityResponse.class) || templateSet.contains(TControllerEntityResponseWildcard.class))
+                    && (templateSet.contains(TServiceCRUD.class) || templateSet.contains(TServiceEntityResponse.class) || templateSet.contains(TServiceEntityResponseWildcard.class))
+                    && templateSet.contains(TRepo.class);
         }
     }
 
@@ -383,6 +435,7 @@ public final class WebApp implements RestApp<WebApp> {
             case WEB_REST_API_STRATEGY -> {
                 assert WebApp.restApiCtx != null;
                 final String packagePath = convertPackageToPath(WebApp.restApiCtx.basePackage());
+                WebApp.basePackage = WebApp.restApiCtx.basePackage();
                 WebApp.basePath = constructPath(clazz, srcRoot, packagePath);
                 for (API api : WebApp.restApiCtx.APIS()) {
                     String path = constructPath(clazz, srcRoot, String.format("%s/%s", packagePath, api.apiPackage()));
@@ -392,6 +445,7 @@ public final class WebApp implements RestApp<WebApp> {
             case WEB_CUSTOM_GENERATION_STRATEGY -> {
                 assert WebApp.builder != null;
                 API api = WebApp.builder.toAPI();
+                WebApp.basePackage = api.apiPackage();
                 WebApp.basePath = constructPath(clazz, srcRoot, convertPackageToPath(api.apiPackage()));
             }
         }
@@ -462,6 +516,14 @@ public final class WebApp implements RestApp<WebApp> {
         return !(WebApp.implementations != null && !defaultTemplatesFlag);
     }
 
+    public static String basePackage() {
+        return WebApp.basePackage;
+    }
+
+    public static String determinePackage() {
+        return WebApp.strategy() == WebApp.WebGenerationStrategy.WEB_REST_API_STRATEGY ? WebApp.context().basePackage() : WebApp.basePackage();
+    }
+
     @NoArgsConstructor
     static class MvcSupportHandler implements MvcSupport {
         @Override
@@ -476,7 +538,7 @@ public final class WebApp implements RestApp<WebApp> {
                 }
                 case SERVICE -> {
                     ruleHolder.add(LombokAnnotations.DATA.getValue());
-                    ruleHolder.add(LombokAnnotations.ALL_ARGS_CONSTRUCTOR.getValue());
+                    ruleHolder.add(LombokAnnotations.REQUIRED_ARGS_CONSTRUCTOR.getValue());
                     ruleHolder.add(SpringAnnotations.SERVICE.getValue());
                 }
                 case REPO -> ruleHolder.add(SpringAnnotations.REPOSITORY.getValue());
@@ -493,8 +555,10 @@ public final class WebApp implements RestApp<WebApp> {
                     ruleHolder.add(LombokAnnotations.EQUALS_AND_HASHCODE.getValue());
                     ruleHolder.add(LombokAnnotations.DATA.getValue());
                     ruleHolder.add(LombokAnnotations.ALL_ARGS_CONSTRUCTOR.getValue());
-                    ruleHolder.add(LombokAnnotations.NO_ARGS_CONSTRUCTOR.getValue());
                     ruleHolder.add(LombokAnnotations.BUILDER.getValue());
+                }
+                case COMPONENT -> {
+                    ruleHolder.add(SpringAnnotations.SPRING_COMPONENT.getValue());
                 }
                 case NONE -> throw new RestException("@" + RestApi.class + " MVC has no templates associated with it");
             }
@@ -536,16 +600,5 @@ public final class WebApp implements RestApp<WebApp> {
         if (!clazz.isAnnotationPresent(GenDto.class))
             throw new RestException("There must be a class annotated with @" + GenDto.class.getSimpleName() + ",\n" +
                     "in order to make use of the custom generation strategy.");
-    }
-
-    private boolean checkMethodImpl(Class<?> @NotNull [] templates) {
-        if (templates.length > 3) throw new RestException("Too many templates used [" + templates.length + "] make sure to only use a max of three, service, repo & controller");
-
-        Set<Class<?>> templateSet = new HashSet<>();
-        Collections.addAll(templateSet, templates);
-
-        return (templateSet.contains(TControllerCRUD.class) || templateSet.contains(TControllerEntityResponse.class) || templateSet.contains(TControllerEntityResponseWildcard.class))
-                && (templateSet.contains(TServiceCRUD.class) || templateSet.contains(TServiceEntityResponse.class) || templateSet.contains(TServiceEntityResponseWildcard.class))
-                && templateSet.contains(TRepo.class);
     }
 }

@@ -3,9 +3,13 @@ package org.restframework.web.core.generators;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.restframework.web.annotations.gen.GenComponent;
+import org.restframework.web.annotations.gen.GenService;
 import org.restframework.web.annotations.types.API;
 import org.restframework.web.core.templates.SpringComponents;
 import org.restframework.web.exceptions.RestException;
+
+import java.lang.annotation.Annotation;
 
 import static org.restframework.web.core.generators.GeneratorUtils.findTemplate;
 
@@ -16,7 +20,7 @@ public final class MvcGenerator {
 
     private final MvcSupport support;
 
-    public synchronized void generateSpringComponent(
+    public synchronized void generateMVC(
             @NotNull API api,
             @NotNull Class<?> template,
             @NotNull String buildPath
@@ -30,6 +34,22 @@ public final class MvcGenerator {
         }
 
         gen.generate(api, template, buildPath);
+    }
+
+    public synchronized void generateComponent(
+            @NotNull GenComponent component,
+            @NotNull String buildPath
+    ) {
+        Generator<GenComponent> gen = new ComponentGenerator(this.support);
+        gen.generate(null, component, buildPath);
+    }
+
+    public synchronized void generateService(
+            @NotNull GenService service,
+            @NotNull String buildPath
+    ) {
+        ServiceGenerator serviceGen = new ServiceGenerator(this.support);
+        serviceGen.generate(service, buildPath);
     }
 
     public synchronized void generateDao(

@@ -20,6 +20,14 @@ public class GeneratorUtils {
         return templateAnnotation;
     }
 
+    public static @NotNull Template findTemplate(@NotNull Class<?> template) {
+        Template templateAnnotation = AnnotationUtils.findAnnotation(template, Template.class);
+        if (templateAnnotation == null)
+            throw new RestException("@" + RestApi.class.getSimpleName() + "templates must be annotated with @Template ");
+
+        return templateAnnotation;
+    }
+
     public static ClassBuilder buildComponent(
             @NotNull API api,
             @NotNull Template templateAnnotation,

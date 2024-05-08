@@ -1,5 +1,6 @@
 package org.restframework.web.core.helpers;
 
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -8,6 +9,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -19,12 +21,11 @@ public class FileHelper {
     public static @NotNull String constructPath(
             @NotNull Class<?> clazz,
             @NotNull String srcRoot,
-            @NotNull String basePackage)
-            throws UnsupportedEncodingException
-    {
+            @NotNull String basePackage
+    ) throws UnsupportedEncodingException, IllegalArgumentException {
         //TODO Add exception handling
         URL location = clazz.getProtectionDomain().getCodeSource().getLocation();
-        String decodedPath = URLDecoder.decode(location.getPath(), "UTF-8");
+        String decodedPath = URLDecoder.decode(location.getPath(), StandardCharsets.UTF_8);
         if (decodedPath.startsWith("/"))
             decodedPath = decodedPath.substring(1);
         Path classPath = Paths.get(decodedPath, basePackage);
@@ -34,9 +35,9 @@ public class FileHelper {
             String sourcePath = classPath.toString().substring(0, index) + srcRoot;
             Path currentPath = Paths.get(sourcePath).toAbsolutePath().normalize();
             String absolutePath = currentPath.toString();
-            return Paths.get(absolutePath.toString(), basePackage).toString();
+            return Paths.get(absolutePath, basePackage).toString();
         }
-        throw new IllegalArgumentException("Source path not found in the expected structure!");
+        throw new IllegalArgumentException("Source path not found in the expected structure! - %s".formatted(classPath.toString()));
     }
 
     public static boolean fileExists(@NotNull File file) {

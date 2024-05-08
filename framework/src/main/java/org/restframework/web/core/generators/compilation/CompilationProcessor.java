@@ -25,6 +25,7 @@ public class CompilationProcessor {
     }
 
     private static void checkInheritance(@NotNull CompilationContext context) {
+        if (context.getComponentType() == SpringComponents.COMPONENT || context.getComponentType() == SpringComponents.NONE) return;
         if (!context.getModelName().isEmpty())
             CompilationFlags.customRepoGenerics = true;
 

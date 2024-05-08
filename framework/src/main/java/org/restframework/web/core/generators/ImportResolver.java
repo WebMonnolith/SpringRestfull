@@ -34,36 +34,54 @@ public class ImportResolver {
             @NotNull String apiPackage)
     {
         List<String> holder = new ArrayList<>();
-        holder.add("import " + apiPackage + ".*");
         switch (component) {
-
             case CONTROLLER -> {
+                holder.add("import " + apiPackage + ".*");
                 holder.add("import " + apiPackage + ".service.*");
                 holder.add("import lombok.*");
                 holder.add("import org.springframework.web.bind.annotation.*");
                 holder.add("import org.springframework.http.*");
+                holder.add("import org.restframework.web.core.templates.*");
+                holder.add("import org.restframework.web.annotations.markers.*");
+                holder.add("import java.util.*");
             }
             case SERVICE -> {
+                holder.add("import " + apiPackage + ".*");
                 holder.add("import " + apiPackage + ".repository.*");
                 holder.add("import lombok.*");
                 holder.add("import org.springframework.stereotype.Service");
+                holder.add("import org.restframework.web.core.templates.*");
+                holder.add("import org.restframework.web.annotations.markers.*");
+                holder.add("import java.util.*");
             }
             case MODEL -> {
+                holder.add("import " + apiPackage + ".*");
                 holder.add("import lombok.*");
                 holder.add("import jakarta.persistence.*");
+                holder.add("import org.restframework.web.core.templates.*");
+                holder.add("import org.restframework.web.annotations.markers.*");
+                holder.add("import java.util.*");
             }
             case REPO -> {
+                holder.add("import " + apiPackage + ".*");
                 holder.add("import org.springframework.stereotype.Repository");
+                holder.add("import org.restframework.web.core.templates.*");
+                holder.add("import org.restframework.web.annotations.markers.*");
+                holder.add("import java.util.*");
             }
             case DTO -> {
+                holder.add("import " + apiPackage + ".*");
                 holder.add("import lombok.*");
+                holder.add("import org.restframework.web.core.templates.*");
+                holder.add("import org.restframework.web.annotations.markers.*");
+                holder.add("import java.util.*");
+            }
+            case COMPONENT -> {
+                holder.add("import org.springframework.stereotype.Component");
+                holder.add("import org.restframework.web.annotations.markers.*");
             }
             case NONE -> throw new RestException("");
         }
-
-        holder.add("import org.restframework.web.core.templates.*");
-        holder.add("import org.restframework.web.annotations.markers.*");
-        holder.add("import java.util.*");
 
         return holder;
     }

@@ -46,6 +46,7 @@ public interface MvcSupport {
         EQUALS_AND_HASHCODE("EqualsAndHashCode(callSuper=true)"),
         NO_ARGS_CONSTRUCTOR("NoArgsConstructor"),
         ALL_ARGS_CONSTRUCTOR("AllArgsConstructor"),
+        REQUIRED_ARGS_CONSTRUCTOR("RequiredArgsConstructor"),
         GETTER("Getter"),
         SETTER("Setter"),
         DATA("Data"),

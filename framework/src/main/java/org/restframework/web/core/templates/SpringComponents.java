@@ -7,5 +7,6 @@ public enum SpringComponents {
     CONTROLLER,
     MODEL,
     DTO,
+    COMPONENT,
     REPO;
 }
