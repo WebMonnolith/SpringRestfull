@@ -11,7 +11,7 @@ import java.util.Optional;
         type=ClassTypes.CLASS
 )
 @SuppressWarnings("unused")
-public interface TServiceCRUD<ID, DTO, Model extends ModelFrame<ID>> {
+public interface TServiceCRUD<ID, DTO, Model> {
     ServiceTemplateUtils utils = new ServiceTemplateUtils();
     int insert(DTO dto);
     List<DTO> getAll();

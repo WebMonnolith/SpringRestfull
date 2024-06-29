@@ -12,7 +12,7 @@ import java.util.Optional;
         type=ClassTypes.CLASS
 )
 @SuppressWarnings("unused")
-public interface TServiceEntityResponseWildcard <ID, DTO, Model extends ModelFrame<ID>> {
+public interface TServiceEntityResponseWildcard <ID, DTO, Model> {
     ServiceTemplateUtils utils = new ServiceTemplateUtils();
     ResponseEntity<?> insert(DTO dto);
     ResponseEntity<?> getAll();

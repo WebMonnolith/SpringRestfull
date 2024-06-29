@@ -13,7 +13,7 @@ import java.util.Optional;
         type=ClassTypes.CLASS
 )
 @SuppressWarnings("unused")
-public interface TControllerEntityResponse<ID, DTO, Model extends ModelFrame<ID>> extends ExceptionAdvice {
+public interface TControllerEntityResponse<ID, DTO, Model> extends ExceptionAdvice {
     ResponseEntity<Integer> insertEntity(DTO entity);
     ResponseEntity<List<DTO>> getAllEntities();
     ResponseEntity<Boolean> removeEntityById(ID id);
