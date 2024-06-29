@@ -73,7 +73,7 @@ public final class WebApp implements RestApp<WebApp> {
     private ConfigurableApplicationContext springContext;
 
     public WebApp(@NotNull Class<?> clazz) throws UnsupportedEncodingException {
-        log.info(":: Spring RESTframework Compiler ::\t\t\t(V1.2.1)\n\n");
+        log.info(":: Spring RESTframework Compiler ::\t\t\t(V1.2.1.1)\n\n");
         WebApp.buildStrategy = this.start(clazz);
         switch (WebApp.buildStrategy) {
             case WEB_REST_API_STRATEGY -> {
